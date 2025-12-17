@@ -1,0 +1,11 @@
+# Include base requirements
+-r base.txt
+
+# Production-specific
+sentry-sdk>=2.0,<3.0
+
+# Celery (for background tasks - Phase 2)
+# celery>=5.4,<6.0
+
+
+

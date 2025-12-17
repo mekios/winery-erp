@@ -1,0 +1,38 @@
+# Production Dockerfile for Angular Frontend
+# Multi-stage build
+
+# Stage 1: Build
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install Angular CLI
+RUN npm install -g @angular/cli@17
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Build for production
+RUN ng build --configuration=production
+
+# Stage 2: Serve with nginx
+FROM nginx:alpine
+
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy built app from builder stage
+COPY --from=builder /app/dist/frontend/browser /usr/share/nginx/html
+
+# Expose port
+EXPOSE 80
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
+

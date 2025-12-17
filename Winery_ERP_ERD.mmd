@@ -1,0 +1,418 @@
+```mermaid
+erDiagram
+
+    USERS {
+      uuid id
+      string email
+      string password_hash
+      string full_name
+      bool is_active
+      datetime created_at
+      datetime updated_at
+    }
+
+    WINERIES {
+      uuid id
+      string name
+      string code
+      string country
+      string region
+      string address
+      string timezone
+      datetime created_at
+      datetime updated_at
+    }
+
+    WINERY_MEMBERSHIPS {
+      uuid id
+      uuid user_id
+      uuid winery_id
+      string role
+      bool is_active
+      datetime created_at
+      datetime updated_at
+    }
+
+    GRAPE_VARIETIES {
+      uuid id
+      uuid winery_id
+      string name
+      string code
+      string color
+      datetime created_at
+      datetime updated_at
+    }
+
+    GROWERS {
+      uuid id
+      uuid winery_id
+      string name
+      string contact_info
+      string notes
+      datetime created_at
+      datetime updated_at
+    }
+
+    VINEYARD_BLOCKS {
+      uuid id
+      uuid winery_id
+      uuid grower_id
+      string name
+      string code
+      string region
+      string subregion
+      float area_ha
+      float elevation_m
+      uuid primary_variety_id
+      string notes
+      datetime created_at
+      datetime updated_at
+    }
+
+    TANKS {
+      uuid id
+      uuid winery_id
+      string code
+      string name
+      string type
+      string material
+      float capacity_l
+      string location
+      bool is_active
+      string notes
+      datetime created_at
+      datetime updated_at
+    }
+
+    BARRELS {
+      uuid id
+      uuid winery_id
+      string code
+      float volume_l
+      string wood_type
+      int year
+      bool is_active
+      string notes
+      datetime created_at
+      datetime updated_at
+    }
+
+    EQUIPMENT {
+      uuid id
+      uuid winery_id
+      string name
+      string code
+      string type
+      string location
+      string capacity
+      string notes
+      datetime created_at
+      datetime updated_at
+    }
+
+    HARVEST_SEASONS {
+      uuid id
+      uuid winery_id
+      int year
+      date start_date
+      date end_date
+      datetime created_at
+      datetime updated_at
+    }
+
+    BATCHES {
+      uuid id
+      uuid winery_id
+      string batch_code
+      uuid harvest_season_id
+      date intake_date
+      string source_type
+      uuid initial_tank_id
+      float must_volume_l
+      float grape_weight_kg
+      string stage
+      string notes
+      datetime created_at
+      datetime updated_at
+    }
+
+    BATCH_SOURCES {
+      uuid id
+      uuid winery_id
+      uuid batch_id
+      uuid vineyard_block_id
+      uuid variety_id
+      float weight_kg
+      bool is_estimated
+      datetime created_at
+      datetime updated_at
+    }
+
+    WINE_LOTS {
+      uuid id
+      uuid winery_id
+      string code
+      string name
+      uuid harvest_season_id
+      string style
+      bool is_blend
+      string notes
+      datetime created_at
+      datetime updated_at
+    }
+
+    LOT_BATCH_LINKS {
+      uuid id
+      uuid winery_id
+      uuid wine_lot_id
+      uuid batch_id
+      float proportion
+    }
+
+    TRANSFERS {
+      uuid id
+      uuid winery_id
+      datetime event_datetime
+      string action
+      uuid from_tank_id
+      uuid to_tank_id
+      uuid from_barrel_id
+      uuid to_barrel_id
+      uuid batch_id
+      uuid wine_lot_id
+      float volume_l
+      float temperature_c
+      string notes
+      string source_system
+      string source_ref
+      uuid created_by
+      uuid verified_by
+      datetime created_at
+      datetime updated_at
+    }
+
+    MATERIALS {
+      uuid id
+      uuid winery_id
+      string sku_code
+      string name
+      string category
+      string unit
+      float density
+      string supplier
+      bool is_active
+      string notes
+      datetime created_at
+      datetime updated_at
+    }
+
+    MATERIAL_STOCKS {
+      uuid id
+      uuid winery_id
+      uuid material_id
+      string location
+      float current_qty
+      float reorder_level
+      datetime created_at
+      datetime updated_at
+    }
+
+    MATERIAL_MOVEMENTS {
+      uuid id
+      uuid winery_id
+      uuid material_id
+      datetime movement_datetime
+      string type
+      float quantity
+      string unit
+      string from_location
+      string to_location
+      uuid related_tank_id
+      uuid related_transfer_id
+      string notes
+      uuid created_by
+      datetime created_at
+      datetime updated_at
+    }
+
+    ADDITIONS {
+      uuid id
+      uuid winery_id
+      datetime addition_datetime
+      uuid tank_id
+      uuid barrel_id
+      uuid wine_lot_id
+      uuid batch_id
+      uuid material_id
+      string product_lot
+      float dosage_value
+      string dosage_unit
+      float total_quantity_used
+      string notes
+      uuid created_by
+      uuid verified_by
+      datetime created_at
+      datetime updated_at
+    }
+
+    ANALYSES {
+      uuid id
+      uuid winery_id
+      uuid tank_id
+      uuid barrel_id
+      uuid wine_lot_id
+      datetime sample_datetime
+      string stage
+      string sample_type
+      float baume
+      float density
+      float brix
+      float residual_sugar_g_l
+      float temp_c
+      float ph
+      float ta_g_l
+      float va_g_l
+      float free_so2_mg_l
+      float total_so2_mg_l
+      float malic_g_l
+      float turbidity_ntu
+      float color_od
+      float potential_alcohol
+      string notes
+      uuid created_by
+      datetime created_at
+      datetime updated_at
+    }
+
+    TANK_LEDGER {
+      uuid id
+      uuid winery_id
+      uuid event_id
+      datetime event_datetime
+      uuid tank_id
+      float delta_volume_l
+      string composition_key_type
+      uuid composition_key_id
+      string composition_key_label
+      string derived_source
+      datetime created_at
+      datetime updated_at
+    }
+
+    WORK_ORDERS {
+      uuid id
+      uuid winery_id
+      string code
+      string title
+      string description
+      string status
+      string priority
+      datetime scheduled_for
+      datetime completed_at
+      uuid created_by
+      uuid assigned_to
+      datetime created_at
+      datetime updated_at
+    }
+
+    WORK_ORDER_LINES {
+      uuid id
+      uuid winery_id
+      uuid work_order_id
+      int line_no
+      string type
+      uuid from_tank_id
+      uuid to_tank_id
+      uuid target_tank_id
+      uuid target_barrel_id
+      float target_volume_l
+      uuid material_id
+      float dosage_value
+      string dosage_unit
+      string status
+      uuid executed_event_id
+      string notes
+      datetime created_at
+      datetime updated_at
+    }
+
+    PACKAGING_SKUS {
+      uuid id
+      uuid winery_id
+      string code
+      string name
+      int bottle_volume_ml
+      string lot_labeling_scheme
+      string default_variety_blend_label
+      string notes
+      datetime created_at
+      datetime updated_at
+    }
+
+    BOTTLING_RUNS {
+      uuid id
+      uuid winery_id
+      datetime run_datetime
+      uuid source_tank_id
+      uuid source_wine_lot_id
+      uuid packaging_sku_id
+      int bottles_produced
+      int scrap_bottles
+      string notes
+      datetime created_at
+      datetime updated_at
+    }
+
+    WINERIES ||--o{ WINERY_MEMBERSHIPS : has
+    USERS ||--o{ WINERY_MEMBERSHIPS : member_of
+
+    WINERIES ||--o{ GRAPE_VARIETIES : has
+    WINERIES ||--o{ GROWERS : has
+    WINERIES ||--o{ VINEYARD_BLOCKS : has
+    GROWERS ||--o{ VINEYARD_BLOCKS : owns
+    GRAPE_VARIETIES ||--o{ VINEYARD_BLOCKS : primary_variety
+
+    WINERIES ||--o{ TANKS : has
+    WINERIES ||--o{ BARRELS : has
+    WINERIES ||--o{ EQUIPMENT : has
+
+    WINERIES ||--o{ HARVEST_SEASONS : has
+    HARVEST_SEASONS ||--o{ BATCHES : includes
+    BATCHES ||--o{ BATCH_SOURCES : composed_of
+    VINEYARD_BLOCKS ||--o{ BATCH_SOURCES : source
+    GRAPE_VARIETIES ||--o{ BATCH_SOURCES : variety
+
+    WINERIES ||--o{ WINE_LOTS : has
+    WINE_LOTS ||--o{ LOT_BATCH_LINKS : links
+    BATCHES ||--o{ LOT_BATCH_LINKS : contributes
+
+    WINERIES ||--o{ TRANSFERS : has
+    TANKS ||--o{ TRANSFERS : from_or_to
+    BARRELS ||--o{ TRANSFERS : from_or_to
+    BATCHES ||--o{ TRANSFERS : may_tag
+    WINE_LOTS ||--o{ TRANSFERS : may_tag
+
+    WINERIES ||--o{ MATERIALS : has
+    MATERIALS ||--o{ MATERIAL_STOCKS : stocked_in
+    MATERIALS ||--o{ MATERIAL_MOVEMENTS : moved
+    WINERIES ||--o{ ADDITIONS : has
+    TANKS ||--o{ ADDITIONS : target
+    BARRELS ||--o{ ADDITIONS : target
+
+    WINERIES ||--o{ ANALYSES : has
+    TANKS ||--o{ ANALYSES : sampled
+    BARRELS ||--o{ ANALYSES : sampled
+
+    WINERIES ||--o{ TANK_LEDGER : has
+    TANKS ||--o{ TANK_LEDGER : state
+    TRANSFERS ||--o{ TANK_LEDGER : event_source
+
+    WINERIES ||--o{ WORK_ORDERS : has
+    WORK_ORDERS ||--o{ WORK_ORDER_LINES : contains
+
+    WINERIES ||--o{ PACKAGING_SKUS : has
+    WINERIES ||--o{ BOTTLING_RUNS : has
+    TANKS ||--o{ BOTTLING_RUNS : source
+    WINE_LOTS ||--o{ BOTTLING_RUNS : source
+    PACKAGING_SKUS ||--o{ BOTTLING_RUNS : type
+```
