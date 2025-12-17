@@ -27,8 +27,10 @@ class WineryContextMixin:
         # Only process for authenticated users
         if request.user.is_authenticated:
             # Try to get winery_id from header or session
+            # Note: DRF's request.headers uses the standard header format
             winery_id = (
                 request.headers.get('X-Winery-ID') or
+                request.META.get('HTTP_X_WINERY_ID') or
                 request.session.get('winery_id')
             )
             

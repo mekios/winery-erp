@@ -46,6 +46,7 @@ export class WineryService {
   wineries = this._wineries.asReadonly();
   currentWinery = this._currentWinery.asReadonly();
   loading = this._loading.asReadonly();
+  initialized = this._initialized.asReadonly();
 
   constructor() {
     // Subscribe to auth initialization

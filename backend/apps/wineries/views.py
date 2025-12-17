@@ -178,9 +178,15 @@ class DashboardView(WineryContextMixin, APIView):
     - tanks: Top tanks by fill percentage
     - alerts: Low SO2, high VA alerts
     """
-    permission_classes = [permissions.IsAuthenticated, IsWineryMember]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        # Ensure winery context is set
+        if not getattr(request, 'winery', None):
+            return Response(
+                {'error': 'No winery selected. Please select a winery from the dropdown.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         winery = request.winery
         if not winery:
             return Response(
@@ -216,7 +222,7 @@ class DashboardView(WineryContextMixin, APIView):
         batches_qs = Batch.objects.filter(winery=winery)
         batches_total = batches_qs.count()
         batches_this_season = batches_qs.filter(
-            season__is_active=True
+            harvest_season__is_active=True
         ).count()
         
         # Wine Lots
@@ -238,7 +244,7 @@ class DashboardView(WineryContextMixin, APIView):
         analyses_qs = Analysis.objects.filter(winery=winery)
         analyses_total = analyses_qs.count()
         analyses_this_week = analyses_qs.filter(
-            analysis_date__date__gte=week_ago
+            analysis_date__gte=week_ago
         ).count()
         
         # Varieties count
@@ -328,7 +334,7 @@ class DashboardView(WineryContextMixin, APIView):
         # Low SO2 alerts (free SO2 < 20 mg/L in recent analyses)
         low_so2_analyses = analyses_qs.filter(
             free_so2_mgl__lt=20,
-            analysis_date__date__gte=week_ago
+            analysis_date__gte=week_ago
         ).order_by('-analysis_date')[:5]
         
         for a in low_so2_analyses:
@@ -343,7 +349,7 @@ class DashboardView(WineryContextMixin, APIView):
         # High VA alerts (VA > 0.6 g/L)
         high_va_analyses = analyses_qs.filter(
             va_gl__gt=0.6,
-            analysis_date__date__gte=week_ago
+            analysis_date__gte=week_ago
         ).order_by('-analysis_date')[:5]
         
         for a in high_va_analyses:
