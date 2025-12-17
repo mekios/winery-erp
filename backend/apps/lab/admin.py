@@ -62,3 +62,4 @@ class AnalysisAdmin(admin.ModelAdmin):
         return "-"
     potential_alcohol_display.short_description = "Potential Alcohol (from Brix)"
 
+

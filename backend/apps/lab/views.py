@@ -245,3 +245,4 @@ class AnalysisViewSet(WineryContextMixin, viewsets.ModelViewSet):
             'by_sample_type': type_counts,
         })
 
+

@@ -306,3 +306,4 @@ class Analysis(models.Model):
         else:
             return 'COMPLETE'
 
+

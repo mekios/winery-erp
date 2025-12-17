@@ -115,3 +115,4 @@ class EquipmentListSerializer(serializers.ModelSerializer):
 
 
 
+

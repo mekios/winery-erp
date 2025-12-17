@@ -240,3 +240,4 @@ class Equipment(models.Model):
 
 
 
+

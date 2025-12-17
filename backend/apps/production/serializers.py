@@ -232,3 +232,4 @@ WINE_LOT_STATUS_CHOICES = [
     for choice in WineLotStatus.choices
 ]
 
+
