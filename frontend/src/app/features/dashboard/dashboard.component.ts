@@ -1,5 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,6 +9,15 @@ import { MatRippleModule } from '@angular/material/core';
 
 import { AuthService } from '@core/services/auth.service';
 import { WineryService } from '@core/services/winery.service';
+import { IconComponent } from '@shared/components/icon/icon.component';
+import { 
+  DashboardService, 
+  DashboardData,
+  RecentTransfer,
+  RecentAnalysis,
+  TopTank,
+  DashboardAlert 
+} from './dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,11 +25,14 @@ import { WineryService } from '@core/services/winery.service';
   imports: [
     CommonModule,
     RouterLink,
+    DecimalPipe,
+    DatePipe,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatRippleModule
+    MatRippleModule,
+    IconComponent
   ],
   template: `
     <div class="dashboard stagger">
@@ -33,7 +45,7 @@ import { WineryService } from '@core/services/winery.service';
           </p>
         </div>
         <div class="header-actions">
-          <button class="btn btn-primary" routerLink="/transfers">
+          <button class="btn btn-primary" routerLink="/production/transfers/new">
             <mat-icon>add</mat-icon>
             New Transfer
           </button>
@@ -51,7 +63,7 @@ import { WineryService } from '@core/services/winery.service';
               <h2>{{ membership.winery.name }}</h2>
               <span class="banner-location">
                 <mat-icon>location_on</mat-icon>
-                {{ membership.winery.region }}, {{ membership.winery.country }}
+                {{ membership.winery.region || 'Region' }}, {{ membership.winery.country || 'Country' }}
               </span>
             </div>
           </div>
@@ -60,268 +72,278 @@ import { WineryService } from '@core/services/winery.service';
           </div>
         </div>
         
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-          <div class="stat-card-wrapper">
-            <div class="stat-icon">
-              <mat-icon>inventory_2</mat-icon>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value">24</div>
-              <div class="stat-label">Active Tanks</div>
-              <div class="stat-change positive">12% from last month</div>
-            </div>
+        @if (loading()) {
+          <div class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
           </div>
-          
-          <div class="stat-card-wrapper">
-            <div class="stat-icon success">
-              <mat-icon>grain</mat-icon>
+        } @else if (data()) {
+          <!-- Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card-wrapper" routerLink="/equipment/tanks">
+              <div class="stat-icon">
+                <app-icon name="tank" [size]="24"></app-icon>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value">{{ data()!.stats.tanks.active }}</div>
+                <div class="stat-label">Active Tanks</div>
+                <div class="stat-change">{{ data()!.stats.tanks.total }} total • {{ data()!.stats.tanks.fill_percentage }}% filled</div>
+              </div>
             </div>
-            <div class="stat-content">
-              <div class="stat-value">156</div>
-              <div class="stat-label">Active Batches</div>
-              <div class="stat-change positive">8% from last month</div>
+            
+            <div class="stat-card-wrapper" routerLink="/harvest/batches">
+              <div class="stat-icon success">
+                <app-icon name="batch" [size]="24"></app-icon>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value">{{ data()!.stats.batches.this_season }}</div>
+                <div class="stat-label">Batches This Season</div>
+                <div class="stat-change">{{ data()!.stats.batches.total }} total</div>
+              </div>
             </div>
-          </div>
-          
-          <div class="stat-card-wrapper">
-            <div class="stat-icon info">
-              <mat-icon>swap_horiz</mat-icon>
+            
+            <div class="stat-card-wrapper" routerLink="/production/transfers">
+              <div class="stat-icon info">
+                <app-icon name="arrow-right-left" [size]="24"></app-icon>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value">{{ data()!.stats.transfers.today }}</div>
+                <div class="stat-label">Transfers Today</div>
+                <div class="stat-change">{{ data()!.stats.transfers.this_week }} this week</div>
+              </div>
             </div>
-            <div class="stat-content">
-              <div class="stat-value">12</div>
-              <div class="stat-label">Transfers Today</div>
-              <div class="stat-change negative">3% from yesterday</div>
-            </div>
-          </div>
-          
-          <div class="stat-card-wrapper">
-            <div class="stat-icon warning">
-              <mat-icon>assignment</mat-icon>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value">7</div>
-              <div class="stat-label">Open Tasks</div>
-              <div class="stat-change positive">2 completed today</div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Quick Actions -->
-        <h3 class="section-title">Quick Actions</h3>
-        <div class="actions-grid">
-          <a class="action-card card card-hover" routerLink="/transfers" matRipple>
-            <div class="action-icon primary">
-              <mat-icon>add_circle</mat-icon>
-            </div>
-            <span class="action-label">New Transfer</span>
-            <span class="action-description">Move wine between tanks</span>
-          </a>
-          
-          <a class="action-card card card-hover" routerLink="/analyses" matRipple>
-            <div class="action-icon success">
-              <mat-icon>science</mat-icon>
-            </div>
-            <span class="action-label">Record Analysis</span>
-            <span class="action-description">Log lab results</span>
-          </a>
-          
-          <a class="action-card card card-hover" routerLink="/batches" matRipple>
-            <div class="action-icon info">
-              <mat-icon>grain</mat-icon>
-            </div>
-            <span class="action-label">New Batch</span>
-            <span class="action-description">Start grape intake</span>
-          </a>
-          
-          <a class="action-card card card-hover" routerLink="/work-orders" matRipple>
-            <div class="action-icon warning">
-              <mat-icon>assignment</mat-icon>
-            </div>
-            <span class="action-label">View Tasks</span>
-            <span class="action-description">7 tasks pending</span>
-          </a>
-        </div>
-        
-        <!-- Main Content Grid -->
-        <div class="content-grid">
-          <!-- Recent Activity -->
-          <div class="card">
-            <div class="card-header d-flex justify-between align-center">
-              <h4>Recent Activity</h4>
-              <a routerLink="/activity" class="text-primary text-sm">View all</a>
-            </div>
-            <div class="card-body">
-              <div class="activity-list">
-                <div class="activity-item">
-                  <div class="activity-icon success">
-                    <mat-icon>check_circle</mat-icon>
-                  </div>
-                  <div class="activity-content">
-                    <span class="activity-title">Transfer #T-2024-0142 completed</span>
-                    <span class="activity-meta">Tank A12 → Tank B03 • 500L</span>
-                  </div>
-                  <span class="activity-time">2 min ago</span>
-                </div>
-                
-                <div class="activity-item">
-                  <div class="activity-icon info">
-                    <mat-icon>science</mat-icon>
-                  </div>
-                  <div class="activity-content">
-                    <span class="activity-title">Analysis recorded for Tank A12</span>
-                    <span class="activity-meta">pH: 3.42 • TA: 6.2 g/L</span>
-                  </div>
-                  <span class="activity-time">15 min ago</span>
-                </div>
-                
-                <div class="activity-item">
-                  <div class="activity-icon warning">
-                    <mat-icon>warning</mat-icon>
-                  </div>
-                  <div class="activity-content">
-                    <span class="activity-title">Low SO₂ alert for Tank C07</span>
-                    <span class="activity-meta">Free SO₂: 18 mg/L (threshold: 25)</span>
-                  </div>
-                  <span class="activity-time">1 hour ago</span>
-                </div>
-                
-                <div class="activity-item">
-                  <div class="activity-icon primary">
-                    <mat-icon>grain</mat-icon>
-                  </div>
-                  <div class="activity-content">
-                    <span class="activity-title">New batch created: B-2024-089</span>
-                    <span class="activity-meta">Cabernet Sauvignon • 2,500 kg</span>
-                  </div>
-                  <span class="activity-time">3 hours ago</span>
-                </div>
+            
+            <div class="stat-card-wrapper" routerLink="/lab/analyses">
+              <div class="stat-icon warning">
+                <app-icon name="flask-conical" [size]="24"></app-icon>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value">{{ data()!.stats.analyses.this_week }}</div>
+                <div class="stat-label">Analyses This Week</div>
+                <div class="stat-change">{{ data()!.stats.analyses.total }} total</div>
               </div>
             </div>
           </div>
           
-          <!-- Open Tasks -->
-          <div class="card">
-            <div class="card-header d-flex justify-between align-center">
-              <h4>Open Tasks</h4>
-              <a routerLink="/work-orders" class="text-primary text-sm">View all</a>
+          <!-- Alerts -->
+          @if (data()!.alerts.length > 0) {
+            <div class="alerts-section">
+              <h3 class="section-title">
+                <mat-icon>warning</mat-icon>
+                Alerts
+              </h3>
+              <div class="alerts-grid">
+                @for (alert of data()!.alerts; track alert.date) {
+                  <div class="alert-card" [class]="alert.type">
+                    <div class="alert-icon">
+                      <mat-icon>{{ alert.type === 'danger' ? 'error' : 'warning' }}</mat-icon>
+                    </div>
+                    <div class="alert-content">
+                      <span class="alert-message">{{ alert.message }}</span>
+                      <span class="alert-time">{{ alert.date | date:'short' }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
             </div>
-            <div class="card-body p-0">
-              <div class="tasks-list">
-                <div class="task-item">
-                  <div class="task-checkbox">
-                    <mat-icon>radio_button_unchecked</mat-icon>
+          }
+          
+          <!-- Quick Actions -->
+          <h3 class="section-title">Quick Actions</h3>
+          <div class="actions-grid">
+            <a class="action-card card card-hover" routerLink="/production/transfers/new" matRipple>
+              <div class="action-icon primary">
+                <app-icon name="arrow-right-left" [size]="24"></app-icon>
+              </div>
+              <span class="action-label">New Transfer</span>
+              <span class="action-description">Move wine between tanks</span>
+            </a>
+            
+            <a class="action-card card card-hover" routerLink="/lab/analyses/new" matRipple>
+              <div class="action-icon success">
+                <app-icon name="flask-conical" [size]="24"></app-icon>
+              </div>
+              <span class="action-label">Record Analysis</span>
+              <span class="action-description">Log lab results</span>
+            </a>
+            
+            <a class="action-card card card-hover" routerLink="/harvest/batches/new" matRipple>
+              <div class="action-icon info">
+                <app-icon name="batch" [size]="24"></app-icon>
+              </div>
+              <span class="action-label">New Batch</span>
+              <span class="action-description">Start grape intake</span>
+            </a>
+            
+            <a class="action-card card card-hover" routerLink="/production/wine-lots/new" matRipple>
+              <div class="action-icon warning">
+                <app-icon name="wine" [size]="24"></app-icon>
+              </div>
+              <span class="action-label">New Wine Lot</span>
+              <span class="action-description">Create wine lot</span>
+            </a>
+          </div>
+          
+          <!-- Main Content Grid -->
+          <div class="content-grid">
+            <!-- Recent Transfers -->
+            <div class="card">
+              <div class="card-header d-flex justify-between align-center">
+                <h4>Recent Transfers</h4>
+                <a routerLink="/production/transfers" class="text-primary text-sm">View all</a>
+              </div>
+              <div class="card-body">
+                @if (data()!.recent_transfers.length > 0) {
+                  <div class="activity-list">
+                    @for (transfer of data()!.recent_transfers; track transfer.id) {
+                      <div class="activity-item">
+                        <div class="activity-icon primary">
+                          <app-icon name="arrow-right-left" [size]="18"></app-icon>
+                        </div>
+                        <div class="activity-content">
+                          <span class="activity-title">{{ transfer.action_type_display }}</span>
+                          <span class="activity-meta">
+                            @if (transfer.source_tank && transfer.destination_tank) {
+                              {{ transfer.source_tank }} → {{ transfer.destination_tank }}
+                            } @else if (transfer.source_tank) {
+                              From {{ transfer.source_tank }}
+                            } @else if (transfer.destination_tank) {
+                              To {{ transfer.destination_tank }}
+                            }
+                            • {{ transfer.volume_l | number:'1.0-0' }} L
+                          </span>
+                        </div>
+                        <span class="activity-time">{{ transfer.transfer_date | date:'short' }}</span>
+                      </div>
+                    }
                   </div>
-                  <div class="task-content">
-                    <span class="task-title">Rack Tank B03</span>
-                    <span class="task-meta">Due today • High priority</span>
+                } @else {
+                  <div class="empty-state-small">
+                    <app-icon name="arrow-right-left" [size]="32"></app-icon>
+                    <p>No transfers yet</p>
                   </div>
-                  <span class="badge badge-danger">Urgent</span>
-                </div>
-                
-                <div class="task-item">
-                  <div class="task-checkbox">
-                    <mat-icon>radio_button_unchecked</mat-icon>
+                }
+              </div>
+            </div>
+            
+            <!-- Recent Analyses -->
+            <div class="card">
+              <div class="card-header d-flex justify-between align-center">
+                <h4>Recent Analyses</h4>
+                <a routerLink="/lab/analyses" class="text-primary text-sm">View all</a>
+              </div>
+              <div class="card-body">
+                @if (data()!.recent_analyses.length > 0) {
+                  <div class="activity-list">
+                    @for (analysis of data()!.recent_analyses; track analysis.id) {
+                      <div class="activity-item">
+                        <div class="activity-icon" 
+                             [class.warning]="analysis.va_gl && analysis.va_gl > 0.5"
+                             [class.success]="!analysis.va_gl || analysis.va_gl <= 0.5">
+                          <app-icon name="flask-conical" [size]="18"></app-icon>
+                        </div>
+                        <div class="activity-content">
+                          <span class="activity-title">{{ analysis.source_display }}</span>
+                          <span class="activity-meta">
+                            @if (analysis.ph) { pH: {{ analysis.ph | number:'1.2-2' }} }
+                            @if (analysis.ta_gl) { • TA: {{ analysis.ta_gl | number:'1.1-1' }} g/L }
+                            @if (analysis.free_so2_mgl) { • SO₂: {{ analysis.free_so2_mgl | number:'1.0-0' }} mg/L }
+                          </span>
+                        </div>
+                        <span class="activity-time">{{ analysis.analysis_date | date:'short' }}</span>
+                      </div>
+                    }
                   </div>
-                  <div class="task-content">
-                    <span class="task-title">SO₂ addition - Tank C07</span>
-                    <span class="task-meta">Due today</span>
+                } @else {
+                  <div class="empty-state-small">
+                    <app-icon name="flask-conical" [size]="32"></app-icon>
+                    <p>No analyses yet</p>
                   </div>
-                  <span class="badge badge-warning">Today</span>
-                </div>
-                
-                <div class="task-item">
-                  <div class="task-checkbox">
-                    <mat-icon>radio_button_unchecked</mat-icon>
-                  </div>
-                  <div class="task-content">
-                    <span class="task-title">Schedule analysis for Tank A01-A05</span>
-                    <span class="task-meta">Due tomorrow</span>
-                  </div>
-                  <span class="badge badge-info">Tomorrow</span>
-                </div>
-                
-                <div class="task-item">
-                  <div class="task-checkbox completed">
-                    <mat-icon>check_circle</mat-icon>
-                  </div>
-                  <div class="task-content completed">
-                    <span class="task-title">Transfer T-2024-0142</span>
-                    <span class="task-meta">Completed 2 min ago</span>
-                  </div>
-                  <span class="badge badge-success">Done</span>
-                </div>
+                }
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- Tank Overview -->
-        <div class="card mt-4">
-          <div class="card-header d-flex justify-between align-center">
-            <h4>Tank Capacity Overview</h4>
-            <a routerLink="/tanks" class="text-primary text-sm">Manage tanks</a>
-          </div>
-          <div class="card-body">
-            <div class="tank-grid">
-              <div class="tank-item">
-                <div class="tank-header">
-                  <span class="tank-name">Tank A12</span>
-                  <span class="tank-volume">4,500 / 5,000 L</span>
-                </div>
-                <div class="progress">
-                  <div class="progress-bar" style="width: 90%"></div>
-                </div>
-                <div class="tank-meta">
-                  <span>Cabernet Sauvignon 2024</span>
-                  <span class="text-success">90%</span>
-                </div>
+          
+          <!-- Tank Overview -->
+          @if (data()!.top_tanks.length > 0) {
+            <div class="card mt-4">
+              <div class="card-header d-flex justify-between align-center">
+                <h4>Tank Capacity Overview</h4>
+                <a routerLink="/equipment/tanks" class="text-primary text-sm">Manage tanks</a>
               </div>
-              
-              <div class="tank-item">
-                <div class="tank-header">
-                  <span class="tank-name">Tank B03</span>
-                  <span class="tank-volume">2,100 / 3,000 L</span>
-                </div>
-                <div class="progress">
-                  <div class="progress-bar info" style="width: 70%"></div>
-                </div>
-                <div class="tank-meta">
-                  <span>Merlot 2024</span>
-                  <span class="text-info">70%</span>
-                </div>
-              </div>
-              
-              <div class="tank-item">
-                <div class="tank-header">
-                  <span class="tank-name">Tank C07</span>
-                  <span class="tank-volume">1,800 / 2,000 L</span>
-                </div>
-                <div class="progress">
-                  <div class="progress-bar warning" style="width: 90%"></div>
-                </div>
-                <div class="tank-meta">
-                  <span>Chardonnay 2024</span>
-                  <span class="text-warning">90%</span>
-                </div>
-              </div>
-              
-              <div class="tank-item">
-                <div class="tank-header">
-                  <span class="tank-name">Tank D01</span>
-                  <span class="tank-volume">500 / 5,000 L</span>
-                </div>
-                <div class="progress">
-                  <div class="progress-bar danger" style="width: 10%"></div>
-                </div>
-                <div class="tank-meta">
-                  <span>Sauvignon Blanc 2024</span>
-                  <span class="text-danger">10%</span>
+              <div class="card-body">
+                <div class="tank-grid">
+                  @for (tank of data()!.top_tanks; track tank.id) {
+                    <div class="tank-item">
+                      <div class="tank-header">
+                        <span class="tank-name">{{ tank.code }}</span>
+                        <span class="tank-volume">{{ tank.current_volume_l | number:'1.0-0' }} / {{ tank.capacity_l | number:'1.0-0' }} L</span>
+                      </div>
+                      <div class="progress">
+                        <div class="progress-bar" 
+                             [class.danger]="tank.fill_percentage < 20"
+                             [class.warning]="tank.fill_percentage >= 20 && tank.fill_percentage < 50"
+                             [class.info]="tank.fill_percentage >= 50 && tank.fill_percentage < 80"
+                             [style.width.%]="tank.fill_percentage"></div>
+                      </div>
+                      <div class="tank-meta">
+                        <span>{{ tank.name }}</span>
+                        <span [class.text-danger]="tank.fill_percentage < 20"
+                              [class.text-warning]="tank.fill_percentage >= 20 && tank.fill_percentage < 50"
+                              [class.text-info]="tank.fill_percentage >= 50 && tank.fill_percentage < 80"
+                              [class.text-success]="tank.fill_percentage >= 80">
+                          {{ tank.fill_percentage }}%
+                        </span>
+                      </div>
+                    </div>
+                  }
                 </div>
               </div>
             </div>
+          }
+          
+          <!-- Summary Cards -->
+          <div class="summary-grid">
+            <div class="summary-card" routerLink="/master-data/varieties">
+              <div class="summary-icon">
+                <app-icon name="grape" [size]="24"></app-icon>
+              </div>
+              <div class="summary-content">
+                <span class="summary-value">{{ data()!.stats.varieties }}</span>
+                <span class="summary-label">Varieties</span>
+              </div>
+            </div>
+            
+            <div class="summary-card" routerLink="/master-data/growers">
+              <div class="summary-icon">
+                <app-icon name="farmer" [size]="24"></app-icon>
+              </div>
+              <div class="summary-content">
+                <span class="summary-value">{{ data()!.stats.growers }}</span>
+                <span class="summary-label">Growers</span>
+              </div>
+            </div>
+            
+            <div class="summary-card" routerLink="/equipment/barrels">
+              <div class="summary-icon">
+                <app-icon name="barrel" [size]="24"></app-icon>
+              </div>
+              <div class="summary-content">
+                <span class="summary-value">{{ data()!.stats.barrels.in_use }}</span>
+                <span class="summary-label">Barrels in Use</span>
+              </div>
+            </div>
+            
+            <div class="summary-card" routerLink="/production/wine-lots">
+              <div class="summary-icon">
+                <app-icon name="wine" [size]="24"></app-icon>
+              </div>
+              <div class="summary-content">
+                <span class="summary-value">{{ data()!.stats.wine_lots.active }}</span>
+                <span class="summary-label">Active Lots</span>
+              </div>
+            </div>
           </div>
-        </div>
+        }
         
       } @else if (wineryService.loading()) {
         <div class="loading-container">
@@ -334,7 +356,7 @@ import { WineryService } from '@core/services/winery.service';
             <mat-icon>business</mat-icon>
             <h3>No Winery Selected</h3>
             <p>You don't have access to any wineries yet, or you need to select one from the header.</p>
-            <button class="btn btn-primary">
+            <button class="btn btn-primary" routerLink="/settings/wineries">
               <mat-icon>add</mat-icon>
               Create New Winery
             </button>
@@ -410,6 +432,72 @@ import { WineryService } from '@core/services/winery.service';
     }
     
     /* ===========================================
+       Alerts Section
+       =========================================== */
+    .alerts-section {
+      margin-bottom: 1.5rem;
+      
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        
+        mat-icon {
+          color: var(--warning);
+        }
+      }
+    }
+    
+    .alerts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 0.75rem;
+    }
+    
+    .alert-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      border-radius: 8px;
+      
+      &.warning {
+        background: rgba(255, 175, 0, 0.1);
+        border: 1px solid rgba(255, 175, 0, 0.2);
+        
+        .alert-icon mat-icon {
+          color: var(--warning);
+        }
+      }
+      
+      &.danger {
+        background: rgba(255, 82, 82, 0.1);
+        border: 1px solid rgba(255, 82, 82, 0.2);
+        
+        .alert-icon mat-icon {
+          color: var(--danger);
+        }
+      }
+    }
+    
+    .alert-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .alert-message {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .alert-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    
+    /* ===========================================
        Stats Grid
        =========================================== */
     .stats-grid {
@@ -417,6 +505,72 @@ import { WineryService } from '@core/services/winery.service';
       grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       margin-bottom: 2rem;
+    }
+    
+    .stat-card-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px rgba(124, 77, 255, 0.15);
+      }
+    }
+    
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(124, 77, 255, 0.12);
+      color: var(--primary);
+      
+      &.success {
+        background: rgba(25, 216, 149, 0.12);
+        color: var(--success);
+      }
+      
+      &.info {
+        background: rgba(33, 150, 243, 0.12);
+        color: var(--info);
+      }
+      
+      &.warning {
+        background: rgba(255, 175, 0, 0.12);
+        color: var(--warning);
+      }
+    }
+    
+    .stat-content {
+      flex: 1;
+    }
+    
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+    
+    .stat-change {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
     }
     
     @media (max-width: 1200px) {
@@ -484,28 +638,22 @@ import { WineryService } from '@core/services/winery.service';
       
       &.primary {
         background: rgba(124, 77, 255, 0.12);
-        mat-icon { color: var(--primary); }
+        color: var(--primary);
       }
       
       &.success {
         background: rgba(25, 216, 149, 0.12);
-        mat-icon { color: var(--success); }
+        color: var(--success);
       }
       
       &.info {
         background: rgba(33, 150, 243, 0.12);
-        mat-icon { color: var(--info); }
+        color: var(--info);
       }
       
       &.warning {
         background: rgba(255, 175, 0, 0.12);
-        mat-icon { color: var(--warning); }
-      }
-      
-      mat-icon {
-        font-size: 1.5rem;
-        width: 1.5rem;
-        height: 1.5rem;
+        color: var(--warning);
       }
     }
     
@@ -568,31 +716,27 @@ import { WineryService } from '@core/services/winery.service';
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      background: rgba(124, 77, 255, 0.12);
+      color: var(--primary);
       
       &.success {
         background: var(--success-light);
-        mat-icon { color: var(--success); }
+        color: var(--success);
       }
       
       &.info {
         background: var(--info-light);
-        mat-icon { color: var(--info); }
+        color: var(--info);
       }
       
       &.warning {
         background: var(--warning-light);
-        mat-icon { color: var(--warning); }
+        color: var(--warning);
       }
       
       &.primary {
         background: rgba(124, 77, 255, 0.12);
-        mat-icon { color: var(--primary); }
-      }
-      
-      mat-icon {
-        font-size: 1.125rem;
-        width: 1.125rem;
-        height: 1.125rem;
+        color: var(--primary);
       }
     }
     
@@ -621,67 +765,22 @@ import { WineryService } from '@core/services/winery.service';
       white-space: nowrap;
     }
     
-    /* ===========================================
-       Tasks List
-       =========================================== */
-    .tasks-list {
+    .empty-state-small {
       display: flex;
       flex-direction: column;
-    }
-    
-    .task-item {
-      display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-      
-      &:last-child {
-        border-bottom: none;
-      }
-    }
-    
-    .task-checkbox {
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      
-      mat-icon {
-        font-size: 1.25rem;
-        color: var(--gray-400);
-      }
-      
-      &.completed mat-icon {
-        color: var(--success);
-      }
-    }
-    
-    .task-content {
-      flex: 1;
-      min-width: 0;
-      
-      &.completed {
-        .task-title {
-          text-decoration: line-through;
-          color: var(--text-muted);
-        }
-      }
-    }
-    
-    .task-title {
-      display: block;
-      font-weight: 600;
-      color: var(--text-primary);
-      font-size: 0.875rem;
-    }
-    
-    .task-meta {
-      display: block;
-      font-size: 0.75rem;
+      padding: 2rem;
       color: var(--text-muted);
+      
+      app-icon {
+        opacity: 0.5;
+        margin-bottom: 0.5rem;
+      }
+      
+      p {
+        margin: 0;
+        font-size: 0.875rem;
+      }
     }
     
     /* ===========================================
@@ -689,11 +788,17 @@ import { WineryService } from '@core/services/winery.service';
        =========================================== */
     .tank-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
     }
     
-    @media (max-width: 768px) {
+    @media (max-width: 992px) {
+      .tank-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 576px) {
       .tank-grid {
         grid-template-columns: 1fr;
       }
@@ -701,7 +806,7 @@ import { WineryService } from '@core/services/winery.service';
     
     .tank-item {
       padding: 1rem;
-      background: var(--gray-100);
+      background: var(--gray-50);
       border-radius: var(--border-radius-sm);
     }
     
@@ -722,10 +827,87 @@ import { WineryService } from '@core/services/winery.service';
       color: var(--text-secondary);
     }
     
+    .progress {
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: var(--success);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+      
+      &.danger { background: var(--danger); }
+      &.warning { background: var(--warning); }
+      &.info { background: var(--info); }
+    }
+    
     .tank-meta {
       display: flex;
       justify-content: space-between;
       margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    
+    /* ===========================================
+       Summary Grid
+       =========================================== */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    @media (max-width: 992px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    .summary-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        border-color: var(--primary);
+      }
+    }
+    
+    .summary-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gray-100);
+      color: var(--text-secondary);
+    }
+    
+    .summary-content {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .summary-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .summary-label {
       font-size: 0.75rem;
       color: var(--text-muted);
     }
@@ -746,11 +928,45 @@ import { WineryService } from '@core/services/winery.service';
       display: flex;
       gap: 0.75rem;
     }
+    
+    .text-danger { color: var(--danger) !important; }
+    .text-warning { color: var(--warning) !important; }
+    .text-info { color: var(--info) !important; }
+    .text-success { color: var(--success) !important; }
+    
+    .mt-4 { margin-top: 1.5rem; }
   `]
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   authService = inject(AuthService);
   wineryService = inject(WineryService);
+  private dashboardService = inject(DashboardService);
+  
+  loading = signal(true);
+  data = signal<DashboardData | null>(null);
+  
+  ngOnInit(): void {
+    this.loadDashboard();
+  }
+  
+  loadDashboard(): void {
+    if (!this.wineryService.currentWinery()) {
+      this.loading.set(false);
+      return;
+    }
+    
+    this.loading.set(true);
+    this.dashboardService.getDashboard().subscribe({
+      next: (data) => {
+        this.data.set(data);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Dashboard error:', err);
+        this.loading.set(false);
+      }
+    });
+  }
   
   formatRole(role: string): string {
     return role.replace('_', ' ');
