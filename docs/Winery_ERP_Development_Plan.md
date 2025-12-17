@@ -10,12 +10,18 @@
 | Phase | Status | Completed |
 |-------|--------|-----------|
 | **Phase 0** | ✅ COMPLETE | Dec 11, 2024 |
-| **Phase 1** | 🔄 IN PROGRESS | Sprint 1.1-1.4 ✅, Starting 1.5 |
+| **Phase 1** | 🔄 IN PROGRESS | Sprint 1.1-1.5 ✅, Starting 1.6 |
 | **Phase 2** | ⏳ Pending | - |
 | **Phase 3** | ⏳ Pending | - |
 | **Phase 4** | ⏳ Pending | - |
 
 ### Recent Completed Work (Dec 17, 2024)
+- ✅ Sprint 1.5: Lab Analyses (backend + frontend)
+  - Analysis model with all wine parameters (pH, TA, VA, Brix, SO₂, etc.)
+  - Computed fields (molecular SO₂, potential alcohol, MLF progress)
+  - Analysis history endpoints for tanks and wine lots
+  - Full-page analysis form with parameter groups
+  - Analyses list with filtering by sample type
 - ✅ Sprint 1.4: Transfers & Wine Lots (backend + frontend)
   - Transfer model with action types (FILL, RACK, BLEND, etc.)
   - WineLot model with batch linking (LotBatchLink)
@@ -241,26 +247,26 @@
 
 ---
 
-### Sprint 1.5: Lab Analyses (Week 5)
+### Sprint 1.5: Lab Analyses (Week 5) ✅ COMPLETE
 
-#### Backend
-- [ ] Create `lab` app
-  - [ ] Analysis model + API (all parameters)
-  - [ ] Analysis validation (range checks)
-- [ ] Add computed fields (e.g., potential alcohol from Brix)
-- [ ] Create analysis history endpoint per tank/lot
+#### Backend ✅ COMPLETE
+- [x] Create `lab` app
+  - [x] Analysis model + API (all parameters)
+  - [x] Analysis validation (range checks)
+- [x] Add computed fields (e.g., potential alcohol from Brix, molecular SO₂)
+- [x] Create analysis history endpoint per tank/lot
 
-#### Frontend
-- [ ] Create `analyses` feature module
-  - [ ] Analysis list (by tank, barrel, or lot)
-  - [ ] Analysis entry form (with parameter groups)
-  - [ ] Analysis history charts
+#### Frontend ✅ COMPLETE
+- [x] Create `analyses` feature module
+  - [x] Analysis list (by tank, barrel, or lot)
+  - [x] Analysis entry form (with parameter groups)
+  - [ ] Analysis history charts (deferred to Phase 2)
     - Fermentation curve (density/Brix over time)
     - SO₂ tracking chart
     - pH/TA chart
-- [ ] Add quick-entry mode for common parameters
+- [x] Add quick-entry mode for common parameters
 
-**Deliverable:** Full lab analysis entry and visualization
+**Deliverable:** ✅ Full lab analysis entry with computed fields (Dec 17, 2024)
 
 ---
 

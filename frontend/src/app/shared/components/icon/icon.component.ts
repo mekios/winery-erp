@@ -95,6 +95,29 @@ const ICONS: Record<string, string> = {
     <path d="M7 16h10"/>
   `,
   
+  // Flask Conical - Erlenmeyer flask (alias for lab)
+  'flask-conical': `
+    <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/>
+    <path d="M8.5 2h7"/>
+    <path d="M7 16h10"/>
+  `,
+  
+  // Arrow Right Left - Transfer icon
+  'arrow-right-left': `
+    <path d="m16 3 4 4-4 4"/>
+    <path d="M20 7H4"/>
+    <path d="m8 21-4-4 4-4"/>
+    <path d="M4 17h16"/>
+  `,
+  
+  // Wine - Wine glass icon  
+  'wine': `
+    <path d="M8 22h8"/>
+    <path d="M7 10h10"/>
+    <path d="M12 15v7"/>
+    <path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/>
+  `,
+  
   // Building - Building 2 icon
   'building': `
     <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>

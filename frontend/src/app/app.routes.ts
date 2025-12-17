@@ -45,6 +45,13 @@ export const routes: Routes = [
     loadChildren: () => import('./features/production/production.routes')
       .then(m => m.PRODUCTION_ROUTES)
   },
+  // Lab (Sprint 1.5)
+  {
+    path: 'lab',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/lab/lab.routes')
+      .then(m => m.LAB_ROUTES)
+  },
   // Settings/Admin
   {
     path: 'settings',

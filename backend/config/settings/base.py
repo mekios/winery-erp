@@ -57,8 +57,8 @@ LOCAL_APPS = [
     'apps.equipment',    # Phase 1 - Sprint 1.2
     'apps.harvest',      # Phase 1 - Sprint 1.3
     'apps.production',   # Phase 1 - Sprint 1.4
+    'apps.lab',          # Phase 1 - Sprint 1.5
     # 'apps.inventory',    # Phase 2
-    # 'apps.lab',          # Phase 1
     # 'apps.ledger',       # Phase 2
     # 'apps.work_orders',  # Phase 2
     # 'apps.packaging',    # Phase 3

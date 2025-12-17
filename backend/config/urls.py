@@ -40,8 +40,8 @@ api_v1_patterns = [
     # Production (Phase 1 - Sprint 1.4)
     path('production/', include('apps.production.urls')),
     
-    # Lab (Phase 1)
-    # path('analyses/', include('apps.lab.urls')),
+    # Lab (Phase 1 - Sprint 1.5)
+    path('lab/', include('apps.lab.urls')),
     
     # Inventory (Phase 2)
     # path('materials/', include('apps.inventory.urls.materials')),

@@ -124,9 +124,9 @@ import { IconComponent } from '@shared/components/icon/icon.component';
             
             <div class="nav-section">Lab & Quality</div>
             
-            <a class="nav-item disabled" matRipple
+            <a class="nav-item" routerLink="/lab/analyses" routerLinkActive="active" matRipple
                [matTooltip]="sidebarCollapsed() ? 'Analyses' : ''" matTooltipPosition="right">
-              <app-icon name="flask" [size]="20"></app-icon>
+              <app-icon name="flask-conical" [size]="20"></app-icon>
               <span>Analyses</span>
             </a>
             
