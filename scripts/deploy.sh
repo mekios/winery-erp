@@ -42,11 +42,11 @@ echo -e "${GREEN}✓ Environment variables look good${NC}"
 # Build and deploy
 echo ""
 echo -e "${YELLOW}Building Docker images...${NC}"
-docker compose -f docker-compose.prod.yml build
+docker-compose -f docker-compose.prod.yml build
 
 echo ""
 echo -e "${YELLOW}Starting services...${NC}"
-docker compose -f docker-compose.prod.yml up -d
+docker-compose -f docker-compose.prod.yml up -d
 
 echo ""
 echo -e "${YELLOW}Waiting for database to be ready...${NC}"
@@ -54,17 +54,17 @@ sleep 10
 
 echo ""
 echo -e "${YELLOW}Running migrations...${NC}"
-docker compose -f docker-compose.prod.yml exec -T backend python manage.py migrate --noinput
+docker-compose -f docker-compose.prod.yml exec -T backend python manage.py migrate --noinput
 
 echo ""
 echo -e "${YELLOW}Collecting static files...${NC}"
-docker compose -f docker-compose.prod.yml exec -T backend python manage.py collectstatic --noinput
+docker-compose -f docker-compose.prod.yml exec -T backend python manage.py collectstatic --noinput
 
 echo ""
 echo -e "${GREEN}✓ Deployment complete!${NC}"
 echo ""
 echo "Services running:"
-docker compose -f docker-compose.prod.yml ps
+docker-compose -f docker-compose.prod.yml ps
 
 echo ""
 echo -e "${GREEN}Your app is available at:${NC}"
@@ -72,6 +72,6 @@ echo "  Frontend: http://$(hostname -I | awk '{print $1}')/"
 echo "  Admin:    http://$(hostname -I | awk '{print $1}')/admin/"
 echo ""
 echo -e "${YELLOW}Next steps:${NC}"
-echo "  1. Load demo data (includes users): docker compose -f docker-compose.prod.yml exec backend python manage.py setup_demo_data"
-echo "  2. Or create a superuser manually: docker compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser"
+echo "  1. Load demo data (includes users): docker-compose -f docker-compose.prod.yml exec backend python manage.py setup_demo_data"
+echo "  2. Or create a superuser manually: docker-compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser"
 echo ""
