@@ -111,6 +111,39 @@ export interface FilterOption {
       }
     }
     
+    /* Compact on mobile */
+    @media screen and (max-width: 768px) {
+      .chip {
+        padding: 6px 10px;
+        border-radius: 8px;
+        gap: 4px;
+        border-width: 1px;
+        
+        .chip-label {
+          font-size: 10px;
+        }
+        
+        .chip-value {
+          font-size: 12px;
+          max-width: 60px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        
+        .chip-arrow {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+        
+        .chip-dot {
+          width: 5px;
+          height: 5px;
+        }
+      }
+    }
+    
     ::ng-deep .fresh-menu {
       .mat-mdc-menu-content {
         padding: 6px !important;

@@ -875,34 +875,91 @@ export interface TableAction {
       opacity: 1;
     }
     
-    /* ===== Responsive Toolbar ===== */
-    @media screen and (max-width: 768px) {
+    /* ===== Responsive Toolbar - Tablet ===== */
+    @media screen and (max-width: 991px) {
       .toolbar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
+        gap: 8px;
         padding: 10px 12px;
       }
       
+      .search-wrap {
+        min-width: 160px;
+        padding: 6px 10px;
+      }
+    }
+    
+    /* ===== Responsive Toolbar - Mobile ===== */
+    @media screen and (max-width: 768px) {
+      .toolbar {
+        padding: 8px 10px;
+        gap: 8px;
+      }
+      
       .toolbar-start {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
       }
       
       .search-wrap {
-        min-width: 100%;
-        padding: 6px 10px;
+        flex: 1;
+        min-width: 120px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        
+        .search-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+        
+        input {
+          font-size: 13px;
+        }
+      }
+      
+      .filters-slot {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
       }
       
       .toolbar-end {
-        justify-content: space-between;
+        flex-shrink: 0;
       }
       
       .count-pill {
-        padding: 4px 10px;
+        padding: 4px 8px;
+        border-radius: 12px;
         
-        .count-num { font-size: 13px; }
-        .count-label { font-size: 10px; }
+        .count-num { font-size: 12px; }
+        .count-label { display: none; }
+      }
+    }
+    
+    /* ===== Very small screens ===== */
+    @media screen and (max-width: 480px) {
+      .toolbar {
+        padding: 8px;
+      }
+      
+      .toolbar-start {
+        width: 100%;
+      }
+      
+      .search-wrap {
+        order: -1;
+        flex-basis: 100%;
+      }
+      
+      .toolbar-end {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+      }
+      
+      .fresh-grid {
+        position: relative;
       }
     }
   `]
