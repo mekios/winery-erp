@@ -48,7 +48,9 @@ import { IconComponent } from '@shared/components/icon/icon.component';
         </div>
       </div>
     } @else if (authService.isAuthenticated()) {
-      <div class="app-container" [class.sidebar-collapsed]="sidebarCollapsed()">
+      <div class="app-container" [class.sidebar-collapsed]="sidebarCollapsed()" [class.mobile-menu-open]="mobileMenuOpen()">
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" (click)="closeMobileMenu()"></div>
         <!-- Sidebar -->
         <aside class="sidebar">
           <!-- Logo -->
@@ -734,20 +736,84 @@ import { IconComponent } from '@shared/components/icon/icon.component';
     }
     
     /* ===========================================
-       Responsive
+       Responsive - Tablet & Mobile
        =========================================== */
     @media (max-width: 991px) {
       .sidebar {
         transform: translateX(-100%);
+        box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+      }
+      
+      /* Show sidebar when mobile menu is open */
+      .mobile-menu-open .sidebar {
+        transform: translateX(0);
       }
       
       .sidebar-collapsed .sidebar {
+        width: 260px; /* Reset to full width on mobile */
         transform: translateX(-100%);
+      }
+      
+      .mobile-menu-open.sidebar-collapsed .sidebar {
+        transform: translateX(0);
       }
       
       .main-wrapper,
       .sidebar-collapsed .main-wrapper {
         margin-left: 0;
+      }
+      
+      /* Mobile overlay */
+      .mobile-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      
+      .mobile-menu-open .mobile-overlay {
+        display: block;
+        opacity: 1;
+      }
+      
+      /* Header adjustments for mobile */
+      .top-header {
+        padding: 0 1rem;
+      }
+      
+      .winery-selector span {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .page-content {
+        padding: 1rem;
+      }
+      
+      .winery-selector {
+        padding: 0.375rem 0.75rem;
+        
+        span {
+          display: none;
+        }
+      }
+      
+      .header-icon-btn {
+        width: 36px;
+        height: 36px;
+      }
+      
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.75rem;
       }
     }
     
@@ -793,13 +859,32 @@ export class AppComponent {
   private router = inject(Router);
   
   sidebarCollapsed = signal(false);
+  mobileMenuOpen = signal(false);
   initialized = false;
+  
+  private mobileBreakpoint = 991;
   
   constructor() {
     // Subscribe to auth initialization
     this.authService.initialized$.subscribe(init => {
       this.initialized = init;
     });
+    
+    // Close mobile menu on route change
+    this.router.events.subscribe(() => {
+      if (this.mobileMenuOpen()) {
+        this.mobileMenuOpen.set(false);
+      }
+    });
+    
+    // Close mobile menu on resize to desktop
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > this.mobileBreakpoint && this.mobileMenuOpen()) {
+          this.mobileMenuOpen.set(false);
+        }
+      });
+    }
   }
 
   getUserInitials(): string {
@@ -824,7 +909,17 @@ export class AppComponent {
   }
   
   toggleSidebar(): void {
-    this.sidebarCollapsed.update((v: boolean) => !v);
+    // On mobile, toggle the mobile menu drawer
+    if (typeof window !== 'undefined' && window.innerWidth <= this.mobileBreakpoint) {
+      this.mobileMenuOpen.update((v: boolean) => !v);
+    } else {
+      // On desktop, toggle sidebar collapse
+      this.sidebarCollapsed.update((v: boolean) => !v);
+    }
+  }
+  
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
   }
 
   onWineryChange(wineryId: string): void {
