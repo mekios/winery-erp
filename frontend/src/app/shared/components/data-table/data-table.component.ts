@@ -127,18 +127,19 @@ export interface TableAction {
       
       <!-- Card View (Mobile) - Only rendered on smaller screens -->
       @if (isMobile()) {
-        <div class="cards-area" [class.loading]="loading">
+        <div class="mobile-list" [class.loading]="loading">
           @for (row of dataSource.data; track $index) {
-            <div class="data-card" 
+            <div class="list-item" 
                  [class.clickable]="rowClickable"
                  matRipple
                  [matRippleDisabled]="!rowClickable"
                  (click)="onRowClick(row)">
-              <!-- Card Top Row: Title + Badge + Actions -->
-              <div class="card-top">
-                <div class="card-main">
+              <!-- Left: Main content -->
+              <div class="item-content">
+                <!-- Row 1: Title + Badge -->
+                <div class="item-header">
                   @if (getPrimaryColumn(); as primaryCol) {
-                    <span class="card-title">
+                    <span class="item-title">
                       <ng-container *ngTemplateOutlet="cellContent; context: { column: primaryCol, row: row }"></ng-container>
                     </span>
                   }
@@ -146,36 +147,64 @@ export interface TableAction {
                     <ng-container *ngTemplateOutlet="cellContent; context: { column: badgeCol, row: row }"></ng-container>
                   }
                 </div>
-                @if (actions.length > 0) {
-                  <div class="card-actions">
-                    @for (action of actions; track action.action) {
-                      @if (!action.condition || action.condition(row)) {
-                        <button class="action-btn-sm" 
-                                [class.danger]="action.color === 'warn'"
-                                (click)="onAction(action.action, row); $event.stopPropagation()">
-                          <mat-icon>{{ action.icon }}</mat-icon>
-                        </button>
-                      }
+                <!-- Row 2: Key values as chips -->
+                <div class="item-meta">
+                  @for (column of getMetricColumns(); track column.key; let i = $index) {
+                    @if (i < 4) {
+                      <span class="meta-chip">
+                        <span class="meta-label">{{ column.label }}:</span>
+                        <span class="meta-value">
+                          <ng-container *ngTemplateOutlet="cellContentSimple; context: { column: column, row: row }"></ng-container>
+                        </span>
+                      </span>
                     }
-                  </div>
-                }
+                  }
+                </div>
               </div>
-              
-              <!-- Card Metrics Row -->
-              <div class="card-metrics">
-                @for (column of getMetricColumns(); track column.key) {
-                  <div class="metric">
-                    <span class="metric-value">
-                      <ng-container *ngTemplateOutlet="cellContent; context: { column: column, row: row }"></ng-container>
-                    </span>
-                    <span class="metric-label">{{ column.label }}</span>
-                  </div>
-                }
-              </div>
+              <!-- Right: Actions -->
+              @if (actions.length > 0) {
+                <div class="item-actions">
+                  @for (action of actions; track action.action) {
+                    @if (!action.condition || action.condition(row)) {
+                      <button class="item-action-btn" 
+                              [class.danger]="action.color === 'warn'"
+                              (click)="onAction(action.action, row); $event.stopPropagation()">
+                        <mat-icon>{{ action.icon }}</mat-icon>
+                      </button>
+                    }
+                  }
+                </div>
+              }
             </div>
           }
         </div>
       }
+      
+      <!-- Simple cell content for mobile (no wrappers) -->
+      <ng-template #cellContentSimple let-column="column" let-row="row">
+        @switch (column.type) {
+          @case ('date') {
+            {{ row[column.key] | date:'MMM d' }}
+          }
+          @case ('number') {
+            @if (column.format) {
+              {{ column.format(row[column.key], row) }}
+            } @else {
+              {{ row[column.key] | number }}
+            }
+          }
+          @case ('boolean') {
+            {{ row[column.key] ? '✓' : '—' }}
+          }
+          @default {
+            @if (column.format) {
+              {{ column.format(row[column.key], row) }}
+            } @else {
+              {{ row[column.key] ?? '—' }}
+            }
+          }
+        }
+      </ng-template>
       
       <!-- Empty State -->
       @if (!loading && dataSource.data.length === 0) {
@@ -637,28 +666,28 @@ export interface TableAction {
       background: #fafbfc;
     }
     
-    /* ===== Mobile Card View ===== */
-    .cards-area {
+    /* ===== Mobile List View ===== */
+    .mobile-list {
       flex: 1;
       overflow: auto;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      background: #fff;
       
       &.loading { opacity: 0.5; }
     }
     
-    .data-card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 12px;
-      transition: box-shadow 0.2s, border-color 0.2s;
+    .list-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 12px;
       
-      &:hover, &:active {
-        border-color: #d1d5db;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      &:active {
+        background: #f9fafb;
       }
       
       &.clickable {
@@ -666,127 +695,87 @@ export interface TableAction {
       }
     }
     
-    /* Card Top Row */
-    .card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    
-    .card-main {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .item-content {
       flex: 1;
       min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
     
-    .card-title {
+    .item-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .item-title {
       font-weight: 600;
-      font-size: 14px;
-      color: #1f2937;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 15px;
+      color: #111827;
       
       .cell-text {
         font-weight: 600;
       }
     }
     
-    .card-main .tag {
+    .item-header .tag {
       font-size: 9px;
-      padding: 2px 6px;
-      flex-shrink: 0;
+      padding: 2px 8px;
     }
     
-    .card-actions {
+    .item-meta {
       display: flex;
-      gap: 4px;
-      flex-shrink: 0;
+      flex-wrap: wrap;
+      gap: 4px 10px;
     }
     
-    .action-btn-sm {
-      background: #f3f4f6;
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 12px;
+    }
+    
+    .meta-label {
+      color: #9ca3af;
+    }
+    
+    .meta-value {
+      color: #374151;
+      font-weight: 500;
+    }
+    
+    .item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .item-action-btn {
+      background: transparent;
       border: none;
-      padding: 4px;
-      border-radius: 6px;
+      padding: 6px;
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       transition: all 0.15s;
       
       mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-        color: #6b7280;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: #9ca3af;
       }
       
-      &:hover, &:active {
-        background: #7c4dff;
-        mat-icon { color: #fff; }
+      &:active {
+        background: #f3f4f6;
+        mat-icon { color: #7c4dff; }
       }
       
-      &.danger:hover, &.danger:active {
-        background: #ef4444;
+      &.danger:active {
+        mat-icon { color: #ef4444; }
       }
-    }
-    
-    /* Card Metrics Row */
-    .card-metrics {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 12px;
-      padding-top: 10px;
-      border-top: 1px solid #f3f4f6;
-    }
-    
-    .metric {
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-    }
-    
-    .metric-value {
-      font-size: 13px;
-      font-weight: 600;
-      color: #374151;
-      
-      .cell-text {
-        font-weight: 600;
-      }
-      
-      .date-text {
-        font-size: 12px;
-        color: #374151;
-        font-weight: 600;
-      }
-      
-      .num-text {
-        font-size: 13px;
-        font-weight: 600;
-      }
-      
-      .bool-chip {
-        width: 18px;
-        height: 18px;
-        border-radius: 4px;
-        
-        mat-icon {
-          font-size: 12px;
-          width: 12px;
-          height: 12px;
-        }
-      }
-    }
-    
-    .metric-label {
-      font-size: 10px;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
     }
     
     /* Always visible action buttons (for card view) */
@@ -800,6 +789,7 @@ export interface TableAction {
         flex-direction: column;
         align-items: stretch;
         gap: 10px;
+        padding: 10px 12px;
       }
       
       .toolbar-start {
@@ -809,23 +799,18 @@ export interface TableAction {
       
       .search-wrap {
         min-width: 100%;
+        padding: 6px 10px;
       }
       
       .toolbar-end {
         justify-content: space-between;
       }
-    }
-    
-    /* Very small screens - stack metrics vertically */
-    @media screen and (max-width: 360px) {
-      .card-metrics {
-        flex-direction: column;
-        gap: 6px;
-      }
       
-      .metric {
-        justify-content: space-between;
-        width: 100%;
+      .count-pill {
+        padding: 4px 10px;
+        
+        .count-num { font-size: 13px; }
+        .count-label { font-size: 10px; }
       }
     }
   `]
