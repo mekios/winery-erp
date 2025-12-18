@@ -1,6 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -12,6 +12,8 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatRippleModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Subject, filter, takeUntil } from 'rxjs';
 
 import { AuthService } from '@core/services/auth.service';
 import { WineryService } from '@core/services/winery.service';
@@ -858,38 +860,55 @@ import { IconComponent } from '@shared/components/icon/icon.component';
     }
   `]
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
   wineryService = inject(WineryService);
   private router = inject(Router);
+  private breakpointObserver = inject(BreakpointObserver);
   
   sidebarCollapsed = signal(false);
   mobileMenuOpen = signal(false);
+  isMobile = signal(false);
   initialized = false;
   
-  private mobileBreakpoint = 991;
+  private destroy$ = new Subject<void>();
   
   constructor() {
     // Subscribe to auth initialization
     this.authService.initialized$.subscribe(init => {
       this.initialized = init;
     });
-    
-    // Close mobile menu on route change
-    this.router.events.subscribe(() => {
-      if (this.mobileMenuOpen()) {
-        this.mobileMenuOpen.set(false);
-      }
-    });
-    
-    // Close mobile menu on resize to desktop
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', () => {
-        if (window.innerWidth > this.mobileBreakpoint && this.mobileMenuOpen()) {
+  }
+  
+  ngOnInit(): void {
+    // Watch for mobile breakpoint changes
+    this.breakpointObserver
+      .observe(['(max-width: 991px)'])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        this.isMobile.set(result.matches);
+        // Close mobile menu when switching to desktop
+        if (!result.matches && this.mobileMenuOpen()) {
           this.mobileMenuOpen.set(false);
         }
       });
-    }
+    
+    // Close mobile menu on route change
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        if (this.mobileMenuOpen()) {
+          this.mobileMenuOpen.set(false);
+        }
+      });
+  }
+  
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getUserInitials(): string {
@@ -915,8 +934,9 @@ export class AppComponent {
   
   toggleSidebar(): void {
     // On mobile, toggle the mobile menu drawer
-    if (typeof window !== 'undefined' && window.innerWidth <= this.mobileBreakpoint) {
+    if (this.isMobile()) {
       this.mobileMenuOpen.update((v: boolean) => !v);
+      console.log('Mobile menu toggled:', this.mobileMenuOpen());
     } else {
       // On desktop, toggle sidebar collapse
       this.sidebarCollapsed.update((v: boolean) => !v);
