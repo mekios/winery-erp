@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild, OnInit, OnChanges, OnDestroy, SimpleChanges, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, OnInit, OnChanges, OnDestroy, SimpleChanges, signal, TemplateRef, ContentChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -70,24 +70,43 @@ export interface TableAction {
           </div>
         }
         
-        <!-- Filters - inline on desktop, toggled panel on mobile -->
-        <div class="filters-row" [class.hidden]="isMobile() && !filterPanelOpen()">
-          <ng-content select="[filters]"></ng-content>
-        </div>
+        <!-- Desktop: Inline filters -->
+        @if (!isMobile() && filterTemplate) {
+          <div class="filters-row">
+            <ng-container *ngTemplateOutlet="filterTemplate"></ng-container>
+          </div>
+        }
         
-        <!-- Mobile Filter Toggle -->
-        @if (isMobile() && hasFilters) {
-          <button class="filter-btn" [class.active]="hasActiveFilters || filterPanelOpen()" (click)="toggleFilterPanel()">
-            <mat-icon>{{ filterPanelOpen() ? 'expand_less' : 'tune' }}</mat-icon>
-            @if (hasActiveFilters && !filterPanelOpen()) {
-              <span class="filter-dot"></span>
-            }
+        <!-- Mobile Filter Button -->
+        @if (isMobile() && filterTemplate) {
+          <button class="filter-btn" [class.active]="filterPanelOpen()" (click)="toggleFilterPanel()">
+            <mat-icon>tune</mat-icon>
           </button>
         }
         
         <!-- Count -->
         <div class="count-badge">{{ totalItems }}</div>
       </div>
+      
+      <!-- Mobile: Filter drawer -->
+      @if (isMobile() && filterTemplate) {
+        <div class="filter-backdrop" [class.visible]="filterPanelOpen()" (click)="closeFilterPanel()"></div>
+        <div class="filter-drawer" [class.open]="filterPanelOpen()">
+          <div class="filter-drawer-handle"></div>
+          <div class="filter-drawer-header">
+            <span class="filter-drawer-title">Filters</span>
+            <button class="filter-drawer-close" (click)="closeFilterPanel()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <div class="filter-drawer-content">
+            <ng-container *ngTemplateOutlet="filterTemplate"></ng-container>
+          </div>
+          <div class="filter-drawer-footer">
+            <button class="filter-done-btn" (click)="closeFilterPanel()">Done</button>
+          </div>
+        </div>
+      }
       
       <!-- Loading -->
       @if (loading) {
@@ -453,7 +472,7 @@ export interface TableAction {
     /* Mobile Toolbar */
     .toolbar.mobile {
       padding: 8px 10px;
-      gap: 8px;
+      gap: 6px;
       
       .search-wrap {
         min-width: 0;
@@ -469,7 +488,7 @@ export interface TableAction {
       }
     }
     
-    /* Filter Button (Mobile) */
+    /* Filter Button */
     .filter-btn {
       display: flex;
       align-items: center;
@@ -480,7 +499,6 @@ export interface TableAction {
       border-radius: 10px;
       background: #fff;
       cursor: pointer;
-      position: relative;
       flex-shrink: 0;
       transition: all 0.2s;
       
@@ -494,39 +512,112 @@ export interface TableAction {
       &:hover, &.active {
         border-color: #7c4dff;
         background: rgba(124, 77, 255, 0.05);
-        
         mat-icon { color: #7c4dff; }
-      }
-      
-      .filter-dot {
-        position: absolute;
-        top: 6px;
-        right: 6px;
-        width: 8px;
-        height: 8px;
-        background: #7c4dff;
-        border-radius: 50%;
-        border: 2px solid #fff;
       }
     }
     
-    /* Mobile: Filters row expands as a row below toolbar */
-    .toolbar.mobile {
-      flex-wrap: wrap;
+    /* Filter Drawer */
+    .filter-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
       
-      .filters-row {
-        order: 10; /* Push to end (new row) */
-        width: 100%;
-        padding-top: 10px;
-        margin-top: 8px;
-        border-top: 1px solid #eef0f3;
-        flex-wrap: wrap;
-        gap: 8px;
-        
-        &.hidden {
-          display: none;
-        }
+      &.visible {
+        opacity: 1;
+        pointer-events: auto;
       }
+    }
+    
+    .filter-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      z-index: 1001;
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      display: flex;
+      flex-direction: column;
+      max-height: 70vh;
+      
+      &.open { transform: translateY(0); }
+    }
+    
+    .filter-drawer-handle {
+      width: 36px;
+      height: 4px;
+      background: #ddd;
+      border-radius: 2px;
+      margin: 10px auto 0;
+    }
+    
+    .filter-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px 16px;
+    }
+    
+    .filter-drawer-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    .filter-drawer-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: #f3f4f6;
+      border-radius: 50%;
+      cursor: pointer;
+      
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #6b7280;
+      }
+      
+      &:hover { background: #e5e7eb; }
+    }
+    
+    .filter-drawer-content {
+      padding: 0 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    
+    .filter-drawer-footer {
+      padding: 12px 20px 20px;
+      border-top: 1px solid #f0f0f0;
+    }
+    
+    .filter-done-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #7c4dff, #9d7aff);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      
+      &:active { transform: scale(0.98); }
     }
     
     /* ===== Loading ===== */
@@ -961,6 +1052,7 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
   @Input() emptyIcon = 'inbox';
   @Input() emptyTitle = 'Nothing here yet';
   @Input() emptyMessage = 'Get started by adding your first item.';
+  @Input() filterTemplate?: TemplateRef<unknown>;
   
   @Output() search = new EventEmitter<string>();
   @Output() sort = new EventEmitter<Sort>();
@@ -978,10 +1070,6 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
   isMobile = signal(false);
   filterPanelOpen = signal(false);
   private searchTimeout?: ReturnType<typeof setTimeout>;
-  
-  /** Check if filters slot has content - set via input */
-  @Input() hasFilters = true;
-  @Input() hasActiveFilters = false;
   
   /** Calculate total pages */
   get totalPages(): number {
@@ -1053,12 +1141,10 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
   
-  /** Toggle mobile filter panel */
   toggleFilterPanel(): void {
     this.filterPanelOpen.set(!this.filterPanelOpen());
   }
   
-  /** Close mobile filter panel */
   closeFilterPanel(): void {
     this.filterPanelOpen.set(false);
   }

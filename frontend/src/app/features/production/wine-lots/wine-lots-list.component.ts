@@ -57,6 +57,21 @@ import {
         </button>
       </header>
       
+      <ng-template #filtersTemplate>
+        <app-filter-chip
+          label="Status"
+          [options]="statusOptions"
+          [value]="selectedStatus"
+          (valueChange)="onStatusChange($event)">
+        </app-filter-chip>
+        <app-filter-chip
+          label="Vintage"
+          [options]="vintageOptions()"
+          [value]="selectedVintage"
+          (valueChange)="onVintageChange($event)">
+        </app-filter-chip>
+      </ng-template>
+      
       <app-data-table
         [columns]="columns"
         [data]="wineLots()"
@@ -65,6 +80,7 @@ import {
         [totalItems]="totalItems()"
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
+        [filterTemplate]="filtersTemplate"
         searchPlaceholder="Search wine lots..."
         emptyIcon="wine"
         emptyTitle="No wine lots yet"
@@ -73,22 +89,6 @@ import {
         (sort)="onSort($event)"
         (page)="onPage($event)"
         (actionClick)="onAction($event)">
-        
-        <ng-container filters>
-          <app-filter-chip
-            label="Status"
-            [options]="statusOptions"
-            [value]="selectedStatus"
-            (valueChange)="onStatusChange($event)">
-          </app-filter-chip>
-          
-          <app-filter-chip
-            label="Vintage"
-            [options]="vintageOptions()"
-            [value]="selectedVintage"
-            (valueChange)="onVintageChange($event)">
-          </app-filter-chip>
-        </ng-container>
         
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>

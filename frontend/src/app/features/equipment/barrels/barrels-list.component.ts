@@ -36,6 +36,21 @@ import { EquipmentService, Barrel, WOOD_TYPE_LABELS } from '../equipment.service
         </button>
       </header>
       
+      <ng-template #filtersTemplate>
+        <app-filter-chip
+          label="Wood"
+          [options]="woodOptions"
+          [value]="selectedWood"
+          (valueChange)="onWoodChange($event)">
+        </app-filter-chip>
+        <app-filter-chip
+          label="Status"
+          [options]="statusOptions"
+          [value]="selectedStatus"
+          (valueChange)="onStatusChange($event)">
+        </app-filter-chip>
+      </ng-template>
+      
       <app-data-table
         [columns]="columns"
         [data]="barrels()"
@@ -44,6 +59,7 @@ import { EquipmentService, Barrel, WOOD_TYPE_LABELS } from '../equipment.service
         [totalItems]="totalItems()"
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
+        [filterTemplate]="filtersTemplate"
         searchPlaceholder="Search barrels..."
         emptyIcon="barrel"
         emptyTitle="No barrels yet"
@@ -52,22 +68,6 @@ import { EquipmentService, Barrel, WOOD_TYPE_LABELS } from '../equipment.service
         (sort)="onSort($event)"
         (page)="onPage($event)"
         (actionClick)="onAction($event)">
-        
-        <ng-container filters>
-          <app-filter-chip
-            label="Wood"
-            [options]="woodOptions"
-            [value]="selectedWood"
-            (valueChange)="onWoodChange($event)">
-          </app-filter-chip>
-          
-          <app-filter-chip
-            label="Status"
-            [options]="statusOptions"
-            [value]="selectedStatus"
-            (valueChange)="onStatusChange($event)">
-          </app-filter-chip>
-        </ng-container>
         
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>

@@ -55,6 +55,21 @@ import { EquipmentService, Tank, TankSummary, TANK_TYPE_LABELS } from '../equipm
         </button>
       </header>
       
+      <ng-template #filtersTemplate>
+        <app-filter-chip
+          label="Type"
+          [options]="typeOptions"
+          [value]="selectedType"
+          (valueChange)="onTypeChange($event)">
+        </app-filter-chip>
+        <app-filter-chip
+          label="Status"
+          [options]="statusOptions"
+          [value]="selectedStatus"
+          (valueChange)="onStatusChange($event)">
+        </app-filter-chip>
+      </ng-template>
+      
       <app-data-table
         [columns]="columns"
         [data]="tanks()"
@@ -63,6 +78,7 @@ import { EquipmentService, Tank, TankSummary, TANK_TYPE_LABELS } from '../equipm
         [totalItems]="totalItems()"
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
+        [filterTemplate]="filtersTemplate"
         searchPlaceholder="Search tanks..."
         emptyIcon="tank"
         emptyTitle="No tanks yet"
@@ -71,22 +87,6 @@ import { EquipmentService, Tank, TankSummary, TANK_TYPE_LABELS } from '../equipm
         (sort)="onSort($event)"
         (page)="onPage($event)"
         (actionClick)="onAction($event)">
-        
-        <ng-container filters>
-          <app-filter-chip
-            label="Type"
-            [options]="typeOptions"
-            [value]="selectedType"
-            (valueChange)="onTypeChange($event)">
-          </app-filter-chip>
-          
-          <app-filter-chip
-            label="Status"
-            [options]="statusOptions"
-            [value]="selectedStatus"
-            (valueChange)="onStatusChange($event)">
-          </app-filter-chip>
-        </ng-container>
         
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>

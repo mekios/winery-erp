@@ -44,6 +44,21 @@ import { MasterDataService, GrapeVariety } from '../master-data.service';
         </button>
       </header>
       
+      <ng-template #filtersTemplate>
+        <app-filter-chip
+          label="Color"
+          [options]="colorOptions"
+          [value]="selectedColor"
+          (valueChange)="onColorChange($event)">
+        </app-filter-chip>
+        <app-filter-chip
+          label="Status"
+          [options]="statusOptions"
+          [value]="selectedActive"
+          (valueChange)="onStatusChange($event)">
+        </app-filter-chip>
+      </ng-template>
+      
       <app-data-table
         [columns]="columns"
         [data]="varieties()"
@@ -52,6 +67,7 @@ import { MasterDataService, GrapeVariety } from '../master-data.service';
         [totalItems]="totalItems()"
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
+        [filterTemplate]="filtersTemplate"
         searchPlaceholder="Search varieties..."
         emptyIcon="grape"
         emptyTitle="No varieties yet"
@@ -61,24 +77,6 @@ import { MasterDataService, GrapeVariety } from '../master-data.service';
         (page)="onPage($event)"
         (actionClick)="onAction($event)">
         
-        <!-- Inline Filters -->
-        <ng-container filters>
-          <app-filter-chip
-            label="Color"
-            [options]="colorOptions"
-            [value]="selectedColor"
-            (valueChange)="onColorChange($event)">
-          </app-filter-chip>
-          
-          <app-filter-chip
-            label="Status"
-            [options]="statusOptions"
-            [value]="selectedActive"
-            (valueChange)="onStatusChange($event)">
-          </app-filter-chip>
-        </ng-container>
-        
-        <!-- Empty Action -->
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>
           Add Variety

@@ -36,6 +36,21 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
         </button>
       </header>
       
+      <ng-template #filtersTemplate>
+        <app-filter-chip
+          label="Grower"
+          [options]="growerOptions()"
+          [value]="selectedGrower"
+          (valueChange)="onGrowerChange($event)">
+        </app-filter-chip>
+        <app-filter-chip
+          label="Status"
+          [options]="statusOptions"
+          [value]="selectedActive"
+          (valueChange)="onStatusChange($event)">
+        </app-filter-chip>
+      </ng-template>
+      
       <app-data-table
         [columns]="columns"
         [data]="vineyards()"
@@ -44,6 +59,7 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
         [totalItems]="totalItems()"
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
+        [filterTemplate]="filtersTemplate"
         searchPlaceholder="Search vineyards..."
         emptyIcon="vineyard"
         emptyTitle="No vineyards yet"
@@ -52,22 +68,6 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
         (sort)="onSort($event)"
         (page)="onPage($event)"
         (actionClick)="onAction($event)">
-        
-        <ng-container filters>
-          <app-filter-chip
-            label="Grower"
-            [options]="growerOptions()"
-            [value]="selectedGrower"
-            (valueChange)="onGrowerChange($event)">
-          </app-filter-chip>
-          
-          <app-filter-chip
-            label="Status"
-            [options]="statusOptions"
-            [value]="selectedActive"
-            (valueChange)="onStatusChange($event)">
-          </app-filter-chip>
-        </ng-container>
         
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>

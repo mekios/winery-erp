@@ -57,6 +57,15 @@ import {
         </button>
       </header>
       
+      <ng-template #filtersTemplate>
+        <app-filter-chip
+          label="Action Type"
+          [options]="actionTypeOptions"
+          [value]="selectedActionType"
+          (valueChange)="onActionTypeChange($event)">
+        </app-filter-chip>
+      </ng-template>
+      
       <app-data-table
         [columns]="columns"
         [data]="transfers()"
@@ -65,6 +74,7 @@ import {
         [totalItems]="totalItems()"
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
+        [filterTemplate]="filtersTemplate"
         searchPlaceholder="Search transfers..."
         emptyIcon="arrow-right-left"
         emptyTitle="No transfers yet"
@@ -73,15 +83,6 @@ import {
         (sort)="onSort($event)"
         (page)="onPage($event)"
         (actionClick)="onAction($event)">
-        
-        <ng-container filters>
-          <app-filter-chip
-            label="Action Type"
-            [options]="actionTypeOptions"
-            [value]="selectedActionType"
-            (valueChange)="onActionTypeChange($event)">
-          </app-filter-chip>
-        </ng-container>
         
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>

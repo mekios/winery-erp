@@ -44,6 +44,21 @@ import { HarvestService, BatchList, HarvestSeasonDropdown, BATCH_STAGE_LABELS } 
         </button>
       </header>
       
+      <ng-template #filtersTemplate>
+        <app-filter-chip
+          label="Season"
+          [options]="seasonOptions()"
+          [value]="selectedSeason"
+          (valueChange)="onSeasonChange($event)">
+        </app-filter-chip>
+        <app-filter-chip
+          label="Stage"
+          [options]="stageOptions"
+          [value]="selectedStage"
+          (valueChange)="onStageChange($event)">
+        </app-filter-chip>
+      </ng-template>
+      
       <app-data-table
         [columns]="columns"
         [data]="batches()"
@@ -53,6 +68,7 @@ import { HarvestService, BatchList, HarvestSeasonDropdown, BATCH_STAGE_LABELS } 
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
         [rowClickable]="true"
+        [filterTemplate]="filtersTemplate"
         searchPlaceholder="Search batches..."
         emptyIcon="batch"
         emptyTitle="No batches yet"
@@ -63,24 +79,6 @@ import { HarvestService, BatchList, HarvestSeasonDropdown, BATCH_STAGE_LABELS } 
         (actionClick)="onAction($event)"
         (rowClick)="onRowClick($event)">
         
-        <!-- Inline Filters -->
-        <ng-container filters>
-          <app-filter-chip
-            label="Season"
-            [options]="seasonOptions()"
-            [value]="selectedSeason"
-            (valueChange)="onSeasonChange($event)">
-          </app-filter-chip>
-          
-          <app-filter-chip
-            label="Stage"
-            [options]="stageOptions"
-            [value]="selectedStage"
-            (valueChange)="onStageChange($event)">
-          </app-filter-chip>
-        </ng-container>
-        
-        <!-- Empty Action -->
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>
           New Batch

@@ -36,6 +36,15 @@ import { MasterDataService, Grower } from '../master-data.service';
         </button>
       </header>
       
+      <ng-template #filtersTemplate>
+        <app-filter-chip
+          label="Status"
+          [options]="statusOptions"
+          [value]="selectedActive"
+          (valueChange)="onStatusChange($event)">
+        </app-filter-chip>
+      </ng-template>
+      
       <app-data-table
         [columns]="columns"
         [data]="growers()"
@@ -44,6 +53,7 @@ import { MasterDataService, Grower } from '../master-data.service';
         [totalItems]="totalItems()"
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
+        [filterTemplate]="filtersTemplate"
         searchPlaceholder="Search growers..."
         emptyIcon="farmer"
         emptyTitle="No growers yet"
@@ -52,15 +62,6 @@ import { MasterDataService, Grower } from '../master-data.service';
         (sort)="onSort($event)"
         (page)="onPage($event)"
         (actionClick)="onAction($event)">
-        
-        <ng-container filters>
-          <app-filter-chip
-            label="Status"
-            [options]="statusOptions"
-            [value]="selectedActive"
-            (valueChange)="onStatusChange($event)">
-          </app-filter-chip>
-        </ng-container>
         
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>

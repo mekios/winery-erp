@@ -63,6 +63,15 @@ import { LabService, AnalysisList, SAMPLE_TYPE_LABELS, SampleType } from '../lab
         </button>
       </header>
       
+      <ng-template #filtersTemplate>
+        <app-filter-chip
+          label="Type"
+          [options]="sampleTypeOptions"
+          [value]="selectedSampleType"
+          (valueChange)="onSampleTypeChange($event)">
+        </app-filter-chip>
+      </ng-template>
+      
       <app-data-table
         [columns]="columns"
         [data]="analyses()"
@@ -72,6 +81,7 @@ import { LabService, AnalysisList, SAMPLE_TYPE_LABELS, SampleType } from '../lab
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
         [rowClickable]="true"
+        [filterTemplate]="filtersTemplate"
         searchPlaceholder="Search analyses..."
         emptyIcon="flask-conical"
         emptyTitle="No analyses yet"
@@ -81,15 +91,6 @@ import { LabService, AnalysisList, SAMPLE_TYPE_LABELS, SampleType } from '../lab
         (page)="onPage($event)"
         (actionClick)="onActionClick($event)"
         (rowClick)="onRowClick($any($event))">
-        
-        <ng-container filters>
-          <app-filter-chip
-            label="Type"
-            [options]="sampleTypeOptions"
-            [value]="selectedSampleType"
-            (valueChange)="onSampleTypeChange($event)">
-          </app-filter-chip>
-        </ng-container>
         
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>
