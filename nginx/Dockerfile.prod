@@ -6,13 +6,13 @@ FROM node:20-alpine AS frontend-builder
 
 WORKDIR /app
 
-# Copy package files
-COPY frontend/package.json ./
+# Copy package files first (for layer caching)
+COPY frontend/package.json frontend/package-lock.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies using npm ci (faster, uses lock file)
+RUN npm ci --legacy-peer-deps
 
-# Copy frontend source
+# Copy frontend source (this layer only rebuilds when source changes)
 COPY frontend/ .
 
 # Build for production

@@ -1,0 +1,57 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+.cursor
+
+# Documentation
+*.md
+docs/
+
+# Node modules (we install fresh in container)
+frontend/node_modules
+node_modules
+
+# Build outputs
+frontend/dist
+frontend/.angular
+
+# Test files
+frontend/coverage
+frontend/e2e
+**/*.spec.ts
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.coverage
+htmlcov/
+
+# Environment files (we use Docker secrets/env)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Local development
+docker-compose.override.yml
+
