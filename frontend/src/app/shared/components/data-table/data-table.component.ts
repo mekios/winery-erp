@@ -49,7 +49,7 @@ export interface TableAction {
     IconComponent,
   ],
   template: `
-    <div class="fresh-grid">
+    <div class="fresh-grid" [class.filter-open]="isMobile() && filterPanelOpen()">
       <!-- Toolbar -->
       <div class="toolbar" [class.mobile]="isMobile()">
         <!-- Search -->
@@ -70,12 +70,10 @@ export interface TableAction {
           </div>
         }
         
-        <!-- Desktop Filters (inline) -->
-        @if (!isMobile()) {
-          <div class="filters-row">
-            <ng-content select="[filters]"></ng-content>
-          </div>
-        }
+        <!-- Filters (always rendered, hidden on mobile toolbar, shown in drawer) -->
+        <div class="filters-row" [class.hidden]="isMobile()">
+          <ng-content select="[filters]"></ng-content>
+        </div>
         
         <!-- Mobile Filter Button -->
         @if (isMobile() && hasFilters) {
@@ -91,25 +89,22 @@ export interface TableAction {
         <div class="count-badge">{{ totalItems }}</div>
       </div>
       
-      <!-- Mobile Filter Bottom Sheet -->
-      <div class="filter-sheet" [class.open]="isMobile() && filterPanelOpen()">
+      <!-- Mobile Filter Bottom Sheet Backdrop -->
+      @if (isMobile() && filterPanelOpen()) {
         <div class="filter-backdrop" (click)="closeFilterPanel()"></div>
-        <div class="filter-drawer">
-          <div class="filter-drawer-handle"></div>
-          <div class="filter-drawer-header">
-            <span class="filter-drawer-title">Filters</span>
-            <button class="filter-drawer-close" (click)="closeFilterPanel()">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-          <div class="filter-drawer-content">
-            @if (isMobile()) {
-              <ng-content select="[filters]"></ng-content>
-            }
-          </div>
-          <div class="filter-drawer-footer">
-            <button class="filter-done-btn" (click)="closeFilterPanel()">Done</button>
-          </div>
+      }
+      
+      <!-- Mobile Filter Drawer (repositions the filters-row via CSS) -->
+      <div class="filter-drawer" [class.open]="isMobile() && filterPanelOpen()">
+        <div class="filter-drawer-handle"></div>
+        <div class="filter-drawer-header">
+          <span class="filter-drawer-title">Filters</span>
+          <button class="filter-drawer-close" (click)="closeFilterPanel()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="filter-drawer-footer">
+          <button class="filter-done-btn" (click)="closeFilterPanel()">Done</button>
         </div>
       </div>
       
@@ -535,12 +530,8 @@ export interface TableAction {
     }
     
     /* ===== Filter Bottom Sheet ===== */
-    .filter-sheet {
+    .filters-row.hidden {
       display: none;
-    }
-    
-    .filter-sheet.open {
-      display: block;
     }
     
     .filter-backdrop {
@@ -567,16 +558,15 @@ export interface TableAction {
       background: #fff;
       border-radius: 20px 20px 0 0;
       z-index: 1001;
-      animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
       box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
-      max-height: 60vh;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
       display: flex;
       flex-direction: column;
     }
     
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
+    .filter-drawer.open {
+      transform: translateY(0);
     }
     
     .filter-drawer-handle {
@@ -623,37 +613,6 @@ export interface TableAction {
       }
     }
     
-    .filter-drawer-content {
-      padding: 0 20px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
-      
-      /* Style filter chips in drawer */
-      ::ng-deep app-filter-chip {
-        display: block;
-        
-        .chip {
-          width: 100%;
-          padding: 14px 16px !important;
-          border-radius: 12px !important;
-          border-width: 1px !important;
-          justify-content: space-between;
-          
-          .chip-label {
-            font-size: 12px !important;
-          }
-          
-          .chip-value {
-            font-size: 14px !important;
-            max-width: none !important;
-            font-weight: 500;
-          }
-        }
-      }
-    }
-    
     .filter-drawer-footer {
       padding: 12px 20px 20px;
       border-top: 1px solid #f0f0f0;
@@ -673,6 +632,42 @@ export interface TableAction {
       
       &:active {
         transform: scale(0.98);
+      }
+    }
+    
+    /* When drawer is open, reposition filters-row inside it */
+    .fresh-grid.filter-open .filters-row {
+      display: flex !important;
+      position: fixed;
+      bottom: 70px;
+      left: 20px;
+      right: 20px;
+      z-index: 1002;
+      flex-direction: column;
+      gap: 12px;
+      
+      /* Style filter chips in drawer */
+      ::ng-deep app-filter-chip {
+        display: block;
+        
+        .chip {
+          width: 100%;
+          padding: 14px 16px !important;
+          border-radius: 12px !important;
+          border-width: 1px !important;
+          justify-content: space-between;
+          background: #fff;
+          
+          .chip-label {
+            font-size: 12px !important;
+          }
+          
+          .chip-value {
+            font-size: 14px !important;
+            max-width: none !important;
+            font-weight: 500;
+          }
+        }
       }
     }
     
