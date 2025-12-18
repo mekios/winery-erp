@@ -51,39 +51,32 @@ export interface TableAction {
   template: `
     <div class="fresh-grid">
       <!-- Toolbar -->
-      <div class="toolbar">
-        <div class="toolbar-start">
-          <!-- Search -->
-          @if (searchable) {
-            <div class="search-wrap" [class.focused]="searchFocused">
-              <mat-icon class="search-icon">search</mat-icon>
-              <input type="text"
-                     [(ngModel)]="searchValue"
-                     (input)="onSearchInput()"
-                     (focus)="searchFocused = true"
-                     (blur)="searchFocused = false"
-                     [placeholder]="searchPlaceholder">
-              @if (searchValue) {
-                <button class="search-clear" (click)="clearSearch()">
-                  <mat-icon>close</mat-icon>
-                </button>
-              }
-            </div>
-          }
-          
-          <!-- Filters Slot -->
-          <div class="filters-slot">
-            <ng-content select="[filters]"></ng-content>
+      <div class="toolbar" [class.mobile]="isMobile()">
+        <!-- Search -->
+        @if (searchable) {
+          <div class="search-wrap" [class.focused]="searchFocused">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input type="text"
+                   [(ngModel)]="searchValue"
+                   (input)="onSearchInput()"
+                   (focus)="searchFocused = true"
+                   (blur)="searchFocused = false"
+                   [placeholder]="isMobile() ? 'Search...' : searchPlaceholder">
+            @if (searchValue) {
+              <button class="search-clear" (click)="clearSearch()">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
           </div>
+        }
+        
+        <!-- Filters - horizontal scroll on mobile -->
+        <div class="filters-row">
+          <ng-content select="[filters]"></ng-content>
         </div>
         
-        <div class="toolbar-end">
-          <div class="count-pill">
-            <span class="count-num">{{ totalItems }}</span>
-            <span class="count-label">items</span>
-          </div>
-          <ng-content select="[toolbar-actions]"></ng-content>
-        </div>
+        <!-- Count -->
+        <div class="count-badge">{{ totalItems }}</div>
       </div>
       
       <!-- Loading -->
@@ -356,70 +349,56 @@ export interface TableAction {
     .toolbar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 16px;
-      background: linear-gradient(135deg, #fafbfc 0%, #f5f6f8 100%);
-      border-bottom: 1px solid #eef0f3;
-      flex-wrap: wrap;
-    }
-    
-    .toolbar-start {
-      display: flex;
-      align-items: center;
       gap: 10px;
-      flex: 1;
-      flex-wrap: wrap;
-    }
-    
-    .toolbar-end {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      padding: 10px 14px;
+      background: #fafbfc;
+      border-bottom: 1px solid #eef0f3;
     }
     
     /* Search */
     .search-wrap {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       background: #fff;
-      border: 2px solid #e8eaed;
-      border-radius: 12px;
-      padding: 8px 12px;
-      min-width: 220px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 7px 10px;
+      min-width: 180px;
+      flex-shrink: 0;
       transition: all 0.2s ease;
       
-      &:hover { border-color: #d0d4da; }
+      &:hover { border-color: #d1d5db; }
       
       &.focused {
         border-color: #7c4dff;
-        box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.1);
+        box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.1);
       }
       
       .search-icon {
         color: #9ca3af;
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
       }
       
       input {
         border: none;
         outline: none;
-        font-size: 14px;
+        font-size: 13px;
         flex: 1;
+        min-width: 60px;
         background: transparent;
         color: #1f2937;
         
-        &::placeholder { color: #9ca3af; }
+        &::placeholder { color: #b0b0b0; }
       }
       
       .search-clear {
         background: #f3f4f6;
         border: none;
-        border-radius: 6px;
-        padding: 4px;
+        border-radius: 4px;
+        padding: 2px;
         cursor: pointer;
         display: flex;
         transition: all 0.15s;
@@ -435,32 +414,53 @@ export interface TableAction {
       }
     }
     
-    .filters-slot {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    /* Count Pill */
-    .count-pill {
+    /* Filters Row */
+    .filters-row {
       display: flex;
       align-items: center;
       gap: 6px;
-      background: linear-gradient(135deg, #7c4dff 0%, #9d7aff 100%);
-      padding: 6px 14px;
-      border-radius: 20px;
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
       
-      .count-num {
-        color: #fff;
-        font-weight: 700;
-        font-size: 14px;
+      &::-webkit-scrollbar { display: none; }
+    }
+    
+    /* Count Badge */
+    .count-badge {
+      background: #7c4dff;
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+    
+    /* Mobile Toolbar */
+    .toolbar.mobile {
+      padding: 8px 10px;
+      gap: 8px;
+      
+      .search-wrap {
+        min-width: 0;
+        flex: 1;
+        max-width: 140px;
+        padding: 6px 8px;
+        
+        input { font-size: 12px; }
       }
       
-      .count-label {
-        color: rgba(255,255,255,0.75);
+      .filters-row {
+        flex: unset;
+      }
+      
+      .count-badge {
         font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        padding: 3px 8px;
       }
     }
     
@@ -875,93 +875,6 @@ export interface TableAction {
       opacity: 1;
     }
     
-    /* ===== Responsive Toolbar - Tablet ===== */
-    @media screen and (max-width: 991px) {
-      .toolbar {
-        gap: 8px;
-        padding: 10px 12px;
-      }
-      
-      .search-wrap {
-        min-width: 160px;
-        padding: 6px 10px;
-      }
-    }
-    
-    /* ===== Responsive Toolbar - Mobile ===== */
-    @media screen and (max-width: 768px) {
-      .toolbar {
-        padding: 8px 10px;
-        gap: 8px;
-      }
-      
-      .toolbar-start {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-      
-      .search-wrap {
-        flex: 1;
-        min-width: 120px;
-        padding: 6px 8px;
-        border-radius: 8px;
-        
-        .search-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-        }
-        
-        input {
-          font-size: 13px;
-        }
-      }
-      
-      .filters-slot {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-      
-      .toolbar-end {
-        flex-shrink: 0;
-      }
-      
-      .count-pill {
-        padding: 4px 8px;
-        border-radius: 12px;
-        
-        .count-num { font-size: 12px; }
-        .count-label { display: none; }
-      }
-    }
-    
-    /* ===== Very small screens ===== */
-    @media screen and (max-width: 480px) {
-      .toolbar {
-        padding: 8px;
-      }
-      
-      .toolbar-start {
-        width: 100%;
-      }
-      
-      .search-wrap {
-        order: -1;
-        flex-basis: 100%;
-      }
-      
-      .toolbar-end {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-      }
-      
-      .fresh-grid {
-        position: relative;
-      }
-    }
   `]
 })
 export class DataTableComponent implements OnInit, OnChanges, OnDestroy {

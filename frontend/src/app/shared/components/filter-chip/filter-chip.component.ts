@@ -111,36 +111,37 @@ export interface FilterOption {
       }
     }
     
-    /* Compact on mobile */
-    @media screen and (max-width: 768px) {
-      .chip {
-        padding: 6px 10px;
-        border-radius: 8px;
-        gap: 4px;
-        border-width: 1px;
-        
-        .chip-label {
-          font-size: 10px;
-        }
-        
-        .chip-value {
-          font-size: 12px;
-          max-width: 60px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        
-        .chip-arrow {
-          font-size: 16px;
-          width: 16px;
-          height: 16px;
-        }
-        
-        .chip-dot {
-          width: 5px;
-          height: 5px;
-        }
+    /* Compact chips always for mobile-friendly grids */
+    :host-context(.filters-row) .chip,
+    :host-context(.mobile) .chip {
+      padding: 5px 8px;
+      border-radius: 8px;
+      gap: 3px;
+      border-width: 1px;
+      white-space: nowrap;
+      
+      .chip-label {
+        font-size: 10px;
+        letter-spacing: 0.3px;
+      }
+      
+      .chip-value {
+        font-size: 11px;
+        max-width: 50px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      
+      .chip-arrow {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+      
+      .chip-dot {
+        width: 4px;
+        height: 4px;
       }
     }
     

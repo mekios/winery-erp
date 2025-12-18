@@ -561,6 +561,62 @@ a {
 }
 
 /* ===========================================
+   Responsive List Pages
+   =========================================== */
+@media screen and (max-width: 768px) {
+  /* Compact page padding */
+  .list-page {
+    padding: 12px !important;
+  }
+  
+  /* Compact header */
+  .list-header {
+    margin-bottom: 12px !important;
+    gap: 10px !important;
+    
+    h1 {
+      font-size: 18px !important;
+    }
+    
+    .subtitle {
+      font-size: 11px !important;
+    }
+    
+    .title-icon {
+      width: 36px !important;
+      height: 36px !important;
+      border-radius: 10px !important;
+    }
+    
+    /* Hide desktop add button */
+    > button[mat-raised-button] {
+      display: none !important;
+    }
+  }
+  
+  /* Hide summary pills on mobile */
+  .summary-pills {
+    display: none !important;
+  }
+  
+  /* FAB for add button on mobile */
+  .list-page {
+    position: relative;
+  }
+  
+  .mobile-fab {
+    position: fixed !important;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 12px rgba(124, 77, 255, 0.4) !important;
+  }
+}
+
+/* ===========================================
    Global Mobile Sidebar (991px breakpoint)
    =========================================== */
 @media screen and (max-width: 991px) {

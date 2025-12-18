@@ -96,6 +96,11 @@ import { LabService, AnalysisList, SAMPLE_TYPE_LABELS, SampleType } from '../lab
           New Analysis
         </button>
       </app-data-table>
+      
+      <!-- Mobile FAB -->
+      <button class="mobile-fab" mat-fab color="primary" (click)="navigateToCreate()">
+        <mat-icon>add</mat-icon>
+      </button>
     </div>
   `,
   styles: [`
@@ -114,6 +119,12 @@ import { LabService, AnalysisList, SAMPLE_TYPE_LABELS, SampleType } from '../lab
     .stat-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px; }
     
     app-data-table { flex: 1; min-height: 0; }
+    
+    /* Mobile FAB - hidden on desktop */
+    .mobile-fab { display: none; }
+    @media screen and (max-width: 768px) {
+      .mobile-fab { display: flex !important; }
+    }
   `]
 })
 export class AnalysesListComponent implements OnInit {
