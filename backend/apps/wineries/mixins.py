@@ -7,7 +7,7 @@ from .models import WineryMembership
 
 class WineryContextMixin:
     """
-    Mixin that sets winery context on the request after DRF authentication.
+    Mixin that sets winery context on the request before permission checks.
     
     Use this in ViewSets that need winery-scoped data.
     The winery is determined from:
@@ -16,8 +16,9 @@ class WineryContextMixin:
     """
     
     def initial(self, request, *args, **kwargs):
-        """Called before dispatch - set winery context after authentication."""
-        super().initial(request, *args, **kwargs)
+        """Called before dispatch - set winery context BEFORE permissions are checked."""
+        # First, perform authentication so we have request.user
+        self.perform_authentication(request)
         
         # Initialize winery context
         request.winery = None
@@ -46,6 +47,10 @@ class WineryContextMixin:
                     request.winery = membership.winery
                     request.winery_role = membership.role
                     request.winery_membership = membership
+        
+        # Now call parent which does permissions and throttles
+        # (authentication already done, so it won't repeat)
+        super().initial(request, *args, **kwargs)
 
 
 class WineryRequiredMixin(WineryContextMixin):
