@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, OnInit, OnChanges, OnDestroy, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -9,6 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatRippleModule } from '@angular/material/core';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { Subject, takeUntil } from 'rxjs';
 import { IconComponent } from '../icon/icon.component';
 
 export interface TableColumn {
@@ -89,83 +91,87 @@ export interface TableAction {
         <div class="loading-strip"></div>
       }
       
-      <!-- Table Area (Desktop) -->
-      <div class="table-area desktop-view" [class.loading]="loading">
-        <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)">
-          @for (column of columns; track column.key) {
-            <ng-container [matColumnDef]="column.key">
-              <th mat-header-cell *matHeaderCellDef 
-                  [mat-sort-header]="column.sortable !== false ? column.key : ''"
-                  [disabled]="column.sortable === false"
-                  [style.width]="column.width"
-                  [class.text-right]="column.align === 'right'"
-                  [class.text-center]="column.align === 'center'">
-                {{ column.label }}
-              </th>
-              
-              <td mat-cell *matCellDef="let row" 
-                  [style.width]="column.width"
-                  [class.text-right]="column.align === 'right'"
-                  [class.text-center]="column.align === 'center'">
-                <ng-container *ngTemplateOutlet="cellContent; context: { column: column, row: row }"></ng-container>
-              </td>
-            </ng-container>
-          }
-          
-          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"
-              [class.clickable]="rowClickable"
-              matRipple
-              [matRippleDisabled]="!rowClickable"
-              (click)="onRowClick(row)"></tr>
-        </table>
-      </div>
+      <!-- Table Area (Desktop) - Only rendered on larger screens -->
+      @if (!isMobile()) {
+        <div class="table-area" [class.loading]="loading">
+          <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)">
+            @for (column of columns; track column.key) {
+              <ng-container [matColumnDef]="column.key">
+                <th mat-header-cell *matHeaderCellDef 
+                    [mat-sort-header]="column.sortable !== false ? column.key : ''"
+                    [disabled]="column.sortable === false"
+                    [style.width]="column.width"
+                    [class.text-right]="column.align === 'right'"
+                    [class.text-center]="column.align === 'center'">
+                  {{ column.label }}
+                </th>
+                
+                <td mat-cell *matCellDef="let row" 
+                    [style.width]="column.width"
+                    [class.text-right]="column.align === 'right'"
+                    [class.text-center]="column.align === 'center'">
+                  <ng-container *ngTemplateOutlet="cellContent; context: { column: column, row: row }"></ng-container>
+                </td>
+              </ng-container>
+            }
+            
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"
+                [class.clickable]="rowClickable"
+                matRipple
+                [matRippleDisabled]="!rowClickable"
+                (click)="onRowClick(row)"></tr>
+          </table>
+        </div>
+      }
       
-      <!-- Card View (Mobile) -->
-      <div class="cards-area mobile-view" [class.loading]="loading">
-        @for (row of dataSource.data; track $index) {
-          <div class="data-card" 
-               [class.clickable]="rowClickable"
-               matRipple
-               [matRippleDisabled]="!rowClickable"
-               (click)="onRowClick(row)">
-            <!-- Card Header - Primary Column -->
-            <div class="card-header">
-              <div class="card-title">
-                @if (getPrimaryColumn(); as primaryCol) {
-                  <ng-container *ngTemplateOutlet="cellContent; context: { column: primaryCol, row: row }"></ng-container>
-                }
-              </div>
-              @if (actions.length > 0) {
-                <div class="card-actions">
-                  @for (action of actions; track action.action) {
-                    @if (!action.condition || action.condition(row)) {
-                      <button class="action-btn" 
-                              [class.danger]="action.color === 'warn'"
-                              matRipple
-                              (click)="onAction(action.action, row); $event.stopPropagation()">
-                        <mat-icon>{{ action.icon }}</mat-icon>
-                      </button>
-                    }
+      <!-- Card View (Mobile) - Only rendered on smaller screens -->
+      @if (isMobile()) {
+        <div class="cards-area" [class.loading]="loading">
+          @for (row of dataSource.data; track $index) {
+            <div class="data-card" 
+                 [class.clickable]="rowClickable"
+                 matRipple
+                 [matRippleDisabled]="!rowClickable"
+                 (click)="onRowClick(row)">
+              <!-- Card Header - Primary Column -->
+              <div class="card-header">
+                <div class="card-title">
+                  @if (getPrimaryColumn(); as primaryCol) {
+                    <ng-container *ngTemplateOutlet="cellContent; context: { column: primaryCol, row: row }"></ng-container>
                   }
                 </div>
-              }
+                @if (actions.length > 0) {
+                  <div class="card-actions">
+                    @for (action of actions; track action.action) {
+                      @if (!action.condition || action.condition(row)) {
+                        <button class="action-btn" 
+                                [class.danger]="action.color === 'warn'"
+                                matRipple
+                                (click)="onAction(action.action, row); $event.stopPropagation()">
+                          <mat-icon>{{ action.icon }}</mat-icon>
+                        </button>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+              
+              <!-- Card Body - Other Columns -->
+              <div class="card-body">
+                @for (column of getSecondaryColumns(); track column.key) {
+                  <div class="card-field">
+                    <span class="field-label">{{ column.label }}</span>
+                    <span class="field-value">
+                      <ng-container *ngTemplateOutlet="cellContent; context: { column: column, row: row }"></ng-container>
+                    </span>
+                  </div>
+                }
+              </div>
             </div>
-            
-            <!-- Card Body - Other Columns -->
-            <div class="card-body">
-              @for (column of getSecondaryColumns(); track column.key) {
-                <div class="card-field">
-                  <span class="field-label">{{ column.label }}</span>
-                  <span class="field-value">
-                    <ng-container *ngTemplateOutlet="cellContent; context: { column: column, row: row }"></ng-container>
-                  </span>
-                </div>
-              }
-            </div>
-          </div>
-        }
-      </div>
+          }
+        </div>
+      }
       
       <!-- Empty State -->
       @if (!loading && dataSource.data.length === 0) {
@@ -628,10 +634,6 @@ export interface TableAction {
     }
     
     /* ===== Mobile Card View ===== */
-    .mobile-view {
-      display: none;
-    }
-    
     .cards-area {
       flex: 1;
       overflow: auto;
@@ -733,16 +735,8 @@ export interface TableAction {
       opacity: 1;
     }
     
-    /* ===== Responsive Breakpoint ===== */
+    /* ===== Responsive Toolbar ===== */
     @media screen and (max-width: 768px) {
-      .desktop-view {
-        display: none !important;
-      }
-      
-      .mobile-view {
-        display: flex !important;
-      }
-      
       .toolbar {
         flex-direction: column;
         align-items: stretch;
@@ -774,7 +768,10 @@ export interface TableAction {
     }
   `]
 })
-export class DataTableComponent implements OnInit, OnChanges {
+export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
+  private breakpointObserver: BreakpointObserver;
+  private destroy$ = new Subject<void>();
+  
   @Input() columns: TableColumn[] = [];
   @Input() data: unknown[] = [];
   @Input() actions: TableAction[] = [];
@@ -804,10 +801,28 @@ export class DataTableComponent implements OnInit, OnChanges {
   displayedColumns: string[] = [];
   searchValue = '';
   searchFocused = false;
+  isMobile = signal(false);
   private searchTimeout?: ReturnType<typeof setTimeout>;
+  
+  constructor(breakpointObserver: BreakpointObserver) {
+    this.breakpointObserver = breakpointObserver;
+  }
   
   ngOnInit(): void {
     this.updateDisplayedColumns();
+    
+    // Watch for screen size changes
+    this.breakpointObserver
+      .observe(['(max-width: 768px)'])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        this.isMobile.set(result.matches);
+      });
+  }
+  
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
   
   ngOnChanges(changes: SimpleChanges): void {
