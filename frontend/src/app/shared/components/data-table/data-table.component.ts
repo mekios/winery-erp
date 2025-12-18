@@ -91,7 +91,7 @@ export interface TableAction {
         <div class="count-badge">{{ totalItems }}</div>
       </div>
       
-      <!-- Mobile: Filter drawer with filters inside -->
+      <!-- Mobile: Filter drawer -->
       @if (isMobile()) {
         <div class="filter-backdrop" [class.visible]="filterPanelOpen()" (click)="closeFilterPanel()"></div>
         <div class="filter-drawer" [class.open]="filterPanelOpen()">
@@ -103,7 +103,7 @@ export interface TableAction {
             </button>
           </div>
           <div class="filter-drawer-content">
-            <ng-content select="[filters]"></ng-content>
+            <ng-content select="[mobile-filters]"></ng-content>
           </div>
           <div class="filter-drawer-footer">
             <button class="filter-done-btn" (click)="closeFilterPanel()">Done</button>

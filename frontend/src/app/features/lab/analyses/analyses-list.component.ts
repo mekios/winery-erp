@@ -91,6 +91,15 @@ import { LabService, AnalysisList, SAMPLE_TYPE_LABELS, SampleType } from '../lab
           </app-filter-chip>
         </ng-container>
         
+        <ng-container mobile-filters>
+          <app-filter-chip
+            label="Type"
+            [options]="sampleTypeOptions"
+            [value]="selectedSampleType"
+            (valueChange)="onSampleTypeChange($event)">
+          </app-filter-chip>
+        </ng-container>
+        
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>
           New Analysis

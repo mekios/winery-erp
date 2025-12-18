@@ -78,6 +78,22 @@ import { MasterDataService, GrapeVariety } from '../master-data.service';
           </app-filter-chip>
         </ng-container>
         
+        <ng-container mobile-filters>
+          <app-filter-chip
+            label="Color"
+            [options]="colorOptions"
+            [value]="selectedColor"
+            (valueChange)="onColorChange($event)">
+          </app-filter-chip>
+          
+          <app-filter-chip
+            label="Status"
+            [options]="statusOptions"
+            [value]="selectedActive"
+            (valueChange)="onStatusChange($event)">
+          </app-filter-chip>
+        </ng-container>
+        
         <!-- Empty Action -->
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>

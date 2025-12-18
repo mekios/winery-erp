@@ -62,6 +62,15 @@ import { MasterDataService, Grower } from '../master-data.service';
           </app-filter-chip>
         </ng-container>
         
+        <ng-container mobile-filters>
+          <app-filter-chip
+            label="Status"
+            [options]="statusOptions"
+            [value]="selectedActive"
+            (valueChange)="onStatusChange($event)">
+          </app-filter-chip>
+        </ng-container>
+        
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>
           Add Grower

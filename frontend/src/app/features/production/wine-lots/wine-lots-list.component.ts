@@ -90,6 +90,22 @@ import {
           </app-filter-chip>
         </ng-container>
         
+        <ng-container mobile-filters>
+          <app-filter-chip
+            label="Status"
+            [options]="statusOptions"
+            [value]="selectedStatus"
+            (valueChange)="onStatusChange($event)">
+          </app-filter-chip>
+          
+          <app-filter-chip
+            label="Vintage"
+            [options]="vintageOptions()"
+            [value]="selectedVintage"
+            (valueChange)="onVintageChange($event)">
+          </app-filter-chip>
+        </ng-container>
+        
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>
           New Wine Lot

@@ -80,6 +80,22 @@ import { HarvestService, BatchList, HarvestSeasonDropdown, BATCH_STAGE_LABELS } 
           </app-filter-chip>
         </ng-container>
         
+        <ng-container mobile-filters>
+          <app-filter-chip
+            label="Season"
+            [options]="seasonOptions()"
+            [value]="selectedSeason"
+            (valueChange)="onSeasonChange($event)">
+          </app-filter-chip>
+          
+          <app-filter-chip
+            label="Stage"
+            [options]="stageOptions"
+            [value]="selectedStage"
+            (valueChange)="onStageChange($event)">
+          </app-filter-chip>
+        </ng-container>
+        
         <!-- Empty Action -->
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>
