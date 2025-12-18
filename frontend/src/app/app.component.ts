@@ -754,17 +754,17 @@ import { IconComponent } from '@shared/components/icon/icon.component';
     /* ===========================================
        Responsive - Tablet & Mobile
        =========================================== */
-    @media (max-width: 991px) {
+    @media screen and (max-width: 991px) {
       /* Hide sidebar off-screen by default on mobile */
       .sidebar {
-        transform: translateX(-100%);
+        transform: translateX(-100%) !important;
         box-shadow: 4px 0 24px rgba(0,0,0,0.3);
         width: 260px !important; /* Override collapsed width */
       }
       
       /* Show sidebar when mobile menu is open */
       .app-container.mobile-menu-open .sidebar {
-        transform: translateX(0);
+        transform: translateX(0) !important;
       }
       
       /* Reset main wrapper margin on mobile */
@@ -774,7 +774,7 @@ import { IconComponent } from '@shared/components/icon/icon.component';
       
       /* Show mobile overlay */
       .mobile-overlay {
-        display: block;
+        display: block !important;
       }
       
       .app-container.mobile-menu-open .mobile-overlay {
