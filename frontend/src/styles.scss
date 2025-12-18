@@ -721,21 +721,10 @@ a {
 }
 
 /* ===========================================
-   CDK Overlay for Filter Drawer (z-index fix)
+   CDK Overlay z-index (ensure dropdowns above all)
    =========================================== */
-/* Ensure dropdown overlays appear above the filter drawer (z-index: 1001) */
 .cdk-overlay-container {
-  z-index: 2000 !important;
-}
-
-/* Mat Menu Panel - ensure proper z-index and full visibility */
-.mat-mdc-menu-panel {
-  z-index: 2002 !important;
-  max-height: 300px !important;
-  
-  .mat-mdc-menu-content {
-    padding: 6px !important;
-  }
+  z-index: 1100 !important;
 }
 
 /* Fresh menu styling (for filter chip dropdowns) */
@@ -743,55 +732,6 @@ a {
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   border: 1px solid #e5e7eb;
-  
-  .menu-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 10px 14px;
-    background: none;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #374151;
-    cursor: pointer;
-    transition: all 0.15s;
-    
-    mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      color: #9ca3af;
-    }
-    
-    .check {
-      margin-left: auto;
-      color: #7c4dff;
-    }
-    
-    &:hover {
-      background: #f5f3ff;
-    }
-    
-    &.selected {
-      background: linear-gradient(135deg, rgba(124,77,255,0.12), rgba(124,77,255,0.06));
-      color: #7c4dff;
-      font-weight: 600;
-    }
-    
-    &.clear {
-      color: #6b7280;
-      mat-icon { color: #9ca3af; }
-      &:hover { background: #f3f4f6; }
-    }
-  }
-  
-  .menu-divider {
-    height: 1px;
-    background: #f3f4f6;
-    margin: 6px 0;
-  }
 }
 
 /* ===========================================

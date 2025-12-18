@@ -83,15 +83,6 @@ import {
           </app-filter-chip>
         </ng-container>
         
-        <ng-container mobile-filters>
-          <app-filter-chip
-            label="Action Type"
-            [options]="actionTypeOptions"
-            [value]="selectedActionType"
-            (valueChange)="onActionTypeChange($event)">
-          </app-filter-chip>
-        </ng-container>
-        
         <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
           <mat-icon>add</mat-icon>
           New Transfer

@@ -70,18 +70,16 @@ export interface TableAction {
           </div>
         }
         
-        <!-- Desktop: Inline filters -->
-        @if (!isMobile()) {
-          <div class="filters-row">
-            <ng-content select="[filters]"></ng-content>
-          </div>
-        }
+        <!-- Filters - inline on desktop, toggled panel on mobile -->
+        <div class="filters-row" [class.hidden]="isMobile() && !filterPanelOpen()">
+          <ng-content select="[filters]"></ng-content>
+        </div>
         
-        <!-- Mobile Filter Button -->
+        <!-- Mobile Filter Toggle -->
         @if (isMobile() && hasFilters) {
           <button class="filter-btn" [class.active]="hasActiveFilters || filterPanelOpen()" (click)="toggleFilterPanel()">
-            <mat-icon>tune</mat-icon>
-            @if (hasActiveFilters) {
+            <mat-icon>{{ filterPanelOpen() ? 'expand_less' : 'tune' }}</mat-icon>
+            @if (hasActiveFilters && !filterPanelOpen()) {
               <span class="filter-dot"></span>
             }
           </button>
@@ -90,26 +88,6 @@ export interface TableAction {
         <!-- Count -->
         <div class="count-badge">{{ totalItems }}</div>
       </div>
-      
-      <!-- Mobile: Filter drawer -->
-      @if (isMobile()) {
-        <div class="filter-backdrop" [class.visible]="filterPanelOpen()" (click)="closeFilterPanel()"></div>
-        <div class="filter-drawer" [class.open]="filterPanelOpen()">
-          <div class="filter-drawer-handle"></div>
-          <div class="filter-drawer-header">
-            <span class="filter-drawer-title">Filters</span>
-            <button class="filter-drawer-close" (click)="closeFilterPanel()">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-          <div class="filter-drawer-content">
-            <ng-content select="[mobile-filters]"></ng-content>
-          </div>
-          <div class="filter-drawer-footer">
-            <button class="filter-done-btn" (click)="closeFilterPanel()">Done</button>
-          </div>
-        </div>
-      }
       
       <!-- Loading -->
       @if (loading) {
@@ -532,151 +510,22 @@ export interface TableAction {
       }
     }
     
-    /* ===== Filter Bottom Sheet ===== */
-    .filter-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-    }
-    
-    .filter-backdrop.visible {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    
-    .filter-drawer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #fff;
-      border-radius: 20px 20px 0 0;
-      z-index: 1001;
-      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-      display: flex;
-      flex-direction: column;
-      max-height: 70vh;
-    }
-    
-    .filter-drawer.open {
-      transform: translateY(0);
-    }
-    
-    .filter-drawer-handle {
-      width: 36px;
-      height: 4px;
-      background: #ddd;
-      border-radius: 2px;
-      margin: 10px auto 0;
-      flex-shrink: 0;
-    }
-    
-    .filter-drawer-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 20px 16px;
-      flex-shrink: 0;
-    }
-    
-    .filter-drawer-title {
-      font-size: 17px;
-      font-weight: 600;
-      color: #1f2937;
-    }
-    
-    .filter-drawer-close {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: #f3f4f6;
-      border-radius: 50%;
-      cursor: pointer;
+    /* Mobile: Filters row expands as a row below toolbar */
+    .toolbar.mobile {
+      flex-wrap: wrap;
       
-      mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        color: #6b7280;
-      }
-      
-      &:hover {
-        background: #e5e7eb;
-      }
-    }
-    
-    .filter-drawer-content {
-      padding: 0 20px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
-      flex: 1;
-      
-      /* Style filter chips in drawer - full width */
-      ::ng-deep app-filter-chip {
-        display: block;
+      .filters-row {
+        order: 10; /* Push to end (new row) */
         width: 100%;
+        padding-top: 10px;
+        margin-top: 8px;
+        border-top: 1px solid #eef0f3;
+        flex-wrap: wrap;
+        gap: 8px;
         
-        .chip {
-          width: 100%;
-          padding: 14px 16px !important;
-          border-radius: 12px !important;
-          border: 1px solid #e5e7eb !important;
-          justify-content: space-between;
-          background: #fff;
-          
-          .chip-label {
-            font-size: 12px !important;
-          }
-          
-          .chip-value {
-            font-size: 14px !important;
-            max-width: none !important;
-            font-weight: 500;
-          }
-          
-          .chip-arrow {
-            font-size: 20px !important;
-            width: 20px !important;
-            height: 20px !important;
-          }
+        &.hidden {
+          display: none;
         }
-      }
-    }
-    
-    .filter-drawer-footer {
-      padding: 12px 20px 20px;
-      border-top: 1px solid #f0f0f0;
-      flex-shrink: 0;
-    }
-    
-    .filter-done-btn {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #7c4dff, #9d7aff);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      
-      &:active {
-        transform: scale(0.98);
       }
     }
     
