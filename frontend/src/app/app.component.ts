@@ -277,7 +277,7 @@ import { IconComponent } from '@shared/components/icon/icon.component';
       left: 0;
       height: 100vh;
       z-index: 1000;
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       overflow-x: hidden;
       overflow-y: hidden;
     }
@@ -736,26 +736,30 @@ import { IconComponent } from '@shared/components/icon/icon.component';
     }
     
     /* ===========================================
+       Mobile Overlay - Always in DOM but hidden
+       =========================================== */
+    .mobile-overlay {
+      display: none;
+    }
+    
+    /* ===========================================
        Responsive - Tablet & Mobile
        =========================================== */
     @media (max-width: 991px) {
       .sidebar {
         transform: translateX(-100%);
         box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       
       /* Show sidebar when mobile menu is open */
       .mobile-menu-open .sidebar {
-        transform: translateX(0);
+        transform: translateX(0) !important;
       }
       
       .sidebar-collapsed .sidebar {
         width: 260px; /* Reset to full width on mobile */
         transform: translateX(-100%);
-      }
-      
-      .mobile-menu-open.sidebar-collapsed .sidebar {
-        transform: translateX(0);
       }
       
       .main-wrapper,
@@ -765,18 +769,19 @@ import { IconComponent } from '@shared/components/icon/icon.component';
       
       /* Mobile overlay */
       .mobile-overlay {
-        display: none;
+        display: block;
         position: fixed;
         inset: 0;
         background: rgba(0, 0, 0, 0.5);
         z-index: 999;
         opacity: 0;
+        pointer-events: none;
         transition: opacity 0.3s ease;
       }
       
       .mobile-menu-open .mobile-overlay {
-        display: block;
         opacity: 1;
+        pointer-events: auto;
       }
       
       /* Header adjustments for mobile */
