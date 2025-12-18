@@ -738,50 +738,46 @@ import { IconComponent } from '@shared/components/icon/icon.component';
     }
     
     /* ===========================================
-       Mobile Overlay - Always in DOM but hidden
+       Mobile Overlay - Hidden on desktop
        =========================================== */
     .mobile-overlay {
       display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
     }
     
     /* ===========================================
        Responsive - Tablet & Mobile
        =========================================== */
     @media (max-width: 991px) {
+      /* Hide sidebar off-screen by default on mobile */
       .sidebar {
         transform: translateX(-100%);
         box-shadow: 4px 0 24px rgba(0,0,0,0.3);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 260px !important; /* Override collapsed width */
       }
       
       /* Show sidebar when mobile menu is open */
-      .mobile-menu-open .sidebar {
-        transform: translateX(0) !important;
+      .app-container.mobile-menu-open .sidebar {
+        transform: translateX(0);
       }
       
-      .sidebar-collapsed .sidebar {
-        width: 260px; /* Reset to full width on mobile */
-        transform: translateX(-100%);
+      /* Reset main wrapper margin on mobile */
+      .main-wrapper {
+        margin-left: 0 !important;
       }
       
-      .main-wrapper,
-      .sidebar-collapsed .main-wrapper {
-        margin-left: 0;
-      }
-      
-      /* Mobile overlay */
+      /* Show mobile overlay */
       .mobile-overlay {
         display: block;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 999;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease;
       }
       
-      .mobile-menu-open .mobile-overlay {
+      .app-container.mobile-menu-open .mobile-overlay {
         opacity: 1;
         pointer-events: auto;
       }
@@ -933,12 +929,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
   
   toggleSidebar(): void {
-    // On mobile, toggle the mobile menu drawer
-    if (this.isMobile()) {
-      this.mobileMenuOpen.update((v: boolean) => !v);
-      console.log('Mobile menu toggled:', this.mobileMenuOpen());
-    } else {
-      // On desktop, toggle sidebar collapse
+    // Always toggle mobile menu - CSS handles visibility based on screen size
+    this.mobileMenuOpen.update((v: boolean) => !v);
+    // Also toggle sidebar collapsed state for desktop
+    if (!this.isMobile()) {
       this.sidebarCollapsed.update((v: boolean) => !v);
     }
   }
