@@ -453,7 +453,13 @@ export interface TableAction {
       letter-spacing: 0.4px;
     }
     
-    .tag-gray { background: #f3f4f6; color: #6b7280; }
+    .tag-gray, .tag.gray { background: #f3f4f6; color: #6b7280; }
+    .tag.blue { background: rgba(59, 130, 246, 0.12); color: #2563eb; }
+    .tag.amber { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+    .tag.purple { background: rgba(139, 92, 246, 0.12); color: #7c3aed; }
+    .tag.pink { background: rgba(236, 72, 153, 0.12); color: #db2777; }
+    .tag.green { background: rgba(16, 185, 129, 0.12); color: #059669; }
+    .tag.cyan { background: rgba(6, 182, 212, 0.12); color: #0891b2; }
     .badge-primary { background: linear-gradient(135deg, rgba(124,77,255,0.15), rgba(124,77,255,0.08)); color: #7c4dff; }
     .badge-success { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.08)); color: #059669; }
     .badge-warning { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.08)); color: #b45309; }

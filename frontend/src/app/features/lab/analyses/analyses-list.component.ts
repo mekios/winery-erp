@@ -8,7 +8,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { PageEvent } from '@angular/material/paginator';
-import { DataTableComponent, TableColumn } from '@shared/components/data-table/data-table.component';
+import { DataTableComponent, TableColumn, TableAction } from '@shared/components/data-table/data-table.component';
 import { FilterChipComponent } from '@shared/components/filter-chip/filter-chip.component';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { IconComponent } from '@shared/components/icon/icon.component';
@@ -88,100 +88,13 @@ import { LabService, AnalysisList, SAMPLE_TYPE_LABELS, SampleType } from '../lab
         [pageSize]="pageSize"
         [pageIndex]="currentPage() - 1"
         [rowClickable]="true"
+        [actions]="actions"
         emptyIcon="flask-conical"
         emptyTitle="No analyses found"
         emptyMessage="Start tracking wine quality by adding your first analysis"
         (page)="onPageEvent($event)"
-        (rowClick)="onRowClick($any($event))">
-        
-        <!-- Custom column templates -->
-        <ng-template #cellTemplate let-row let-column="column">
-          @switch (column.key) {
-            @case ('analysis_date') {
-              <span class="date-cell">{{ row.analysis_date | date:'MMM d, y' }}</span>
-            }
-            @case ('sample_type') {
-              <span class="type-badge" [class]="row.sample_type.toLowerCase()">
-                {{ getSampleTypeLabel(row.sample_type) }}
-              </span>
-            }
-            @case ('ph') {
-              @if (row.ph !== null) {
-                <span class="param-value" [class.warning]="row.ph < 3.0 || row.ph > 3.8">
-                  {{ row.ph | number:'1.2-2' }}
-                </span>
-              } @else {
-                <span class="empty-value">—</span>
-              }
-            }
-            @case ('va_gl') {
-              @if (row.va_gl !== null) {
-                <span class="param-value" [class.danger]="row.va_gl > 0.7" [class.warning]="row.va_gl > 0.5 && row.va_gl <= 0.7">
-                  {{ row.va_gl | number:'1.2-2' }}
-                </span>
-              } @else {
-                <span class="empty-value">—</span>
-              }
-            }
-            @case ('free_so2_mgl') {
-              @if (row.free_so2_mgl !== null) {
-                <span class="param-value" [class.warning]="row.free_so2_mgl < 20">
-                  {{ row.free_so2_mgl | number:'1.0-1' }}
-                </span>
-              } @else {
-                <span class="empty-value">—</span>
-              }
-            }
-            @case ('molecular_so2') {
-              @if (row.molecular_so2 !== null) {
-                <span class="param-value molecular" 
-                      [class.good]="row.molecular_so2 >= 0.5 && row.molecular_so2 <= 0.8"
-                      [class.warning]="row.molecular_so2 < 0.5"
-                      [class.danger]="row.molecular_so2 > 1.0">
-                  {{ row.molecular_so2 | number:'1.2-2' }}
-                </span>
-              } @else {
-                <span class="empty-value">—</span>
-              }
-            }
-            @case ('brix') {
-              @if (row.brix !== null) {
-                <span class="param-value">{{ row.brix | number:'1.1-1' }}°</span>
-              } @else {
-                <span class="empty-value">—</span>
-              }
-            }
-            @case ('alcohol_abv') {
-              @if (row.alcohol_abv !== null) {
-                <span class="param-value">{{ row.alcohol_abv | number:'1.1-1' }}%</span>
-              } @else {
-                <span class="empty-value">—</span>
-              }
-            }
-            @case ('actions') {
-              <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #actionMenu="matMenu">
-                <button mat-menu-item [routerLink]="[row.id]">
-                  <mat-icon>visibility</mat-icon>
-                  <span>View Details</span>
-                </button>
-                <button mat-menu-item [routerLink]="[row.id, 'edit']">
-                  <mat-icon>edit</mat-icon>
-                  <span>Edit</span>
-                </button>
-                <button mat-menu-item (click)="onDelete(row)">
-                  <mat-icon color="warn">delete</mat-icon>
-                  <span>Delete</span>
-                </button>
-              </mat-menu>
-            }
-            @default {
-              {{ row[column.key] ?? '—' }}
-            }
-          }
-        </ng-template>
+        (rowClick)="onRowClick($any($event))"
+        (actionClick)="onActionClick($event)">
       </app-data-table>
     </div>
   `,
@@ -337,17 +250,31 @@ export class AnalysesListComponent implements OnInit {
     ...Object.entries(SAMPLE_TYPE_LABELS).map(([value, label]) => ({ value, label }))
   ];
 
+  sampleTypeBadgeMap: Record<string, { label: string; class: string }> = {
+    'TANK': { label: 'Tank', class: 'blue' },
+    'BARREL': { label: 'Barrel', class: 'amber' },
+    'WINE_LOT': { label: 'Wine Lot', class: 'purple' },
+    'BATCH': { label: 'Batch', class: 'pink' },
+    'BLEND': { label: 'Blend', class: 'green' },
+    'BOTTLE': { label: 'Bottle', class: 'cyan' },
+    'OTHER': { label: 'Other', class: 'gray' }
+  };
+
   columns: TableColumn[] = [
-    { key: 'analysis_date', label: 'Date', sortable: true },
-    { key: 'sample_type', label: 'Type', sortable: true },
-    { key: 'source_display', label: 'Source', sortable: false },
-    { key: 'ph', label: 'pH', sortable: true },
-    { key: 'va_gl', label: 'VA (g/L)', sortable: true },
-    { key: 'free_so2_mgl', label: 'Free SO₂', sortable: true },
-    { key: 'molecular_so2', label: 'Mol. SO₂', sortable: false },
-    { key: 'brix', label: 'Brix', sortable: true },
-    { key: 'alcohol_abv', label: 'Alc %', sortable: true },
-    { key: 'actions', label: '', sortable: false, width: '60px' },
+    { key: 'analysis_date', label: 'Date', sortable: true, width: '110px', format: (v) => this.formatDate(v as string) },
+    { key: 'sample_type', label: 'Type', sortable: true, width: '80px', type: 'badge', badgeMap: this.sampleTypeBadgeMap },
+    { key: 'source_display', label: 'Source', sortable: false, width: '120px' },
+    { key: 'ph', label: 'pH', sortable: true, width: '60px', format: (v) => v != null ? Number(v).toFixed(2) : '—' },
+    { key: 'va_gl', label: 'VA', sortable: true, width: '60px', format: (v) => v != null ? Number(v).toFixed(2) : '—' },
+    { key: 'free_so2_mgl', label: 'SO₂', sortable: true, width: '60px', format: (v) => v != null ? Number(v).toFixed(0) : '—' },
+    { key: 'brix', label: 'Brix', sortable: true, width: '60px', format: (v) => v != null ? `${Number(v).toFixed(1)}°` : '—' },
+    { key: 'alcohol_abv', label: 'Alc', sortable: true, width: '60px', format: (v) => v != null ? `${Number(v).toFixed(1)}%` : '—' },
+    { key: 'actions', label: '', sortable: false, width: '90px', type: 'actions' },
+  ];
+  
+  actions: TableAction[] = [
+    { icon: 'edit', label: 'Edit', action: 'edit' },
+    { icon: 'delete', label: 'Delete', action: 'delete', color: 'warn' }
   ];
 
   ngOnInit(): void {
@@ -430,6 +357,22 @@ export class AnalysesListComponent implements OnInit {
 
   getSampleTypeLabel(type: SampleType): string {
     return SAMPLE_TYPE_LABELS[type] || type;
+  }
+  
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  
+  
+  onActionClick(event: { action: string; row: unknown }): void {
+    const row = event.row as AnalysisList;
+    if (event.action === 'edit') {
+      this.router.navigate(['/lab/analyses', row.id, 'edit']);
+    } else if (event.action === 'delete') {
+      this.onDelete(row);
+    }
   }
 }
 
