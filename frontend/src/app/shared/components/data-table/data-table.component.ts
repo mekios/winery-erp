@@ -70,13 +70,47 @@ export interface TableAction {
           </div>
         }
         
-        <!-- Filters - horizontal scroll on mobile -->
-        <div class="filters-row">
-          <ng-content select="[filters]"></ng-content>
-        </div>
+        <!-- Desktop Filters (inline) -->
+        @if (!isMobile()) {
+          <div class="filters-row">
+            <ng-content select="[filters]"></ng-content>
+          </div>
+        }
+        
+        <!-- Mobile Filter Button -->
+        @if (isMobile() && hasFilters) {
+          <button class="filter-btn" [class.active]="hasActiveFilters || filterPanelOpen()" (click)="toggleFilterPanel()">
+            <mat-icon>tune</mat-icon>
+            @if (hasActiveFilters) {
+              <span class="filter-dot"></span>
+            }
+          </button>
+        }
         
         <!-- Count -->
         <div class="count-badge">{{ totalItems }}</div>
+      </div>
+      
+      <!-- Mobile Filter Bottom Sheet -->
+      <div class="filter-sheet" [class.open]="isMobile() && filterPanelOpen()">
+        <div class="filter-backdrop" (click)="closeFilterPanel()"></div>
+        <div class="filter-drawer">
+          <div class="filter-drawer-handle"></div>
+          <div class="filter-drawer-header">
+            <span class="filter-drawer-title">Filters</span>
+            <button class="filter-drawer-close" (click)="closeFilterPanel()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <div class="filter-drawer-content">
+            @if (isMobile()) {
+              <ng-content select="[filters]"></ng-content>
+            }
+          </div>
+          <div class="filter-drawer-footer">
+            <button class="filter-done-btn" (click)="closeFilterPanel()">Done</button>
+          </div>
+        </div>
       </div>
       
       <!-- Loading -->
@@ -448,19 +482,197 @@ export interface TableAction {
       .search-wrap {
         min-width: 0;
         flex: 1;
-        max-width: 140px;
         padding: 6px 8px;
         
-        input { font-size: 12px; }
-      }
-      
-      .filters-row {
-        flex: unset;
+        input { font-size: 13px; }
       }
       
       .count-badge {
         font-size: 11px;
         padding: 3px 8px;
+      }
+    }
+    
+    /* Filter Button (Mobile) */
+    .filter-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #fff;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: #6b7280;
+      }
+      
+      &:hover, &.active {
+        border-color: #7c4dff;
+        background: rgba(124, 77, 255, 0.05);
+        
+        mat-icon { color: #7c4dff; }
+      }
+      
+      .filter-dot {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 8px;
+        height: 8px;
+        background: #7c4dff;
+        border-radius: 50%;
+        border: 2px solid #fff;
+      }
+    }
+    
+    /* ===== Filter Bottom Sheet ===== */
+    .filter-sheet {
+      display: none;
+    }
+    
+    .filter-sheet.open {
+      display: block;
+    }
+    
+    .filter-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      animation: fadeIn 0.2s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .filter-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      z-index: 1001;
+      animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+      max-height: 60vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    
+    .filter-drawer-handle {
+      width: 36px;
+      height: 4px;
+      background: #ddd;
+      border-radius: 2px;
+      margin: 10px auto 0;
+    }
+    
+    .filter-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px 16px;
+    }
+    
+    .filter-drawer-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    .filter-drawer-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: #f3f4f6;
+      border-radius: 50%;
+      cursor: pointer;
+      
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #6b7280;
+      }
+      
+      &:hover {
+        background: #e5e7eb;
+      }
+    }
+    
+    .filter-drawer-content {
+      padding: 0 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      
+      /* Style filter chips in drawer */
+      ::ng-deep app-filter-chip {
+        display: block;
+        
+        .chip {
+          width: 100%;
+          padding: 14px 16px !important;
+          border-radius: 12px !important;
+          border-width: 1px !important;
+          justify-content: space-between;
+          
+          .chip-label {
+            font-size: 12px !important;
+          }
+          
+          .chip-value {
+            font-size: 14px !important;
+            max-width: none !important;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+    
+    .filter-drawer-footer {
+      padding: 12px 20px 20px;
+      border-top: 1px solid #f0f0f0;
+    }
+    
+    .filter-done-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #7c4dff, #9d7aff);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      
+      &:active {
+        transform: scale(0.98);
       }
     }
     
@@ -911,7 +1123,12 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
   searchValue = '';
   searchFocused = false;
   isMobile = signal(false);
+  filterPanelOpen = signal(false);
   private searchTimeout?: ReturnType<typeof setTimeout>;
+  
+  /** Check if filters slot has content - set via input */
+  @Input() hasFilters = true;
+  @Input() hasActiveFilters = false;
   
   /** Calculate total pages */
   get totalPages(): number {
@@ -981,6 +1198,16 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
       length: this.totalItems,
       previousPageIndex: this.pageIndex
     });
+  }
+  
+  /** Toggle mobile filter panel */
+  toggleFilterPanel(): void {
+    this.filterPanelOpen.set(!this.filterPanelOpen());
+  }
+  
+  /** Close mobile filter panel */
+  closeFilterPanel(): void {
+    this.filterPanelOpen.set(false);
   }
   
   onAction(action: string, row: unknown): void {
