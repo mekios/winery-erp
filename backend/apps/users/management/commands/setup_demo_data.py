@@ -171,8 +171,9 @@ class Command(BaseCommand):
             winery=winery,
             name='Nemea Cooperative',
             defaults={
-                'contact_email': 'info@nemea-coop.gr',
-                'contact_phone': '+30 123 456 7890',
+                'email': 'info@nemea-coop.gr',
+                'phone': '+30 123 456 7890',
+                'contact_name': 'Dimitris Papadopoulos',
                 'address': 'Nemea, Corinthia, Greece',
             }
         )
