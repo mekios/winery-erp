@@ -1,15 +1,15 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-
 import { PageEvent } from '@angular/material/paginator';
+import { Sort } from '@angular/material/sort';
+
 import { DataTableComponent, TableColumn, TableAction } from '@shared/components/data-table/data-table.component';
-import { FilterChipComponent } from '@shared/components/filter-chip/filter-chip.component';
+import { FilterChipComponent, FilterOption } from '@shared/components/filter-chip/filter-chip.component';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { IconComponent } from '@shared/components/icon/icon.component';
 import { LabService, AnalysisList, SAMPLE_TYPE_LABELS, SampleType } from '../lab.service';
@@ -18,216 +18,102 @@ import { LabService, AnalysisList, SAMPLE_TYPE_LABELS, SampleType } from '../lab
   selector: 'app-analyses-list',
   standalone: true,
   imports: [
-    CommonModule, RouterModule, DecimalPipe, DatePipe,
-    MatButtonModule, MatMenuModule, MatIconModule, MatDialogModule, MatSnackBarModule,
-    DataTableComponent, FilterChipComponent, ConfirmDialogComponent, IconComponent
+    CommonModule, DecimalPipe,
+    MatButtonModule, MatIconModule, MatSnackBarModule,
+    DataTableComponent, FilterChipComponent, IconComponent
   ],
   template: `
     <div class="list-page">
-      <!-- Header -->
-      <div class="page-header">
-        <div class="header-content">
-          <div class="header-icon">
-            <app-icon name="flask-conical" [size]="32"></app-icon>
+      <header class="list-header">
+        <div class="header-title">
+          <div class="title-icon">
+            <app-icon name="flask-conical" [size]="24"></app-icon>
           </div>
-          <div class="header-text">
+          <div>
             <h1>Lab Analyses</h1>
-            <p>Track wine quality parameters and fermentation progress</p>
+            <span class="subtitle">Wine quality tracking</span>
           </div>
         </div>
-        <div class="header-actions">
-          <button mat-flat-button class="primary-btn" routerLink="new">
-            <mat-icon>add</mat-icon>
-            New Analysis
-          </button>
-        </div>
-      </div>
-
-      <!-- Summary Stats -->
-      <div class="stats-bar">
-        <div class="stat-item">
-          <span class="stat-value">{{ totalCount() }}</span>
-          <span class="stat-label">Total</span>
-        </div>
-        @if (summary()?.averages?.ph) {
-          <div class="stat-item">
-            <span class="stat-value">{{ summary()?.averages?.ph | number:'1.2-2' }}</span>
-            <span class="stat-label">Avg pH</span>
+        
+        <!-- Summary Stats Pills -->
+        @if (summary()) {
+          <div class="summary-pills">
+            <div class="stat-pill">
+              <span class="stat-value">{{ totalCount() }}</span>
+              <span class="stat-label">total</span>
+            </div>
+            @if (summary()?.averages?.ph) {
+              <div class="stat-pill">
+                <span class="stat-value">{{ summary()?.averages?.ph | number:'1.2-2' }}</span>
+                <span class="stat-label">avg pH</span>
+              </div>
+            }
+            @if (summary()?.averages?.va_gl) {
+              <div class="stat-pill" [class.warning]="(summary()?.averages?.va_gl ?? 0) > 0.6">
+                <span class="stat-value">{{ summary()?.averages?.va_gl | number:'1.2-2' }}</span>
+                <span class="stat-label">avg VA</span>
+              </div>
+            }
           </div>
         }
-        @if (summary()?.averages?.va_gl) {
-          <div class="stat-item" [class.warning]="(summary()?.averages?.va_gl ?? 0) > 0.6">
-            <span class="stat-value">{{ summary()?.averages?.va_gl | number:'1.2-2' }}</span>
-            <span class="stat-label">Avg VA</span>
-          </div>
-        }
-        @if (summary()?.averages?.free_so2_mgl) {
-          <div class="stat-item">
-            <span class="stat-value">{{ summary()?.averages?.free_so2_mgl | number:'1.0-1' }}</span>
-            <span class="stat-label">Avg Free SO₂</span>
-          </div>
-        }
-      </div>
-
-      <!-- Filters -->
-      <div class="filters-bar">
-        <app-filter-chip
-          label="All Types"
-          [options]="sampleTypeOptions"
-          [value]="selectedSampleType()"
-          (valueChange)="onSampleTypeChange($any($event))">
-        </app-filter-chip>
-      </div>
-
-      <!-- Data Table -->
+        
+        <button mat-raised-button color="primary" (click)="navigateToCreate()">
+          <mat-icon>add</mat-icon>
+          New Analysis
+        </button>
+      </header>
+      
       <app-data-table
         [columns]="columns"
         [data]="analyses()"
+        [actions]="actions"
         [loading]="loading()"
         [totalItems]="totalCount()"
         [pageSize]="pageSize"
-        [pageIndex]="currentPage() - 1"
+        [pageIndex]="pageIndex"
         [rowClickable]="true"
-        [actions]="actions"
+        searchPlaceholder="Search analyses..."
         emptyIcon="flask-conical"
-        emptyTitle="No analyses found"
-        emptyMessage="Start tracking wine quality by adding your first analysis"
-        (page)="onPageEvent($event)"
-        (rowClick)="onRowClick($any($event))"
-        (actionClick)="onActionClick($event)">
+        emptyTitle="No analyses yet"
+        emptyMessage="Add your first lab analysis to start tracking."
+        (search)="onSearch($event)"
+        (sort)="onSort($event)"
+        (page)="onPage($event)"
+        (actionClick)="onActionClick($event)"
+        (rowClick)="onRowClick($any($event))">
+        
+        <ng-container filters>
+          <app-filter-chip
+            label="Type"
+            [options]="sampleTypeOptions"
+            [value]="selectedSampleType"
+            (valueChange)="onSampleTypeChange($event)">
+          </app-filter-chip>
+        </ng-container>
+        
+        <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
+          <mat-icon>add</mat-icon>
+          New Analysis
+        </button>
       </app-data-table>
     </div>
   `,
   styles: [`
-    .list-page {
-      padding: 1.5rem 2rem;
-      min-height: 100%;
-    }
-
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .header-content {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .header-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(168, 85, 247, 0.1));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--primary);
-    }
-
-    .header-text h1 {
-      margin: 0;
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .header-text p {
-      margin: 0.25rem 0 0;
-      color: var(--text-secondary);
-      font-size: 0.9375rem;
-    }
-
-    .primary-btn {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-      font-weight: 600;
-      padding: 0 1.5rem;
-      height: 44px;
-      border-radius: 12px;
-    }
-
-    .stats-bar {
-      display: flex;
-      gap: 2rem;
-      margin-bottom: 1.5rem;
-      padding: 1rem 1.5rem;
-      background: var(--bg-card);
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-    }
-
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      
-      &.warning .stat-value {
-        color: var(--warning);
-      }
-    }
-
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .stat-label {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .filters-bar {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .type-badge {
-      display: inline-flex;
-      padding: 0.25rem 0.625rem;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      
-      &.tank { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-      &.barrel { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-      &.wine_lot { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
-      &.batch { background: rgba(236, 72, 153, 0.1); color: #ec4899; }
-      &.blend { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-      &.bottle { background: rgba(6, 182, 212, 0.1); color: #06b6d4; }
-      &.other { background: rgba(107, 114, 128, 0.1); color: #6b7280; }
-    }
-
-    .date-cell {
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-    }
-
-    .param-value {
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-      
-      &.warning { color: var(--warning); }
-      &.danger { color: var(--danger); }
-      &.good { color: var(--success); }
-      
-      &.molecular {
-        padding: 0.125rem 0.5rem;
-        border-radius: 4px;
-        background: var(--gray-100);
-      }
-    }
-
-    .empty-value {
-      color: var(--text-muted);
-    }
+    :host { display: block; height: 100%; }
+    .list-page { display: flex; flex-direction: column; height: 100%; padding: 16px 20px; }
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 16px; flex-shrink: 0; flex-wrap: wrap; }
+    .header-title { display: flex; align-items: center; gap: 14px; }
+    .title-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #7c4dff, #b47cff); display: flex; align-items: center; justify-content: center; color: #fff; }
+    h1 { margin: 0; font-size: 22px; font-weight: 700; }
+    .subtitle { color: #6b7280; font-size: 13px; }
+    
+    .summary-pills { display: flex; gap: 8px; margin-left: auto; margin-right: 16px; }
+    .stat-pill { display: flex; align-items: center; gap: 6px; background: #f3f4f6; padding: 8px 14px; border-radius: 20px; }
+    .stat-pill.warning { background: linear-gradient(135deg, #f59e0b, #fbbf24); .stat-value, .stat-label { color: #fff; } }
+    .stat-value { font-weight: 700; font-size: 14px; color: #374151; }
+    .stat-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px; }
+    
+    app-data-table { flex: 1; min-height: 0; }
   `]
 })
 export class AnalysesListComponent implements OnInit {
@@ -237,39 +123,39 @@ export class AnalysesListComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
 
   analyses = signal<AnalysisList[]>([]);
-  loading = signal(true);
+  loading = signal(false);
   totalCount = signal(0);
-  currentPage = signal(1);
-  pageSize = 20;
-  
-  selectedSampleType = signal<string>('');
   summary = signal<any>(null);
+  
+  pageSize = 25;
+  pageIndex = 0;
+  searchQuery = '';
+  sortField = 'analysis_date';
+  sortDirection: 'asc' | 'desc' = 'desc';
+  selectedSampleType: string | null = null;
 
-  sampleTypeOptions = [
-    { value: '', label: 'All Types' },
-    ...Object.entries(SAMPLE_TYPE_LABELS).map(([value, label]) => ({ value, label }))
-  ];
+  sampleTypeOptions: FilterOption[] = Object.entries(SAMPLE_TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
   sampleTypeBadgeMap: Record<string, { label: string; class: string }> = {
-    'TANK': { label: 'Tank', class: 'blue' },
-    'BARREL': { label: 'Barrel', class: 'amber' },
-    'WINE_LOT': { label: 'Wine Lot', class: 'purple' },
-    'BATCH': { label: 'Batch', class: 'pink' },
-    'BLEND': { label: 'Blend', class: 'green' },
-    'BOTTLE': { label: 'Bottle', class: 'cyan' },
-    'OTHER': { label: 'Other', class: 'gray' }
+    'TANK': { label: 'Tank', class: 'badge-info' },
+    'BARREL': { label: 'Barrel', class: 'badge-warning' },
+    'WINE_LOT': { label: 'Wine Lot', class: 'badge-primary' },
+    'BATCH': { label: 'Batch', class: 'badge-secondary' },
+    'BLEND': { label: 'Blend', class: 'badge-success' },
+    'BOTTLE': { label: 'Bottle', class: 'badge-info' },
+    'OTHER': { label: 'Other', class: 'badge-secondary' }
   };
 
   columns: TableColumn[] = [
-    { key: 'analysis_date', label: 'Date', sortable: true, width: '110px', format: (v) => this.formatDate(v as string) },
-    { key: 'sample_type', label: 'Type', sortable: true, width: '80px', type: 'badge', badgeMap: this.sampleTypeBadgeMap },
-    { key: 'source_display', label: 'Source', sortable: false, width: '120px' },
-    { key: 'ph', label: 'pH', sortable: true, width: '60px', format: (v) => v != null ? Number(v).toFixed(2) : '—' },
-    { key: 'va_gl', label: 'VA', sortable: true, width: '60px', format: (v) => v != null ? Number(v).toFixed(2) : '—' },
-    { key: 'free_so2_mgl', label: 'SO₂', sortable: true, width: '60px', format: (v) => v != null ? Number(v).toFixed(0) : '—' },
-    { key: 'brix', label: 'Brix', sortable: true, width: '60px', format: (v) => v != null ? `${Number(v).toFixed(1)}°` : '—' },
-    { key: 'alcohol_abv', label: 'Alc', sortable: true, width: '60px', format: (v) => v != null ? `${Number(v).toFixed(1)}%` : '—' },
-    { key: 'actions', label: '', sortable: false, width: '90px', type: 'actions' },
+    { key: 'analysis_date', label: 'Date', type: 'date', sortable: true, width: '110px' },
+    { key: 'sample_type', label: 'Type', sortable: true, width: '90px', type: 'badge', badgeMap: this.sampleTypeBadgeMap },
+    { key: 'source_display', label: 'Source', sortable: false },
+    { key: 'ph', label: 'pH', sortable: true, width: '70px', align: 'right', format: (v) => v != null ? Number(v).toFixed(2) : '—' },
+    { key: 'va_gl', label: 'VA', sortable: true, width: '70px', align: 'right', format: (v) => v != null ? Number(v).toFixed(2) : '—' },
+    { key: 'free_so2_mgl', label: 'SO₂', sortable: true, width: '70px', align: 'right', format: (v) => v != null ? Number(v).toFixed(0) : '—' },
+    { key: 'brix', label: 'Brix', sortable: true, width: '70px', align: 'right', format: (v) => v != null ? `${Number(v).toFixed(1)}°` : '—' },
+    { key: 'alcohol_abv', label: 'Alc %', sortable: true, width: '70px', align: 'right', format: (v) => v != null ? `${Number(v).toFixed(1)}%` : '—' },
+    { key: 'actions', label: '', type: 'actions', width: '80px', sortable: false },
   ];
   
   actions: TableAction[] = [
@@ -278,21 +164,20 @@ export class AnalysesListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.loadAnalyses();
+    this.loadData();
     this.loadSummary();
   }
 
-  loadAnalyses(): void {
+  loadData(): void {
     this.loading.set(true);
     
-    const params: Record<string, string | number | boolean> = {
-      page: this.currentPage(),
+    const params: Record<string, string | number | boolean | undefined> = {
+      page: this.pageIndex + 1,
       page_size: this.pageSize,
+      search: this.searchQuery || undefined,
+      ordering: this.sortDirection === 'desc' ? `-${this.sortField}` : this.sortField,
+      sample_type: this.selectedSampleType || undefined,
     };
-    
-    if (this.selectedSampleType()) {
-      params['sample_type'] = this.selectedSampleType();
-    }
 
     this.labService.getAnalyses(params).subscribe({
       next: (response) => {
@@ -314,37 +199,64 @@ export class AnalysesListComponent implements OnInit {
     });
   }
 
-  onPageEvent(event: PageEvent): void {
-    this.currentPage.set(event.pageIndex + 1);
-    this.loadAnalyses();
+  onSearch(query: string): void {
+    this.searchQuery = query;
+    this.pageIndex = 0;
+    this.loadData();
+  }
+  
+  onSort(sort: Sort): void {
+    this.sortField = sort.active || 'analysis_date';
+    this.sortDirection = sort.direction || 'desc';
+    this.loadData();
   }
 
-  onSampleTypeChange(type: string): void {
-    this.selectedSampleType.set(type);
-    this.currentPage.set(1);
-    this.loadAnalyses();
+  onPage(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadData();
+  }
+
+  onSampleTypeChange(value: string | boolean | null): void {
+    this.selectedSampleType = value as string | null;
+    this.pageIndex = 0;
+    this.loadData();
   }
 
   onRowClick(row: AnalysisList): void {
-    this.router.navigate(['/lab/analyses', row.id]);
+    this.router.navigate(['/lab/analyses', row.id, 'edit']);
+  }
+  
+  navigateToCreate(): void {
+    this.router.navigate(['/lab/analyses/new']);
   }
 
-  onDelete(analysis: AnalysisList): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+  onActionClick(event: { action: string; row: unknown }): void {
+    const row = event.row as AnalysisList;
+    if (event.action === 'edit') {
+      this.router.navigate(['/lab/analyses', row.id, 'edit']);
+    } else if (event.action === 'delete') {
+      this.confirmDelete(row);
+    }
+  }
+  
+  confirmDelete(analysis: AnalysisList): void {
+    const ref = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Delete Analysis',
-        message: `Are you sure you want to delete this analysis from ${analysis.analysis_date}?`,
+        message: `Delete analysis from ${this.formatDate(analysis.analysis_date)}?`,
         confirmText: 'Delete',
-        confirmColor: 'warn'
+        confirmColor: 'warn',
+        icon: 'delete',
       }
     });
 
-    dialogRef.afterClosed().subscribe(confirmed => {
+    ref.afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.labService.deleteAnalysis(analysis.id).subscribe({
           next: () => {
-            this.snackBar.open('Analysis deleted', 'Close', { duration: 3000 });
-            this.loadAnalyses();
+            this.snackBar.open('Deleted', 'Close', { duration: 3000 });
+            this.loadData();
             this.loadSummary();
           },
           error: () => {
@@ -363,16 +275,6 @@ export class AnalysesListComponent implements OnInit {
     if (!dateStr) return '—';
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  }
-  
-  
-  onActionClick(event: { action: string; row: unknown }): void {
-    const row = event.row as AnalysisList;
-    if (event.action === 'edit') {
-      this.router.navigate(['/lab/analyses', row.id, 'edit']);
-    } else if (event.action === 'delete') {
-      this.onDelete(row);
-    }
   }
 }
 

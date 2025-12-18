@@ -7,3 +7,4 @@ class LabConfig(AppConfig):
     verbose_name = 'Lab Analyses'
 
 
+

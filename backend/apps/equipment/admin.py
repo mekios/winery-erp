@@ -64,3 +64,4 @@ class EquipmentAdmin(admin.ModelAdmin):
 
 
 
+

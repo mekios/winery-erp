@@ -171,3 +171,4 @@ class AnalysisHistorySerializer(serializers.Serializer):
     lactic_acid_gl = serializers.DecimalField(max_digits=5, decimal_places=2)
 
 
+
