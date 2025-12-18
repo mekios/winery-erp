@@ -283,8 +283,8 @@ export interface TableAction {
         }
       </ng-template>
       
-      <!-- Paginator -->
-      @if (paginate && totalItems > 0) {
+      <!-- Desktop Paginator -->
+      @if (paginate && totalItems > 0 && !isMobile()) {
         <mat-paginator
           [length]="totalItems"
           [pageSize]="pageSize"
@@ -293,6 +293,29 @@ export interface TableAction {
           (page)="onPage($event)"
           showFirstLastButtons>
         </mat-paginator>
+      }
+      
+      <!-- Mobile Paginator -->
+      @if (paginate && totalItems > 0 && isMobile()) {
+        <div class="mobile-pagination">
+          <button class="page-btn" 
+                  [disabled]="pageIndex === 0"
+                  (click)="goToPage(pageIndex - 1)">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          
+          <div class="page-info">
+            <span class="page-current">{{ pageIndex + 1 }}</span>
+            <span class="page-sep">/</span>
+            <span class="page-total">{{ totalPages }}</span>
+          </div>
+          
+          <button class="page-btn"
+                  [disabled]="pageIndex >= totalPages - 1"
+                  (click)="goToPage(pageIndex + 1)">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
       }
     </div>
   `,
@@ -666,6 +689,75 @@ export interface TableAction {
       background: #fafbfc;
     }
     
+    /* ===== Mobile Pagination ===== */
+    .mobile-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 12px 16px;
+      background: #fafbfc;
+      border-top: 1px solid #f0f0f0;
+    }
+    
+    .page-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.15s;
+      
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        color: #374151;
+      }
+      
+      &:active:not(:disabled) {
+        background: #7c4dff;
+        transform: scale(0.95);
+        
+        mat-icon { color: #fff; }
+      }
+      
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+    }
+    
+    .page-info {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      min-width: 60px;
+      justify-content: center;
+    }
+    
+    .page-current {
+      font-size: 18px;
+      font-weight: 700;
+      color: #7c4dff;
+    }
+    
+    .page-sep {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+    
+    .page-total {
+      font-size: 14px;
+      color: #6b7280;
+    }
+    
     /* ===== Mobile List View ===== */
     .mobile-list {
       flex: 1;
@@ -851,6 +943,11 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
   isMobile = signal(false);
   private searchTimeout?: ReturnType<typeof setTimeout>;
   
+  /** Calculate total pages */
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.pageSize) || 1;
+  }
+  
   constructor(breakpointObserver: BreakpointObserver) {
     this.breakpointObserver = breakpointObserver;
   }
@@ -903,6 +1000,17 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
   
   onPage(event: PageEvent): void {
     this.page.emit(event);
+  }
+  
+  /** Navigate to specific page (for mobile pagination) */
+  goToPage(index: number): void {
+    if (index < 0 || index >= this.totalPages) return;
+    this.page.emit({
+      pageIndex: index,
+      pageSize: this.pageSize,
+      length: this.totalItems,
+      previousPageIndex: this.pageIndex
+    });
   }
   
   onAction(action: string, row: unknown): void {
