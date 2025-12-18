@@ -212,24 +212,115 @@ import { IconComponent } from '../icon/icon.component';
       padding: 1.5rem;
     }
     
-    /* Responsive */
-    @media (max-width: 640px) {
+    /* Responsive - Tablet */
+    @media (max-width: 768px) {
       .page-header {
-        flex-wrap: wrap;
-        padding: 1rem;
+        padding: 0.875rem 1rem;
+        gap: 0.75rem;
+      }
+      
+      .header-left {
+        gap: 0.75rem;
+      }
+      
+      .back-btn {
+        width: 36px;
+        height: 36px;
+        
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+      
+      .header-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
       }
       
       .header-text h1 {
         font-size: 1.125rem;
       }
       
-      .header-actions {
-        width: 100%;
-        justify-content: flex-end;
+      .header-text p {
+        font-size: 0.75rem;
+      }
+      
+      .btn {
+        padding: 0 1rem;
+        height: 38px;
+        font-size: 0.8125rem;
       }
       
       .page-content {
         padding: 1rem;
+      }
+    }
+    
+    /* Responsive - Mobile */
+    @media (max-width: 480px) {
+      .page-header {
+        flex-wrap: wrap;
+        padding: 0.75rem;
+        gap: 0.5rem;
+      }
+      
+      .header-left {
+        flex: 1;
+        min-width: 0;
+        gap: 0.5rem;
+      }
+      
+      .back-btn {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+      }
+      
+      .header-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        flex-shrink: 0;
+        
+        app-icon {
+          transform: scale(0.85);
+        }
+      }
+      
+      .header-text {
+        min-width: 0;
+        
+        h1 {
+          font-size: 1rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        
+        p {
+          display: none;
+        }
+      }
+      
+      .header-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+      }
+      
+      .btn {
+        height: 40px;
+        width: 100%;
+        border-radius: 8px;
+      }
+      
+      .page-content {
+        padding: 0.75rem;
       }
     }
   `]

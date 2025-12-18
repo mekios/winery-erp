@@ -237,6 +237,53 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/f
         cursor: not-allowed;
       }
     }
+    
+    /* Mobile responsive */
+    @media (max-width: 480px) {
+      .input-container {
+        border-radius: 10px;
+      }
+      
+      .stepper-btn {
+        width: 40px;
+        min-height: 44px;
+        
+        svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
+      
+      .value-display {
+        padding: 0 0.5rem;
+        min-width: 80px;
+        gap: 0.25rem;
+      }
+      
+      .number-field {
+        font-size: 16px; /* Prevents iOS zoom */
+        padding: 0.375rem 0;
+      }
+      
+      .unit-label {
+        font-size: 0.75rem;
+        padding: 0.125rem 0.375rem;
+      }
+      
+      .progress-bar {
+        height: 3px;
+      }
+      
+      .quick-values {
+        gap: 0.375rem;
+      }
+      
+      .quick-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+        border-radius: 6px;
+      }
+    }
   `],
 })
 export class NumberInputComponent implements ControlValueAccessor {
