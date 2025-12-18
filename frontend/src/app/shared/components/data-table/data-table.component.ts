@@ -134,20 +134,24 @@ export interface TableAction {
                  matRipple
                  [matRippleDisabled]="!rowClickable"
                  (click)="onRowClick(row)">
-              <!-- Card Header - Primary Column -->
-              <div class="card-header">
-                <div class="card-title">
+              <!-- Card Top Row: Title + Badge + Actions -->
+              <div class="card-top">
+                <div class="card-main">
                   @if (getPrimaryColumn(); as primaryCol) {
-                    <ng-container *ngTemplateOutlet="cellContent; context: { column: primaryCol, row: row }"></ng-container>
+                    <span class="card-title">
+                      <ng-container *ngTemplateOutlet="cellContent; context: { column: primaryCol, row: row }"></ng-container>
+                    </span>
+                  }
+                  @if (getBadgeColumn(); as badgeCol) {
+                    <ng-container *ngTemplateOutlet="cellContent; context: { column: badgeCol, row: row }"></ng-container>
                   }
                 </div>
                 @if (actions.length > 0) {
                   <div class="card-actions">
                     @for (action of actions; track action.action) {
                       @if (!action.condition || action.condition(row)) {
-                        <button class="action-btn" 
+                        <button class="action-btn-sm" 
                                 [class.danger]="action.color === 'warn'"
-                                matRipple
                                 (click)="onAction(action.action, row); $event.stopPropagation()">
                           <mat-icon>{{ action.icon }}</mat-icon>
                         </button>
@@ -157,14 +161,14 @@ export interface TableAction {
                 }
               </div>
               
-              <!-- Card Body - Other Columns -->
-              <div class="card-body">
-                @for (column of getSecondaryColumns(); track column.key) {
-                  <div class="card-field">
-                    <span class="field-label">{{ column.label }}</span>
-                    <span class="field-value">
+              <!-- Card Metrics Row -->
+              <div class="card-metrics">
+                @for (column of getMetricColumns(); track column.key) {
+                  <div class="metric">
+                    <span class="metric-value">
                       <ng-container *ngTemplateOutlet="cellContent; context: { column: column, row: row }"></ng-container>
                     </span>
+                    <span class="metric-label">{{ column.label }}</span>
                   </div>
                 }
               </div>
@@ -637,10 +641,10 @@ export interface TableAction {
     .cards-area {
       flex: 1;
       overflow: auto;
-      padding: 12px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
       
       &.loading { opacity: 0.5; }
     }
@@ -648,13 +652,13 @@ export interface TableAction {
     .data-card {
       background: #fff;
       border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      overflow: hidden;
+      border-radius: 10px;
+      padding: 12px;
       transition: box-shadow 0.2s, border-color 0.2s;
       
-      &:hover {
+      &:hover, &:active {
         border-color: #d1d5db;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       }
       
       &.clickable {
@@ -662,72 +666,127 @@ export interface TableAction {
       }
     }
     
-    .card-header {
+    /* Card Top Row */
+    .card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 16px;
-      background: linear-gradient(135deg, #fafbfc 0%, #f5f6f8 100%);
-      border-bottom: 1px solid #eef0f3;
-      gap: 12px;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    
+    .card-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
     }
     
     .card-title {
       font-weight: 600;
-      font-size: 15px;
+      font-size: 14px;
       color: #1f2937;
-      flex: 1;
-      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       
       .cell-text {
         font-weight: 600;
       }
     }
     
+    .card-main .tag {
+      font-size: 9px;
+      padding: 2px 6px;
+      flex-shrink: 0;
+    }
+    
     .card-actions {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       flex-shrink: 0;
+    }
+    
+    .action-btn-sm {
+      background: #f3f4f6;
+      border: none;
+      padding: 4px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      transition: all 0.15s;
       
-      .action-btn {
-        background: #fff;
-        border: 1px solid #e5e7eb;
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #6b7280;
+      }
+      
+      &:hover, &:active {
+        background: #7c4dff;
+        mat-icon { color: #fff; }
+      }
+      
+      &.danger:hover, &.danger:active {
+        background: #ef4444;
       }
     }
     
-    .card-body {
-      padding: 12px 16px;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px 16px;
-    }
-    
-    .card-field {
+    /* Card Metrics Row */
+    .card-metrics {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      padding-top: 10px;
+      border-top: 1px solid #f3f4f6;
     }
     
-    .field-label {
-      font-size: 11px;
+    .metric {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    
+    .metric-value {
+      font-size: 13px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #9ca3af;
-    }
-    
-    .field-value {
-      font-size: 14px;
       color: #374151;
       
       .cell-text {
-        font-weight: 500;
+        font-weight: 600;
       }
       
-      .tag {
-        font-size: 10px;
-        padding: 3px 8px;
+      .date-text {
+        font-size: 12px;
+        color: #374151;
+        font-weight: 600;
       }
+      
+      .num-text {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      
+      .bool-chip {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        
+        mat-icon {
+          font-size: 12px;
+          width: 12px;
+          height: 12px;
+        }
+      }
+    }
+    
+    .metric-label {
+      font-size: 10px;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
     
     /* Always visible action buttons (for card view) */
@@ -755,15 +814,18 @@ export interface TableAction {
       .toolbar-end {
         justify-content: space-between;
       }
-      
-      .card-body {
-        grid-template-columns: 1fr;
-      }
     }
     
-    @media screen and (min-width: 480px) and (max-width: 768px) {
-      .card-body {
-        grid-template-columns: repeat(2, 1fr);
+    /* Very small screens - stack metrics vertically */
+    @media screen and (max-width: 360px) {
+      .card-metrics {
+        flex-direction: column;
+        gap: 6px;
+      }
+      
+      .metric {
+        justify-content: space-between;
+        width: 100%;
       }
     }
   `]
@@ -868,14 +930,29 @@ export class DataTableComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
   
-  /** Get the primary column (first non-actions column) for card title */
+  /** Get the primary column (first non-actions, non-badge column) for card title */
   getPrimaryColumn(): TableColumn | null {
-    return this.columns.find(c => c.type !== 'actions') ?? null;
+    return this.columns.find(c => c.type !== 'actions' && c.type !== 'badge') ?? null;
   }
   
-  /** Get secondary columns (all except first and actions) for card body */
+  /** Get the badge column if any */
+  getBadgeColumn(): TableColumn | null {
+    return this.columns.find(c => c.type === 'badge') ?? null;
+  }
+  
+  /** Get metric columns (non-primary, non-badge, non-actions) for compact display */
+  getMetricColumns(): TableColumn[] {
+    const primaryKey = this.getPrimaryColumn()?.key;
+    return this.columns.filter(c => 
+      c.type !== 'actions' && 
+      c.type !== 'badge' && 
+      c.key !== primaryKey
+    );
+  }
+  
+  /** Get secondary columns (all except first and actions) for card body - legacy */
   getSecondaryColumns(): TableColumn[] {
     const nonActionColumns = this.columns.filter(c => c.type !== 'actions');
-    return nonActionColumns.slice(1); // Skip the first (primary) column
+    return nonActionColumns.slice(1);
   }
 }
