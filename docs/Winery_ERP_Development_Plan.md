@@ -10,12 +10,29 @@
 | Phase | Status | Completed |
 |-------|--------|-----------|
 | **Phase 0** | ✅ COMPLETE | Dec 11, 2024 |
-| **Phase 1** | 🔄 IN PROGRESS | Sprint 1.1-1.5 ✅, Starting 1.6 |
+| **Phase 1** | 🔄 IN PROGRESS | Sprint 1.1-1.6 ✅ (core done), Polish ongoing |
 | **Phase 2** | ⏳ Pending | - |
 | **Phase 3** | ⏳ Pending | - |
 | **Phase 4** | ⏳ Pending | - |
 
-### Recent Completed Work (Dec 17, 2024)
+### Recent Completed Work (Dec 18, 2024)
+- ✅ **Vultr Deployment**
+  - Production Docker Compose with Nginx, Gunicorn, PostgreSQL, Redis
+  - SSL/HTTPS via Let's Encrypt (certbot)
+  - Deployment script (`scripts/deploy.sh`)
+  - Demo data setup command (`setup_demo_data`)
+  - Deployment documentation (`docs/VULTR_DEPLOYMENT.md`)
+- ✅ **Sprint 1.6: Dashboard & Polish** (partially complete)
+  - Dashboard with real data from backend aggregation
+  - Winery overview stats (tanks, batches, wine lots, analyses)
+  - Recent transfers and analyses feeds
+  - Tank overview with fill levels
+  - Fixed winery context mixin (permission checks now work correctly)
+- ✅ **Lab Analyses UX Improvements**
+  - Human-readable date formatting ("Dec 17, 2025")
+  - Colored sample type badges (Tank, Barrel, Wine Lot, etc.)
+  - Edit/delete action buttons (appear on row hover)
+  - Optimized column widths
 - ✅ Sprint 1.5: Lab Analyses (backend + frontend)
   - Analysis model with all wine parameters (pH, TA, VA, Brix, SO₂, etc.)
   - Computed fields (molecular SO₂, potential alcohol, MLF progress)
@@ -23,12 +40,6 @@
   - Full-page analysis form with parameter groups
   - Analyses list with filtering by sample type
 - ✅ Sprint 1.4: Transfers & Wine Lots (backend + frontend)
-  - Transfer model with action types (FILL, RACK, BLEND, etc.)
-  - WineLot model with batch linking (LotBatchLink)
-  - Transfer validation (volume checks, capacity limits)
-  - Transfers list with filter by action type
-  - Wine lots list with filters (status, vintage)
-  - Full-page forms for both entities
 - ✅ Sprint 1.3: Harvest & Batches (backend + frontend)
 - ✅ Winery Management UI (admin can create/manage wineries and members)
 - ✅ UI/UX Improvements:
@@ -39,6 +50,7 @@
   - Custom scrollbar styling
   - Full-page form routes (replacing dialogs)
   - Sectioned form layouts with design system buttons
+  - Custom number input component with steppers and quick values
 
 ### Development Environment (Current Ports)
 
@@ -270,23 +282,25 @@
 
 ---
 
-### Sprint 1.6: Dashboard & Polish (Week 6)
+### Sprint 1.6: Dashboard & Polish (Week 6) — ✅ CORE COMPLETE
 
-#### Backend
-- [ ] Create dashboard aggregation endpoints
-  - [ ] Tank summary (count by status, total volume)
-  - [ ] Recent transfers
-  - [ ] Recent analyses
-  - [ ] Batches by stage
-- [ ] Performance optimization (select_related, prefetch_related)
-- [ ] API documentation review
+#### Backend ✅ COMPLETE
+- [x] Create dashboard aggregation endpoints
+  - [x] Tank summary (count by status, total volume)
+  - [x] Recent transfers
+  - [x] Recent analyses
+  - [x] Top tanks by fill level
+  - [x] Alerts (low SO₂, high VA)
+- [x] Fix WineryContextMixin (winery set before permission checks)
+- [ ] Performance optimization (select_related, prefetch_related) — remaining
+- [ ] API documentation review — remaining
 
-#### Frontend
-- [ ] Create `dashboard` feature module
-  - [ ] Winery overview cards (tanks, batches, active lots)
-  - [ ] Recent activity feed
-  - [ ] Quick actions (new transfer, new analysis)
-  - [ ] Tank status overview (visual grid or list)
+#### Frontend ✅ COMPLETE
+- [x] Create `dashboard` feature module
+  - [x] Winery overview cards (tanks, batches, active lots)
+  - [x] Recent activity feed (transfers, analyses)
+  - [x] Quick actions (new transfer, new analysis)
+  - [x] Tank status overview with fill levels
 - [ ] Responsive design testing
 - [ ] Error handling improvements
 - [ ] Loading states and skeletons
