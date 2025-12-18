@@ -86,6 +86,10 @@ import { HarvestService, BatchList, HarvestSeasonDropdown, BATCH_STAGE_LABELS } 
           New Batch
         </button>
       </app-data-table>
+      
+      <button class="mobile-fab" mat-fab color="primary" (click)="navigateToCreate()">
+        <mat-icon>add</mat-icon>
+      </button>
     </div>
   `,
   styles: [`
@@ -97,6 +101,9 @@ import { HarvestService, BatchList, HarvestSeasonDropdown, BATCH_STAGE_LABELS } 
     h1 { margin: 0; font-size: 22px; font-weight: 700; }
     .subtitle { color: #6b7280; font-size: 13px; }
     app-data-table { flex: 1; min-height: 0; }
+    
+    .mobile-fab { display: none; }
+    @media screen and (max-width: 768px) { .mobile-fab { display: flex !important; } }
   `]
 })
 export class BatchesListComponent implements OnInit {

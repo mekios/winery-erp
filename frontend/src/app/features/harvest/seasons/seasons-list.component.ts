@@ -123,12 +123,19 @@ import { HarvestService, HarvestSeason } from '../harvest.service';
           }
         </div>
       }
+      
+      <button class="mobile-fab" mat-fab color="primary" (click)="navigateToCreate()">
+        <mat-icon>add</mat-icon>
+      </button>
     </div>
   `,
   styles: [`
     :host { display: block; height: 100%; overflow: auto; }
-    .list-page { padding: 16px 20px; }
+    .list-page { padding: 16px 20px; position: relative; }
     .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 16px; }
+    
+    .mobile-fab { display: none; }
+    @media screen and (max-width: 768px) { .mobile-fab { display: flex !important; } }
     .header-title { display: flex; align-items: center; gap: 14px; }
     .title-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #7c4dff, #b47cff); display: flex; align-items: center; justify-content: center; color: #fff; }
     h1 { margin: 0; font-size: 22px; font-weight: 700; }

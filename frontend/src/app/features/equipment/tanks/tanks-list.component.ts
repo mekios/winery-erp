@@ -93,6 +93,10 @@ import { EquipmentService, Tank, TankSummary, TANK_TYPE_LABELS } from '../equipm
           Add Tank
         </button>
       </app-data-table>
+      
+      <button class="mobile-fab" mat-fab color="primary" (click)="navigateToCreate()">
+        <mat-icon>add</mat-icon>
+      </button>
     </div>
   `,
   styles: [`
@@ -111,6 +115,9 @@ import { EquipmentService, Tank, TankSummary, TANK_TYPE_LABELS } from '../equipm
     .stat-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px; }
     
     app-data-table { flex: 1; min-height: 0; }
+    
+    .mobile-fab { display: none; }
+    @media screen and (max-width: 768px) { .mobile-fab { display: flex !important; } }
   `]
 })
 export class TanksListComponent implements OnInit {
