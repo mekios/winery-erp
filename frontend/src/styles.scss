@@ -575,6 +575,11 @@ a {
     transform: translateX(0) !important;
   }
   
+  /* Show mobile close button */
+  .app-container .mobile-close-btn {
+    display: flex !important;
+  }
+  
   /* Remove main wrapper margin on mobile */
   .app-container .main-wrapper {
     margin-left: 0 !important;

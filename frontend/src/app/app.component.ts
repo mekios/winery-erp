@@ -55,6 +55,11 @@ import { IconComponent } from '@shared/components/icon/icon.component';
         <div class="mobile-overlay" (click)="closeMobileMenu()"></div>
         <!-- Sidebar -->
         <aside class="sidebar">
+          <!-- Mobile Close Button -->
+          <button class="mobile-close-btn" (click)="closeMobileMenu()" aria-label="Close menu">
+            <mat-icon>close</mat-icon>
+          </button>
+          
           <!-- Logo -->
           <div class="sidebar-brand" [matTooltip]="sidebarCollapsed() ? 'Winery ERP' : ''" matTooltipPosition="right">
             <span class="brand-icon">🍇</span>
@@ -738,6 +743,36 @@ import { IconComponent } from '@shared/components/icon/icon.component';
     }
     
     /* ===========================================
+       Mobile Close Button - Hidden on desktop
+       =========================================== */
+    .mobile-close-btn {
+      display: none;
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.2s ease, color 0.2s ease;
+      
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+    }
+    
+    /* ===========================================
        Mobile Overlay - Hidden on desktop
        =========================================== */
     .mobile-overlay {
@@ -765,6 +800,13 @@ import { IconComponent } from '@shared/components/icon/icon.component';
       /* Show sidebar when mobile menu is open */
       .app-container.mobile-menu-open .sidebar {
         transform: translateX(0) !important;
+      }
+      
+      /* Show mobile close button on mobile */
+      .mobile-close-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
       }
       
       /* Reset main wrapper margin on mobile */
