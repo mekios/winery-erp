@@ -64,3 +64,4 @@ class AnalysisAdmin(admin.ModelAdmin):
 
 
 
+

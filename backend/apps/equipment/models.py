@@ -242,3 +242,4 @@ class Equipment(models.Model):
 
 
 
+

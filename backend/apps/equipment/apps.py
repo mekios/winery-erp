@@ -10,3 +10,4 @@ class EquipmentConfig(AppConfig):
 
 
 
+

@@ -10,3 +10,4 @@ class MasterDataConfig(AppConfig):
 
 
 
+
