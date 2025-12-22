@@ -52,6 +52,13 @@ export const routes: Routes = [
     loadChildren: () => import('./features/lab/lab.routes')
       .then(m => m.LAB_ROUTES)
   },
+  // Work Orders (Sprint 2.3)
+  {
+    path: 'work-orders',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/work-orders/work-orders.routes')
+      .then(m => m.WORK_ORDERS_ROUTES)
+  },
   // Settings/Admin
   {
     path: 'settings',

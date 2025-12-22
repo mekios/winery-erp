@@ -68,7 +68,7 @@ export interface TopTank {
 
 export interface DashboardAlert {
   type: 'warning' | 'danger' | 'info';
-  category: string;
+  category: 'low_so2' | 'high_va' | 'unknown_composition' | string;
   message: string;
   date: string;
   source_id: string;

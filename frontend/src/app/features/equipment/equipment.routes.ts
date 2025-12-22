@@ -23,6 +23,13 @@ export const EQUIPMENT_ROUTES: Routes = [
     title: 'New Tank'
   },
   {
+    path: 'tanks/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./tanks/tank-detail.component')
+      .then(m => m.TankDetailComponent),
+    title: 'Tank Details'
+  },
+  {
     path: 'tanks/:id/edit',
     canActivate: [authGuard],
     loadComponent: () => import('./tanks/tank-form.component')

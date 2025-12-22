@@ -141,9 +141,9 @@ import { IconComponent } from '@shared/components/icon/icon.component';
             
             <div class="nav-section">Operations</div>
             
-            <a class="nav-item disabled" matRipple
+            <a class="nav-item" routerLink="/work-orders" routerLinkActive="active" matRipple
                [matTooltip]="sidebarCollapsed() ? 'Work Orders' : ''" matTooltipPosition="right">
-              <mat-icon>assignment</mat-icon>
+              <app-icon name="clipboard-list" [size]="20"></app-icon>
               <span>Work Orders</span>
             </a>
             <a class="nav-item disabled" matRipple

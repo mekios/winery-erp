@@ -10,6 +10,8 @@ import { MatRippleModule } from '@angular/material/core';
 import { AuthService } from '@core/services/auth.service';
 import { WineryService } from '@core/services/winery.service';
 import { IconComponent } from '@shared/components/icon/icon.component';
+import { SkeletonComponent } from '@shared/components/skeleton/skeleton.component';
+import { ErrorStateComponent } from '@shared/components/error-state/error-state.component';
 import { 
   DashboardService, 
   DashboardData,
@@ -32,7 +34,9 @@ import {
     MatIconModule,
     MatProgressSpinnerModule,
     MatRippleModule,
-    IconComponent
+    IconComponent,
+    SkeletonComponent,
+    ErrorStateComponent,
   ],
   template: `
     <div class="dashboard stagger">
@@ -72,9 +76,30 @@ import {
           </div>
         </div>
         
-        @if (loading()) {
-          <div class="loading-container">
-            <mat-spinner diameter="40"></mat-spinner>
+        @if (error()) {
+          <app-error-state
+            [title]="error()!"
+            message="We couldn't load the dashboard data. Please check your connection and try again."
+            variant="network"
+            (retry)="loadDashboard()">
+          </app-error-state>
+        } @else if (loading()) {
+          <!-- Skeleton loading state -->
+          <div class="skeleton-dashboard">
+            <div class="stats-grid">
+              @for (i of [1,2,3,4]; track i) {
+                <app-skeleton type="stat-card"></app-skeleton>
+              }
+            </div>
+            <div class="actions-grid skeleton-actions">
+              @for (i of [1,2,3,4]; track i) {
+                <app-skeleton type="card"></app-skeleton>
+              }
+            </div>
+            <div class="content-grid">
+              <app-skeleton type="list" [rows]="5"></app-skeleton>
+              <app-skeleton type="list" [rows]="5"></app-skeleton>
+            </div>
           </div>
         } @else if (data()) {
           <!-- Stats Grid -->
@@ -132,16 +157,21 @@ import {
                 Alerts
               </h3>
               <div class="alerts-grid">
-                @for (alert of data()!.alerts; track alert.date) {
-                  <div class="alert-card" [class]="alert.type">
+                @for (alert of data()!.alerts; track $index) {
+                  <a class="alert-card" [class]="alert.type" [routerLink]="getAlertLink(alert)">
                     <div class="alert-icon">
-                      <mat-icon>{{ alert.type === 'danger' ? 'error' : 'warning' }}</mat-icon>
+                      @if (alert.category === 'unknown_composition') {
+                        <mat-icon>help_outline</mat-icon>
+                      } @else {
+                        <mat-icon>{{ alert.type === 'danger' ? 'error' : 'warning' }}</mat-icon>
+                      }
                     </div>
                     <div class="alert-content">
                       <span class="alert-message">{{ alert.message }}</span>
                       <span class="alert-time">{{ alert.date | date:'short' }}</span>
                     </div>
-                  </div>
+                    <mat-icon class="alert-arrow">chevron_right</mat-icon>
+                  </a>
                 }
               </div>
             </div>
@@ -460,6 +490,9 @@ import {
       gap: 0.75rem;
       padding: 0.875rem 1rem;
       border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
       
       &.warning {
         background: rgba(255, 175, 0, 0.1);
@@ -467,6 +500,11 @@ import {
         
         .alert-icon mat-icon {
           color: var(--warning);
+        }
+        
+        &:hover {
+          background: rgba(255, 175, 0, 0.15);
+          border-color: rgba(255, 175, 0, 0.3);
         }
       }
       
@@ -477,6 +515,21 @@ import {
         .alert-icon mat-icon {
           color: var(--danger);
         }
+        
+        &:hover {
+          background: rgba(255, 82, 82, 0.15);
+          border-color: rgba(255, 82, 82, 0.3);
+        }
+      }
+      
+      .alert-arrow {
+        color: var(--text-muted);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+      
+      &:hover .alert-arrow {
+        opacity: 1;
       }
     }
     
@@ -913,12 +966,22 @@ import {
     }
     
     /* ===========================================
-       Loading
+       Loading / Skeleton
        =========================================== */
     .loading-container {
       display: flex;
       justify-content: center;
       padding: 4rem;
+    }
+    
+    .skeleton-dashboard {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    
+    .skeleton-actions {
+      margin-bottom: 0;
     }
     
     /* ===========================================
@@ -944,6 +1007,7 @@ export class DashboardComponent implements OnInit {
   
   loading = signal(true);
   data = signal<DashboardData | null>(null);
+  error = signal<string | null>(null);
   private hasLoaded = false;
   
   constructor() {
@@ -974,19 +1038,34 @@ export class DashboardComponent implements OnInit {
     }
     
     this.loading.set(true);
+    this.error.set(null);
+    this.hasLoaded = false;
+    
     this.dashboardService.getDashboard().subscribe({
       next: (data) => {
         this.data.set(data);
         this.loading.set(false);
+        this.hasLoaded = true;
       },
       error: (err) => {
         console.error('Dashboard error:', err);
         this.loading.set(false);
+        this.error.set('Failed to load dashboard');
       }
     });
   }
   
   formatRole(role: string): string {
     return role.replace('_', ' ');
+  }
+  
+  getAlertLink(alert: DashboardAlert): string[] {
+    if (alert.category === 'unknown_composition' && alert.source_id) {
+      return ['/equipment/tanks', alert.source_id];
+    }
+    if ((alert.category === 'low_so2' || alert.category === 'high_va') && alert.source_id) {
+      return ['/lab/analyses'];
+    }
+    return [];
   }
 }

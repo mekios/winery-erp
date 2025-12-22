@@ -12,6 +12,8 @@ import { DataTableComponent, TableColumn, TableAction } from '@shared/components
 import { FilterChipComponent, FilterOption } from '@shared/components/filter-chip/filter-chip.component';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { IconComponent } from '@shared/components/icon/icon.component';
+import { SkeletonComponent } from '@shared/components/skeleton/skeleton.component';
+import { ErrorStateComponent } from '@shared/components/error-state/error-state.component';
 import { HarvestService, BatchList, HarvestSeasonDropdown, BATCH_STAGE_LABELS } from '../harvest.service';
 
 @Component({
@@ -25,6 +27,8 @@ import { HarvestService, BatchList, HarvestSeasonDropdown, BATCH_STAGE_LABELS } 
     DataTableComponent,
     FilterChipComponent,
     IconComponent,
+    SkeletonComponent,
+    ErrorStateComponent,
   ],
   template: `
     <div class="list-page">
@@ -44,46 +48,64 @@ import { HarvestService, BatchList, HarvestSeasonDropdown, BATCH_STAGE_LABELS } 
         </button>
       </header>
       
-      <ng-template #filtersTemplate>
-        <app-filter-chip
-          label="Season"
-          [options]="seasonOptions()"
-          [value]="selectedSeason"
-          (valueChange)="onSeasonChange($event)">
-        </app-filter-chip>
-        <app-filter-chip
-          label="Stage"
-          [options]="stageOptions"
-          [value]="selectedStage"
-          (valueChange)="onStageChange($event)">
-        </app-filter-chip>
-      </ng-template>
-      
-      <app-data-table
-        [columns]="columns"
-        [data]="batches()"
-        [actions]="actions"
-        [loading]="loading()"
-        [totalItems]="totalItems()"
-        [pageSize]="pageSize"
-        [pageIndex]="pageIndex"
-        [rowClickable]="true"
-        [filterTemplate]="filtersTemplate"
-        searchPlaceholder="Search batches..."
-        emptyIcon="batch"
-        emptyTitle="No batches yet"
-        emptyMessage="Create your first batch to start tracking."
-        (search)="onSearch($event)"
-        (sort)="onSort($event)"
-        (page)="onPage($event)"
-        (actionClick)="onAction($event)"
-        (rowClick)="onRowClick($event)">
+      @if (error()) {
+        <app-error-state
+          [title]="error()!"
+          message="We couldn't load the batches. Please check your connection and try again."
+          variant="network"
+          (retry)="loadData()">
+        </app-error-state>
+      } @else if (initialLoading()) {
+        <div class="skeleton-container">
+          <div class="skeleton-stats">
+            @for (i of [1,2,3,4]; track i) {
+              <app-skeleton type="stat-card"></app-skeleton>
+            }
+          </div>
+          <app-skeleton type="table" [rows]="8" [cols]="6"></app-skeleton>
+        </div>
+      } @else {
+        <ng-template #filtersTemplate>
+          <app-filter-chip
+            label="Season"
+            [options]="seasonOptions()"
+            [value]="selectedSeason"
+            (valueChange)="onSeasonChange($event)">
+          </app-filter-chip>
+          <app-filter-chip
+            label="Stage"
+            [options]="stageOptions"
+            [value]="selectedStage"
+            (valueChange)="onStageChange($event)">
+          </app-filter-chip>
+        </ng-template>
         
-        <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
-          <mat-icon>add</mat-icon>
-          New Batch
-        </button>
-      </app-data-table>
+        <app-data-table
+          [columns]="columns"
+          [data]="batches()"
+          [actions]="actions"
+          [loading]="loading()"
+          [totalItems]="totalItems()"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [rowClickable]="true"
+          [filterTemplate]="filtersTemplate"
+          searchPlaceholder="Search batches..."
+          emptyIcon="batch"
+          emptyTitle="No batches yet"
+          emptyMessage="Create your first batch to start tracking."
+          (search)="onSearch($event)"
+          (sort)="onSort($event)"
+          (page)="onPage($event)"
+          (actionClick)="onAction($event)"
+          (rowClick)="onRowClick($event)">
+          
+          <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
+            <mat-icon>add</mat-icon>
+            New Batch
+          </button>
+        </app-data-table>
+      }
       
       <button class="mobile-fab" mat-fab color="primary" (click)="navigateToCreate()">
         <mat-icon>add</mat-icon>
@@ -100,6 +122,13 @@ import { HarvestService, BatchList, HarvestSeasonDropdown, BATCH_STAGE_LABELS } 
     .subtitle { color: #6b7280; font-size: 13px; }
     app-data-table { flex: 1; min-height: 0; }
     
+    .skeleton-container { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+    .skeleton-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    @media (max-width: 992px) { .skeleton-stats { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 576px) { .skeleton-stats { grid-template-columns: 1fr; } }
+    
+    app-error-state { flex: 1; }
+    
     .mobile-fab { display: none; }
     @media screen and (max-width: 768px) { .mobile-fab { display: flex !important; } }
   `]
@@ -114,6 +143,8 @@ export class BatchesListComponent implements OnInit {
   batches = signal<BatchList[]>([]);
   seasons = signal<HarvestSeasonDropdown[]>([]);
   loading = signal(false);
+  initialLoading = signal(true);
+  error = signal<string | null>(null);
   totalItems = signal(0);
   pageSize = 25;
   pageIndex = 0;
@@ -165,7 +196,11 @@ export class BatchesListComponent implements OnInit {
   }
   
   loadData(): void {
-    this.loading.set(true);
+    const isInitial = this.initialLoading();
+    if (!isInitial) {
+      this.loading.set(true);
+    }
+    this.error.set(null);
     
     const params: Record<string, string | number | boolean | undefined> = {
       page: this.pageIndex + 1,
@@ -181,10 +216,20 @@ export class BatchesListComponent implements OnInit {
         this.batches.set(response.results);
         this.totalItems.set(response.count);
         this.loading.set(false);
+        this.initialLoading.set(false);
       },
-      error: () => {
-        this.snackBar.open('Failed to load', 'Close', { duration: 3000 });
+      error: (err) => {
+        console.error('Failed to load batches:', err);
         this.loading.set(false);
+        this.initialLoading.set(false);
+        
+        if (isInitial) {
+          // Show error state for initial load failures
+          this.error.set('Failed to load batches');
+        } else {
+          // Show snackbar for subsequent failures (filtering, pagination)
+          this.snackBar.open('Failed to load', 'Close', { duration: 3000 });
+        }
       }
     });
   }

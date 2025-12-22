@@ -164,6 +164,7 @@ export class TanksListComponent implements OnInit {
   ];
   
   actions: TableAction[] = [
+    { icon: 'visibility', label: 'View', action: 'view' },
     { icon: 'edit', label: 'Edit', action: 'edit' },
     { icon: 'delete', label: 'Delete', action: 'delete', color: 'warn' },
   ];
@@ -204,8 +205,13 @@ export class TanksListComponent implements OnInit {
   
   onAction(e: { action: string; row: unknown }): void {
     const tank = e.row as Tank;
+    if (e.action === 'view') this.navigateToDetail(tank);
     if (e.action === 'edit') this.navigateToEdit(tank);
     if (e.action === 'delete') this.confirmDelete(tank);
+  }
+  
+  navigateToDetail(tank: Tank): void {
+    this.router.navigate(['/equipment/tanks', tank.id]);
   }
   
   navigateToCreate(): void {

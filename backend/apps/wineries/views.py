@@ -360,6 +360,27 @@ class DashboardView(WineryContextMixin, APIView):
                 'date': a.analysis_date.isoformat(),
                 'source_id': str(a.tank_id or a.barrel_id or a.wine_lot_id or ''),
             })
+        
+        # Composition integrity alerts (tanks with unknown composition)
+        try:
+            from apps.ledger.models import TankLedger
+            
+            # Check tanks with wine for unknown composition
+            tanks_with_wine = tanks_qs.filter(current_volume_l__gt=0)
+            for tank in tanks_with_wine[:10]:  # Limit for performance
+                composition = TankLedger.get_tank_composition(tank)
+                if composition['unknown_volume_l'] > 0:
+                    pct = composition['unknown_percentage']
+                    alerts.append({
+                        'type': 'warning',
+                        'category': 'unknown_composition',
+                        'message': f'Tank {tank.code} has {pct:.1f}% unknown origin',
+                        'date': timezone.now().isoformat(),
+                        'source_id': str(tank.id),
+                    })
+        except ImportError:
+            # Ledger app not available
+            pass
 
         return Response({
             'stats': stats,

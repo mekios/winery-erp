@@ -43,12 +43,15 @@ api_v1_patterns = [
     # Lab (Phase 1 - Sprint 1.5)
     path('lab/', include('apps.lab.urls')),
     
+    # Ledger/Composition Engine (Phase 2 - Sprint 2.1)
+    path('ledger/', include('apps.ledger.urls')),
+    
+    # Work Orders (Phase 2 - Sprint 2.3)
+    path('work-orders/', include('apps.work_orders.urls')),
+    
     # Inventory (Phase 2)
     # path('materials/', include('apps.inventory.urls.materials')),
     # path('additions/', include('apps.inventory.urls.additions')),
-    
-    # Work Orders (Phase 2)
-    # path('work-orders/', include('apps.work_orders.urls')),
     
     # Packaging (Phase 3)
     # path('packaging-skus/', include('apps.packaging.urls.skus')),

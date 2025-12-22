@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Sum, Count, Q
 
 from apps.wineries.mixins import WineryRequiredMixin
 from .models import Tank, Barrel, Equipment
@@ -64,29 +65,38 @@ class TankViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def summary(self, request):
-        """Get tank summary statistics."""
+        """Get tank summary statistics using efficient aggregations."""
         queryset = self.get_queryset().filter(is_active=True)
         
-        total_tanks = queryset.count()
-        total_capacity = sum(t.capacity_l for t in queryset)
-        total_volume = sum(t.current_volume_l for t in queryset)
+        # Single aggregation query for totals
+        totals = queryset.aggregate(
+            total_tanks=Count('id'),
+            total_capacity=Sum('capacity_l'),
+            total_volume=Sum('current_volume_l'),
+        )
         
-        by_status = {}
-        for status_choice in Tank.STATUS_CHOICES:
-            count = queryset.filter(status=status_choice[0]).count()
-            if count > 0:
-                by_status[status_choice[0]] = count
+        total_tanks = totals['total_tanks'] or 0
+        total_capacity = float(totals['total_capacity'] or 0)
+        total_volume = float(totals['total_volume'] or 0)
         
-        by_type = {}
-        for type_choice in Tank.TANK_TYPE_CHOICES:
-            count = queryset.filter(tank_type=type_choice[0]).count()
-            if count > 0:
-                by_type[type_choice[0]] = count
+        # Efficient count by status using conditional aggregation
+        by_status = {
+            row['status']: row['count']
+            for row in queryset.values('status').annotate(count=Count('id'))
+            if row['count'] > 0
+        }
+        
+        # Efficient count by type using conditional aggregation
+        by_type = {
+            row['tank_type']: row['count']
+            for row in queryset.values('tank_type').annotate(count=Count('id'))
+            if row['count'] > 0
+        }
         
         return Response({
             'total_tanks': total_tanks,
-            'total_capacity_l': float(total_capacity),
-            'total_volume_l': float(total_volume),
+            'total_capacity_l': total_capacity,
+            'total_volume_l': total_volume,
             'utilization_percentage': round((total_volume / total_capacity * 100), 1) if total_capacity > 0 else 0,
             'by_status': by_status,
             'by_type': by_type,
@@ -138,27 +148,38 @@ class BarrelViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def summary(self, request):
-        """Get barrel summary statistics."""
+        """Get barrel summary statistics using efficient aggregations."""
         queryset = self.get_queryset().filter(is_active=True)
         
-        total_barrels = queryset.count()
-        total_capacity = sum(b.volume_l for b in queryset)
+        # Single aggregation query for totals
+        totals = queryset.aggregate(
+            total_barrels=Count('id'),
+            total_capacity=Sum('volume_l'),
+            total_volume=Sum('current_volume_l'),
+        )
         
-        by_wood_type = {}
-        for wood_choice in Barrel.WOOD_TYPE_CHOICES:
-            count = queryset.filter(wood_type=wood_choice[0]).count()
-            if count > 0:
-                by_wood_type[wood_choice[0]] = count
+        total_barrels = totals['total_barrels'] or 0
+        total_capacity = float(totals['total_capacity'] or 0)
+        total_volume = float(totals['total_volume'] or 0)
         
-        by_status = {}
-        for status_choice in Barrel.STATUS_CHOICES:
-            count = queryset.filter(status=status_choice[0]).count()
-            if count > 0:
-                by_status[status_choice[0]] = count
+        # Efficient count by wood type
+        by_wood_type = {
+            row['wood_type']: row['count']
+            for row in queryset.values('wood_type').annotate(count=Count('id'))
+            if row['count'] > 0
+        }
+        
+        # Efficient count by status
+        by_status = {
+            row['status']: row['count']
+            for row in queryset.values('status').annotate(count=Count('id'))
+            if row['count'] > 0
+        }
         
         return Response({
             'total_barrels': total_barrels,
-            'total_capacity_l': float(total_capacity),
+            'total_capacity_l': total_capacity,
+            'total_volume_l': total_volume,
             'by_wood_type': by_wood_type,
             'by_status': by_status,
         })

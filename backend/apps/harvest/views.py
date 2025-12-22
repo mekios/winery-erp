@@ -120,17 +120,19 @@ class BatchViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
             total_must_volume=Sum('must_volume_l'),
         )
         
-        by_stage = {}
-        for stage_choice in Batch.STAGE_CHOICES:
-            count = queryset.filter(stage=stage_choice[0]).count()
-            if count > 0:
-                by_stage[stage_choice[0]] = count
+        # Efficient count by stage using single query
+        by_stage = {
+            row['stage']: row['count']
+            for row in queryset.values('stage').annotate(count=Count('id'))
+            if row['count'] > 0
+        }
         
-        by_source_type = {}
-        for source_choice in Batch.SOURCE_TYPE_CHOICES:
-            count = queryset.filter(source_type=source_choice[0]).count()
-            if count > 0:
-                by_source_type[source_choice[0]] = count
+        # Efficient count by source type using single query
+        by_source_type = {
+            row['source_type']: row['count']
+            for row in queryset.values('source_type').annotate(count=Count('id'))
+            if row['count'] > 0
+        }
         
         return Response({
             'total_batches': totals['total_batches'] or 0,
