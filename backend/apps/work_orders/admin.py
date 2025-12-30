@@ -59,3 +59,7 @@ class WorkOrderLineAdmin(admin.ModelAdmin):
         return obj.target_display
     target_display.short_description = 'Target'
 
+
+
+
+

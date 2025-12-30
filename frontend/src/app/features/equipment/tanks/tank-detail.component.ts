@@ -12,7 +12,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { IconComponent } from '@shared/components/icon/icon.component';
 import { SkeletonComponent } from '@shared/components/skeleton/skeleton.component';
 import { ErrorStateComponent } from '@shared/components/error-state/error-state.component';
-import { EquipmentService, Tank, TANK_TYPE_LABELS, TANK_STATUS_LABELS, TANK_MATERIAL_LABELS } from '../equipment.service';
+import { EquipmentService, Tank, TANK_TYPE_LABELS, TANK_STATUS_LABELS } from '../equipment.service';
 import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
 
 @Component({
@@ -53,7 +53,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
             <div class="meta-row">
               <span>{{ TANK_TYPE_LABELS[tank()!.tank_type] }}</span>
               <span class="separator">•</span>
-              <span>{{ TANK_MATERIAL_LABELS[tank()!.material] }}</span>
+              <span>{{ tank()!.material_name || 'Unknown material' }}</span>
               <span class="separator">•</span>
               <span>{{ tank()!.location || 'No location' }}</span>
             </div>
@@ -784,7 +784,6 @@ export class TankDetailComponent implements OnInit {
   
   TANK_TYPE_LABELS = TANK_TYPE_LABELS;
   TANK_STATUS_LABELS = TANK_STATUS_LABELS;
-  TANK_MATERIAL_LABELS = TANK_MATERIAL_LABELS;
   
   private varietyColors = [
     '#7c4dff', '#10b981', '#f59e0b', '#ef4444', '#3b82f6',
@@ -867,4 +866,5 @@ export class TankDetailComponent implements OnInit {
     return this.varietyColors[index % this.varietyColors.length];
   }
 }
+
 

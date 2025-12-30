@@ -83,11 +83,16 @@ export class WineryService {
           this._loading.set(false);
           this._initialized.set(true);
           
-          // Auto-select first winery or restore from storage
+          // Restore from storage or auto-select first winery
           const storedWineryId = localStorage.getItem(this.ACTIVE_WINERY_KEY);
-          const membership = storedWineryId 
+          let membership = storedWineryId 
             ? memberships.find(m => m.winery.id === storedWineryId)
-            : memberships[0];
+            : null;
+          
+          // Fall back to first winery if stored one not found
+          if (!membership && memberships.length > 0) {
+            membership = memberships[0];
+          }
           
           if (membership) {
             this._currentWinery.set(membership);

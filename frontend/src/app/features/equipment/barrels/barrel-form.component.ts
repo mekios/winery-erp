@@ -10,7 +10,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { FormPageComponent } from '@shared/components/form-page/form-page.component';
 import { NumberInputComponent } from '@shared/components/number-input/number-input.component';
-import { EquipmentService, Barrel, WOOD_TYPE_LABELS } from '../equipment.service';
+import { EquipmentService, Barrel } from '../equipment.service';
+import { MasterDataService, WoodTypeDropdown } from '@features/master-data/master-data.service';
 
 const TOAST_LEVELS = [
   { value: 'LIGHT', label: 'Light', icon: '🌾' },
@@ -87,11 +88,12 @@ const STATUSES = [
               <label class="form-label">Wood Type</label>
               <mat-form-field appearance="outline">
                 <mat-select formControlName="wood_type">
-                  @for (w of woodTypes; track w.value) {
-                    <mat-option [value]="w.value">
+                  <mat-option [value]="null">-- None --</mat-option>
+                  @for (w of woodTypes(); track w.id) {
+                    <mat-option [value]="w.id">
                       <span class="wood-option">
                         <span class="wood-icon">🪵</span>
-                        {{ w.label }}
+                        {{ w.name }}
                       </span>
                     </mat-option>
                   }
@@ -283,13 +285,14 @@ export class BarrelFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private equipmentService = inject(EquipmentService);
+  private masterDataService = inject(MasterDataService);
   private snackBar = inject(MatSnackBar);
   
   form!: FormGroup;
   saving = signal(false);
   barrel = signal<Barrel | null>(null);
+  woodTypes = signal<WoodTypeDropdown[]>([]);
   
-  woodTypes = Object.entries(WOOD_TYPE_LABELS).map(([value, label]) => ({ value, label }));
   toastLevels = TOAST_LEVELS;
   statuses = STATUSES;
   
@@ -299,6 +302,7 @@ export class BarrelFormComponent implements OnInit {
   
   ngOnInit(): void {
     this.initForm();
+    this.loadWoodTypes();
     
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -306,11 +310,18 @@ export class BarrelFormComponent implements OnInit {
     }
   }
   
+  private loadWoodTypes(): void {
+    this.masterDataService.getWoodTypesDropdown().subscribe({
+      next: (woodTypes) => this.woodTypes.set(woodTypes),
+      error: () => console.error('Failed to load wood types')
+    });
+  }
+  
   private initForm(): void {
     this.form = this.fb.group({
       code: ['', Validators.required],
       volume_l: [225],
-      wood_type: ['FRENCH_OAK'],
+      wood_type: [null],
       toast_level: ['MEDIUM'],
       cooper: [''],
       vintage_year: [new Date().getFullYear()],

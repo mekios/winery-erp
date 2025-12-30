@@ -159,6 +159,12 @@ import { IconComponent } from '@shared/components/icon/icon.component';
               <app-icon name="building" [size]="20"></app-icon>
               <span>Wineries</span>
             </a>
+            
+            <a class="nav-item" routerLink="/settings/config-lists" routerLinkActive="active" matRipple
+               [matTooltip]="sidebarCollapsed() ? 'Config Lists' : ''" matTooltipPosition="right">
+              <app-icon name="settings" [size]="20"></app-icon>
+              <span>Config Lists</span>
+            </a>
           </nav>
           
           <!-- Collapse Toggle -->

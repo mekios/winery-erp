@@ -29,9 +29,18 @@ import { IconComponent } from '../icon/icon.component';
             }
           </div>
         </div>
-        
-        <div class="header-actions">
+      </header>
+      
+      <!-- Form Content - Full Width -->
+      <main class="page-content">
+        <ng-content></ng-content>
+      </main>
+      
+      <!-- Sticky Footer Actions -->
+      <footer class="form-footer">
+        <div class="footer-content">
           <button class="btn btn-secondary" type="button" (click)="onBack()" [disabled]="saving">
+            <mat-icon>close</mat-icon>
             Cancel
           </button>
           <button class="btn btn-primary" 
@@ -40,18 +49,14 @@ import { IconComponent } from '../icon/icon.component';
                   (click)="save.emit()">
             @if (saving) {
               <mat-spinner diameter="18"></mat-spinner>
+              <span>Saving...</span>
             } @else {
               <mat-icon>check</mat-icon>
               {{ saveLabel }}
             }
           </button>
         </div>
-      </header>
-      
-      <!-- Form Content - Full Width -->
-      <main class="page-content">
-        <ng-content></ng-content>
-      </main>
+      </footer>
     </div>
   `,
   styles: [`
@@ -142,8 +147,21 @@ import { IconComponent } from '../icon/icon.component';
       }
     }
     
-    .header-actions {
+    /* Sticky Footer */
+    .form-footer {
+      position: sticky;
+      bottom: 0;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      padding: 1rem 1.5rem;
+      flex-shrink: 0;
+      z-index: 10;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .footer-content {
       display: flex;
+      justify-content: flex-end;
       gap: 0.75rem;
     }
     
@@ -256,20 +274,22 @@ import { IconComponent } from '../icon/icon.component';
       
       .page-content {
         padding: 1rem;
+        padding-bottom: 1.5rem;
+      }
+      
+      .form-footer {
+        padding: 0.875rem 1rem;
       }
     }
     
     /* Responsive - Mobile */
     @media (max-width: 480px) {
       .page-header {
-        flex-wrap: wrap;
         padding: 0.75rem;
         gap: 0.5rem;
       }
       
       .header-left {
-        flex: 1;
-        min-width: 0;
         gap: 0.5rem;
       }
       
@@ -305,22 +325,23 @@ import { IconComponent } from '../icon/icon.component';
         }
       }
       
-      .header-actions {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+      .form-footer {
+        padding: 0.75rem;
+      }
+      
+      .footer-content {
         gap: 0.5rem;
-        margin-top: 0.25rem;
       }
       
       .btn {
-        height: 40px;
-        width: 100%;
+        height: 44px;
         border-radius: 8px;
+        padding: 0 1rem;
       }
       
       .page-content {
         padding: 0.75rem;
+        padding-bottom: 1rem;
       }
     }
   `]

@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { AuthService } from '@core/services/auth.service';
+import { WineryService } from '@core/services/winery.service';
 
 @Component({
   selector: 'app-login',
@@ -541,6 +542,7 @@ import { AuthService } from '@core/services/auth.service';
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private wineryService = inject(WineryService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   
@@ -563,6 +565,8 @@ export class LoginComponent {
     
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
+        // Load wineries after successful login
+        this.wineryService.loadUserWineries();
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
         this.router.navigateByUrl(returnUrl);
       },

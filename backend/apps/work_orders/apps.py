@@ -6,3 +6,7 @@ class WorkOrdersConfig(AppConfig):
     name = 'apps.work_orders'
     verbose_name = 'Work Orders'
 
+
+
+
+

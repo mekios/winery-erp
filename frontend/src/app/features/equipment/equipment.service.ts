@@ -6,7 +6,6 @@ import { ApiService, PaginatedResponse, QueryParams } from '@shared/services/api
 // Tank Types
 // ===============================
 export type TankType = 'FERMENTATION' | 'STORAGE' | 'BLENDING' | 'SETTLING' | 'TEMPERATURE_CONTROL';
-export type TankMaterial = 'STAINLESS' | 'CONCRETE' | 'FIBERGLASS' | 'OAK' | 'PLASTIC';
 export type TankStatus = 'EMPTY' | 'IN_USE' | 'CLEANING' | 'MAINTENANCE' | 'OUT_OF_SERVICE';
 
 export interface Tank {
@@ -14,7 +13,9 @@ export interface Tank {
   code: string;
   name: string;
   tank_type: TankType;
-  material: TankMaterial;
+  material: string | null;  // UUID FK to TankMaterial
+  material_name: string | null;
+  material_code: string | null;
   capacity_l: number;
   current_volume_l: number;
   fill_percentage: number;
@@ -33,7 +34,7 @@ export interface TankCreate {
   code: string;
   name?: string;
   tank_type?: TankType;
-  material?: TankMaterial;
+  material?: string;  // UUID FK to TankMaterial
   capacity_l: number;
   current_volume_l?: number;
   location?: string;
@@ -77,7 +78,6 @@ export interface TankSummary {
 // ===============================
 // Barrel Types
 // ===============================
-export type WoodType = 'FRENCH_OAK' | 'AMERICAN_OAK' | 'HUNGARIAN_OAK' | 'ACACIA' | 'CHESTNUT' | 'OTHER';
 export type ToastLevel = 'LIGHT' | 'MEDIUM' | 'MEDIUM_PLUS' | 'HEAVY';
 export type BarrelStatus = 'EMPTY' | 'IN_USE' | 'CONDITIONING' | 'RETIRED';
 
@@ -86,7 +86,9 @@ export interface Barrel {
   code: string;
   volume_l: number;
   current_volume_l: number;
-  wood_type: WoodType;
+  wood_type: string | null;  // UUID FK to WoodType
+  wood_type_name: string | null;
+  wood_type_code: string | null;
   toast_level: ToastLevel;
   cooper: string;
   vintage_year: number | null;
@@ -104,7 +106,7 @@ export interface Barrel {
 export interface BarrelCreate {
   code: string;
   volume_l?: number;
-  wood_type?: WoodType;
+  wood_type?: string;  // UUID FK to WoodType
   toast_level?: ToastLevel;
   cooper?: string;
   vintage_year?: number;
@@ -126,29 +128,12 @@ export const TANK_TYPE_LABELS: Record<TankType, string> = {
   TEMPERATURE_CONTROL: 'Temperature Control',
 };
 
-export const TANK_MATERIAL_LABELS: Record<TankMaterial, string> = {
-  STAINLESS: 'Stainless Steel',
-  CONCRETE: 'Concrete',
-  FIBERGLASS: 'Fiberglass',
-  OAK: 'Oak',
-  PLASTIC: 'Food-Grade Plastic',
-};
-
 export const TANK_STATUS_LABELS: Record<TankStatus, string> = {
   EMPTY: 'Empty',
   IN_USE: 'In Use',
   CLEANING: 'Cleaning',
   MAINTENANCE: 'Maintenance',
   OUT_OF_SERVICE: 'Out of Service',
-};
-
-export const WOOD_TYPE_LABELS: Record<WoodType, string> = {
-  FRENCH_OAK: 'French Oak',
-  AMERICAN_OAK: 'American Oak',
-  HUNGARIAN_OAK: 'Hungarian Oak',
-  ACACIA: 'Acacia',
-  CHESTNUT: 'Chestnut',
-  OTHER: 'Other',
 };
 
 @Injectable({ providedIn: 'root' })

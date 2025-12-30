@@ -81,6 +81,53 @@ class Grower(models.Model):
         return self.name
 
 
+class TankMaterial(models.Model):
+    """
+    Tank material types (e.g., Stainless Steel, Concrete, Oak).
+    Global list - shared across all wineries. Only superusers can modify.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=20, unique=True)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.IntegerField(default=0)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Tank Material'
+        verbose_name_plural = 'Tank Materials'
+        ordering = ['sort_order', 'name']
+    
+    def __str__(self):
+        return self.name
+
+
+class WoodType(models.Model):
+    """
+    Barrel wood types (e.g., French Oak, American Oak).
+    Global list - shared across all wineries. Only superusers can modify.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=20, unique=True)
+    origin_country = models.CharField(max_length=100, blank=True)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.IntegerField(default=0)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Wood Type'
+        verbose_name_plural = 'Wood Types'
+        ordering = ['sort_order', 'name']
+    
+    def __str__(self):
+        return self.name
+
+
 class VineyardBlock(models.Model):
     """
     Vineyard blocks - specific vineyard areas that supply grapes.
@@ -138,6 +185,7 @@ class VineyardBlock(models.Model):
     
     def __str__(self):
         return f"{self.grower.name} - {self.name}"
+
 
 
 

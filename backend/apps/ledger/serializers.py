@@ -66,3 +66,7 @@ class TankIntegritySerializer(serializers.Serializer):
     tank_current_volume_l = serializers.DecimalField(max_digits=10, decimal_places=2)
     volume_mismatch_l = serializers.DecimalField(max_digits=10, decimal_places=2)
 
+
+
+
+

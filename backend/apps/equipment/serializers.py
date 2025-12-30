@@ -9,11 +9,13 @@ class TankSerializer(serializers.ModelSerializer):
     """Full serializer for Tank model."""
     fill_percentage = serializers.ReadOnlyField()
     available_capacity_l = serializers.ReadOnlyField()
+    material_name = serializers.CharField(source='material.name', read_only=True, allow_null=True)
+    material_code = serializers.CharField(source='material.code', read_only=True, allow_null=True)
     
     class Meta:
         model = Tank
         fields = [
-            'id', 'code', 'name', 'tank_type', 'material',
+            'id', 'code', 'name', 'tank_type', 'material', 'material_name', 'material_code',
             'capacity_l', 'current_volume_l', 'fill_percentage', 'available_capacity_l',
             'location', 'status', 'has_cooling', 'has_heating',
             'is_active', 'notes',
@@ -25,11 +27,12 @@ class TankSerializer(serializers.ModelSerializer):
 class TankListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for tank lists and dropdowns."""
     fill_percentage = serializers.ReadOnlyField()
+    material_name = serializers.CharField(source='material.name', read_only=True, allow_null=True)
     
     class Meta:
         model = Tank
         fields = [
-            'id', 'code', 'name', 'tank_type', 'material',
+            'id', 'code', 'name', 'tank_type', 'material', 'material_name',
             'capacity_l', 'current_volume_l', 'fill_percentage',
             'status', 'is_active'
         ]
@@ -50,12 +53,14 @@ class TankDropdownSerializer(serializers.ModelSerializer):
 class BarrelSerializer(serializers.ModelSerializer):
     """Full serializer for Barrel model."""
     age_years = serializers.ReadOnlyField()
+    wood_type_name = serializers.CharField(source='wood_type.name', read_only=True, allow_null=True)
+    wood_type_code = serializers.CharField(source='wood_type.code', read_only=True, allow_null=True)
     
     class Meta:
         model = Barrel
         fields = [
             'id', 'code', 'volume_l', 'current_volume_l',
-            'wood_type', 'toast_level', 'cooper',
+            'wood_type', 'wood_type_name', 'wood_type_code', 'toast_level', 'cooper',
             'vintage_year', 'first_use_year', 'age_years', 'use_count',
             'location', 'status', 'is_active', 'notes',
             'created_at', 'updated_at'
@@ -66,11 +71,12 @@ class BarrelSerializer(serializers.ModelSerializer):
 class BarrelListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for barrel lists."""
     age_years = serializers.ReadOnlyField()
+    wood_type_name = serializers.CharField(source='wood_type.name', read_only=True, allow_null=True)
     
     class Meta:
         model = Barrel
         fields = [
-            'id', 'code', 'volume_l', 'wood_type', 'toast_level',
+            'id', 'code', 'volume_l', 'wood_type', 'wood_type_name', 'toast_level',
             'vintage_year', 'age_years', 'use_count', 'status', 'is_active'
         ]
 
@@ -78,13 +84,15 @@ class BarrelListSerializer(serializers.ModelSerializer):
 class BarrelDropdownSerializer(serializers.ModelSerializer):
     """Minimal serializer for dropdowns."""
     display_name = serializers.SerializerMethodField()
+    wood_type_name = serializers.CharField(source='wood_type.name', read_only=True, allow_null=True)
     
     class Meta:
         model = Barrel
-        fields = ['id', 'code', 'display_name', 'volume_l', 'wood_type', 'status']
+        fields = ['id', 'code', 'display_name', 'volume_l', 'wood_type', 'wood_type_name', 'status']
     
     def get_display_name(self, obj):
-        return f"{obj.code} ({obj.wood_type})"
+        wood_name = obj.wood_type.name if obj.wood_type else 'Unknown'
+        return f"{obj.code} ({wood_name})"
 
 
 class EquipmentSerializer(serializers.ModelSerializer):
@@ -112,6 +120,7 @@ class EquipmentListSerializer(serializers.ModelSerializer):
             'id', 'name', 'code', 'equipment_type',
             'manufacturer', 'model', 'status', 'is_active'
         ]
+
 
 
 

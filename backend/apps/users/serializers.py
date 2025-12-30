@@ -13,8 +13,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'full_name', 'is_active', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        fields = ['id', 'email', 'full_name', 'is_active', 'is_superuser', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'is_superuser', 'created_at', 'updated_at']
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -86,6 +86,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         if not user.check_password(value):
             raise serializers.ValidationError('Old password is incorrect.')
         return value
+
 
 
 

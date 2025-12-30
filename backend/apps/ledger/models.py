@@ -243,3 +243,7 @@ class TankLedger(models.Model):
             'has_integrity_issues': has_integrity_issues or unknown_volume > 0,
         }
 
+
+
+
+

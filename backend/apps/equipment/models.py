@@ -21,14 +21,6 @@ class Tank(models.Model):
         ('TEMPERATURE_CONTROL', 'Temperature Control'),
     ]
     
-    MATERIAL_CHOICES = [
-        ('STAINLESS', 'Stainless Steel'),
-        ('CONCRETE', 'Concrete'),
-        ('FIBERGLASS', 'Fiberglass'),
-        ('OAK', 'Oak'),
-        ('PLASTIC', 'Food-Grade Plastic'),
-    ]
-    
     STATUS_CHOICES = [
         ('EMPTY', 'Empty'),
         ('IN_USE', 'In Use'),
@@ -46,7 +38,13 @@ class Tank(models.Model):
     code = models.CharField(max_length=20, help_text='Unique tank identifier (e.g., A01, B12)')
     name = models.CharField(max_length=100, blank=True)
     tank_type = models.CharField(max_length=30, choices=TANK_TYPE_CHOICES, default='STORAGE')
-    material = models.CharField(max_length=20, choices=MATERIAL_CHOICES, default='STAINLESS')
+    material = models.ForeignKey(
+        'master_data.TankMaterial',
+        on_delete=models.PROTECT,
+        related_name='tanks',
+        null=True,
+        blank=True
+    )
     capacity_l = models.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -97,15 +95,6 @@ class Barrel(models.Model):
     Wine barrels for aging.
     Tracks wood type, age, and usage history.
     """
-    WOOD_TYPE_CHOICES = [
-        ('FRENCH_OAK', 'French Oak'),
-        ('AMERICAN_OAK', 'American Oak'),
-        ('HUNGARIAN_OAK', 'Hungarian Oak'),
-        ('ACACIA', 'Acacia'),
-        ('CHESTNUT', 'Chestnut'),
-        ('OTHER', 'Other'),
-    ]
-    
     TOAST_LEVEL_CHOICES = [
         ('LIGHT', 'Light'),
         ('MEDIUM', 'Medium'),
@@ -140,7 +129,13 @@ class Barrel(models.Model):
         default=0,
         validators=[MinValueValidator(0)]
     )
-    wood_type = models.CharField(max_length=20, choices=WOOD_TYPE_CHOICES, default='FRENCH_OAK')
+    wood_type = models.ForeignKey(
+        'master_data.WoodType',
+        on_delete=models.PROTECT,
+        related_name='barrels',
+        null=True,
+        blank=True
+    )
     toast_level = models.CharField(max_length=20, choices=TOAST_LEVEL_CHOICES, default='MEDIUM')
     cooper = models.CharField(max_length=100, blank=True, help_text='Barrel manufacturer')
     vintage_year = models.IntegerField(
@@ -237,6 +232,7 @@ class Equipment(models.Model):
     
     def __str__(self):
         return f"{self.name} ({self.code})" if self.code else self.name
+
 
 
 

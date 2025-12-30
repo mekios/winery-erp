@@ -2,7 +2,7 @@
 Serializers for Master Data models.
 """
 from rest_framework import serializers
-from .models import GrapeVariety, Grower, VineyardBlock
+from .models import GrapeVariety, Grower, VineyardBlock, TankMaterial, WoodType
 
 
 class GrapeVarietySerializer(serializers.ModelSerializer):
@@ -79,6 +79,47 @@ class VineyardBlockListSerializer(serializers.ModelSerializer):
     
     def get_display_name(self, obj):
         return f"{obj.grower.name} - {obj.name}"
+
+
+class TankMaterialSerializer(serializers.ModelSerializer):
+    """Serializer for TankMaterial model."""
+    
+    class Meta:
+        model = TankMaterial
+        fields = [
+            'id', 'name', 'code', 'is_active', 'sort_order',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class TankMaterialListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for dropdown lists."""
+    
+    class Meta:
+        model = TankMaterial
+        fields = ['id', 'name', 'code']
+
+
+class WoodTypeSerializer(serializers.ModelSerializer):
+    """Serializer for WoodType model."""
+    
+    class Meta:
+        model = WoodType
+        fields = [
+            'id', 'name', 'code', 'origin_country', 'is_active', 'sort_order',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class WoodTypeListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for dropdown lists."""
+    
+    class Meta:
+        model = WoodType
+        fields = ['id', 'name', 'code', 'origin_country']
+
 
 
 

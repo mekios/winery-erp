@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -7,7 +7,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Tank, TankCreate, TANK_TYPE_LABELS, TANK_MATERIAL_LABELS, TANK_STATUS_LABELS } from '../equipment.service';
+import { Tank, TankCreate, TANK_TYPE_LABELS, TANK_STATUS_LABELS } from '../equipment.service';
+import { MasterDataService, TankMaterialDropdown } from '@features/master-data/master-data.service';
 
 export interface TankDialogData {
   tank?: Tank;
@@ -62,8 +63,9 @@ export interface TankDialogData {
           <mat-form-field appearance="outline">
             <mat-label>Material</mat-label>
             <mat-select formControlName="material">
-              @for (material of materials; track material.value) {
-                <mat-option [value]="material.value">{{ material.label }}</mat-option>
+              <mat-option [value]="null">-- None --</mat-option>
+              @for (material of materials(); track material.id) {
+                <mat-option [value]="material.id">{{ material.name }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
@@ -149,11 +151,13 @@ export interface TankDialogData {
     }
   `]
 })
-export class TankDialogComponent {
+export class TankDialogComponent implements OnInit {
+  private masterDataService = inject(MasterDataService);
+  
   form: FormGroup;
+  materials = signal<TankMaterialDropdown[]>([]);
   
   tankTypes = Object.entries(TANK_TYPE_LABELS).map(([value, label]) => ({ value, label }));
-  materials = Object.entries(TANK_MATERIAL_LABELS).map(([value, label]) => ({ value, label }));
   statuses = Object.entries(TANK_STATUS_LABELS).map(([value, label]) => ({ value, label }));
   
   constructor(
@@ -165,7 +169,7 @@ export class TankDialogComponent {
       code: [data.tank?.code || '', Validators.required],
       name: [data.tank?.name || ''],
       tank_type: [data.tank?.tank_type || 'STORAGE'],
-      material: [data.tank?.material || 'STAINLESS'],
+      material: [data.tank?.material || null],
       capacity_l: [data.tank?.capacity_l || 0, [Validators.required, Validators.min(0)]],
       current_volume_l: [data.tank?.current_volume_l || 0, Validators.min(0)],
       location: [data.tank?.location || ''],
@@ -174,6 +178,12 @@ export class TankDialogComponent {
       has_heating: [data.tank?.has_heating || false],
       is_active: [data.tank?.is_active ?? true],
       notes: [data.tank?.notes || ''],
+    });
+  }
+  
+  ngOnInit(): void {
+    this.masterDataService.getTankMaterialsDropdown().subscribe({
+      next: (materials) => this.materials.set(materials)
     });
   }
   
@@ -188,6 +198,7 @@ export class TankDialogComponent {
     }
   }
 }
+
 
 
 

@@ -90,6 +90,48 @@ export interface VineyardBlockCreate {
 }
 
 // ===============================
+// Tank Material Types
+// ===============================
+export interface TankMaterial {
+  id: string;
+  name: string;
+  code: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TankMaterialCreate {
+  name: string;
+  code: string;
+  is_active?: boolean;
+  sort_order?: number;
+}
+
+// ===============================
+// Wood Type Types
+// ===============================
+export interface WoodType {
+  id: string;
+  name: string;
+  code: string;
+  origin_country: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WoodTypeCreate {
+  name: string;
+  code: string;
+  origin_country?: string;
+  is_active?: boolean;
+  sort_order?: number;
+}
+
+// ===============================
 // Dropdown Types
 // ===============================
 export interface GrapeVarietyDropdown {
@@ -111,6 +153,19 @@ export interface VineyardBlockDropdown {
   grower_name: string;
   display_name: string;
   region: string;
+}
+
+export interface TankMaterialDropdown {
+  id: string;
+  name: string;
+  code: string;
+}
+
+export interface WoodTypeDropdown {
+  id: string;
+  name: string;
+  code: string;
+  origin_country: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -200,7 +255,64 @@ export class MasterDataService {
   deleteVineyard(id: string): Observable<void> {
     return this.api.delete('master-data/vineyards', id);
   }
+  
+  // ===============================
+  // Tank Materials
+  // ===============================
+  
+  getTankMaterials(params?: QueryParams): Observable<PaginatedResponse<TankMaterial>> {
+    return this.api.getList<TankMaterial>('master-data/tank-materials', params);
+  }
+  
+  getTankMaterialsDropdown(): Observable<TankMaterialDropdown[]> {
+    return this.api.getDropdown<TankMaterialDropdown>('master-data/tank-materials');
+  }
+  
+  getTankMaterial(id: string): Observable<TankMaterial> {
+    return this.api.get<TankMaterial>('master-data/tank-materials', id);
+  }
+  
+  createTankMaterial(data: TankMaterialCreate): Observable<TankMaterial> {
+    return this.api.create<TankMaterial>('master-data/tank-materials', data);
+  }
+  
+  updateTankMaterial(id: string, data: Partial<TankMaterialCreate>): Observable<TankMaterial> {
+    return this.api.patch<TankMaterial>('master-data/tank-materials', id, data);
+  }
+  
+  deleteTankMaterial(id: string): Observable<void> {
+    return this.api.delete('master-data/tank-materials', id);
+  }
+  
+  // ===============================
+  // Wood Types
+  // ===============================
+  
+  getWoodTypes(params?: QueryParams): Observable<PaginatedResponse<WoodType>> {
+    return this.api.getList<WoodType>('master-data/wood-types', params);
+  }
+  
+  getWoodTypesDropdown(): Observable<WoodTypeDropdown[]> {
+    return this.api.getDropdown<WoodTypeDropdown>('master-data/wood-types');
+  }
+  
+  getWoodType(id: string): Observable<WoodType> {
+    return this.api.get<WoodType>('master-data/wood-types', id);
+  }
+  
+  createWoodType(data: WoodTypeCreate): Observable<WoodType> {
+    return this.api.create<WoodType>('master-data/wood-types', data);
+  }
+  
+  updateWoodType(id: string, data: Partial<WoodTypeCreate>): Observable<WoodType> {
+    return this.api.patch<WoodType>('master-data/wood-types', id, data);
+  }
+  
+  deleteWoodType(id: string): Observable<void> {
+    return this.api.delete('master-data/wood-types', id);
+  }
 }
+
 
 
 

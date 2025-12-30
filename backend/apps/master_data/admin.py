@@ -2,7 +2,7 @@
 Django Admin configuration for Master Data models.
 """
 from django.contrib import admin
-from .models import GrapeVariety, Grower, VineyardBlock
+from .models import GrapeVariety, Grower, VineyardBlock, TankMaterial, WoodType
 
 
 @admin.register(GrapeVariety)
@@ -31,6 +31,25 @@ class VineyardBlockAdmin(admin.ModelAdmin):
     ordering = ['winery', 'grower__name', 'name']
     readonly_fields = ['id', 'created_at', 'updated_at']
     autocomplete_fields = ['grower', 'primary_variety']
+
+
+@admin.register(TankMaterial)
+class TankMaterialAdmin(admin.ModelAdmin):
+    list_display = ['name', 'code', 'sort_order', 'is_active', 'created_at']
+    list_filter = ['is_active']
+    search_fields = ['name', 'code']
+    ordering = ['sort_order', 'name']
+    readonly_fields = ['id', 'created_at', 'updated_at']
+
+
+@admin.register(WoodType)
+class WoodTypeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'code', 'origin_country', 'sort_order', 'is_active', 'created_at']
+    list_filter = ['is_active', 'origin_country']
+    search_fields = ['name', 'code', 'origin_country']
+    ordering = ['sort_order', 'name']
+    readonly_fields = ['id', 'created_at', 'updated_at']
+
 
 
 

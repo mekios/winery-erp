@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -7,7 +7,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Barrel, BarrelCreate, WOOD_TYPE_LABELS } from '../equipment.service';
+import { Barrel, BarrelCreate } from '../equipment.service';
+import { MasterDataService, WoodTypeDropdown } from '@features/master-data/master-data.service';
 
 export interface BarrelDialogData {
   barrel?: Barrel;
@@ -53,8 +54,9 @@ const STATUSES = [
           <mat-form-field appearance="outline">
             <mat-label>Wood Type</mat-label>
             <mat-select formControlName="wood_type">
-              @for (w of woodTypes; track w.value) {
-                <mat-option [value]="w.value">{{ w.label }}</mat-option>
+              <mat-option [value]="null">-- None --</mat-option>
+              @for (w of woodTypes(); track w.id) {
+                <mat-option [value]="w.id">{{ w.name }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
@@ -111,9 +113,11 @@ const STATUSES = [
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
   `]
 })
-export class BarrelDialogComponent {
+export class BarrelDialogComponent implements OnInit {
+  private masterDataService = inject(MasterDataService);
+  
   form: FormGroup;
-  woodTypes = Object.entries(WOOD_TYPE_LABELS).map(([value, label]) => ({ value, label }));
+  woodTypes = signal<WoodTypeDropdown[]>([]);
   toastLevels = TOAST_LEVELS;
   statuses = STATUSES;
   
@@ -121,7 +125,7 @@ export class BarrelDialogComponent {
     this.form = this.fb.group({
       code: [data.barrel?.code || '', Validators.required],
       volume_l: [data.barrel?.volume_l || 225],
-      wood_type: [data.barrel?.wood_type || 'FRENCH_OAK'],
+      wood_type: [data.barrel?.wood_type || null],
       toast_level: [data.barrel?.toast_level || 'MEDIUM'],
       cooper: [data.barrel?.cooper || ''],
       vintage_year: [data.barrel?.vintage_year || new Date().getFullYear()],
@@ -132,9 +136,16 @@ export class BarrelDialogComponent {
     });
   }
   
+  ngOnInit(): void {
+    this.masterDataService.getWoodTypesDropdown().subscribe({
+      next: (types) => this.woodTypes.set(types)
+    });
+  }
+  
   onCancel(): void { this.dialogRef.close(); }
   onSave(): void { if (this.form.valid) this.dialogRef.close(this.form.value as BarrelCreate); }
 }
+
 
 
 

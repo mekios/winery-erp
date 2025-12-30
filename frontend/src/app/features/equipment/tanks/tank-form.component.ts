@@ -10,7 +10,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { FormPageComponent } from '@shared/components/form-page/form-page.component';
 import { NumberInputComponent } from '@shared/components/number-input/number-input.component';
-import { EquipmentService, Tank, TANK_TYPE_LABELS, TANK_MATERIAL_LABELS, TANK_STATUS_LABELS } from '../equipment.service';
+import { EquipmentService, Tank, TANK_TYPE_LABELS, TANK_STATUS_LABELS } from '../equipment.service';
+import { MasterDataService, TankMaterialDropdown } from '@features/master-data/master-data.service';
 
 @Component({
   selector: 'app-tank-form',
@@ -70,11 +71,12 @@ import { EquipmentService, Tank, TANK_TYPE_LABELS, TANK_MATERIAL_LABELS, TANK_ST
               </mat-form-field>
             </div>
             <div class="form-group">
-              <label class="form-label required">Material</label>
+              <label class="form-label">Material</label>
               <mat-form-field appearance="outline">
                 <mat-select formControlName="material">
-                  @for (material of materials; track material.value) {
-                    <mat-option [value]="material.value">{{ material.label }}</mat-option>
+                  <mat-option [value]="null">-- None --</mat-option>
+                  @for (material of materials(); track material.id) {
+                    <mat-option [value]="material.id">{{ material.name }}</mat-option>
                   }
                 </mat-select>
               </mat-form-field>
@@ -333,14 +335,15 @@ export class TankFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private equipmentService = inject(EquipmentService);
+  private masterDataService = inject(MasterDataService);
   private snackBar = inject(MatSnackBar);
   
   form!: FormGroup;
   saving = signal(false);
   tank = signal<Tank | null>(null);
+  materials = signal<TankMaterialDropdown[]>([]);
   
   tankTypes = Object.entries(TANK_TYPE_LABELS).map(([value, label]) => ({ value, label }));
-  materials = Object.entries(TANK_MATERIAL_LABELS).map(([value, label]) => ({ value, label }));
   statuses = Object.entries(TANK_STATUS_LABELS).map(([value, label]) => ({ value, label }));
   
   get isEdit(): boolean {
@@ -349,6 +352,7 @@ export class TankFormComponent implements OnInit {
   
   ngOnInit(): void {
     this.initForm();
+    this.loadMaterials();
     
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -356,12 +360,19 @@ export class TankFormComponent implements OnInit {
     }
   }
   
+  private loadMaterials(): void {
+    this.masterDataService.getTankMaterialsDropdown().subscribe({
+      next: (materials) => this.materials.set(materials),
+      error: () => console.error('Failed to load tank materials')
+    });
+  }
+  
   private initForm(): void {
     this.form = this.fb.group({
       code: ['', Validators.required],
       name: [''],
       tank_type: ['STORAGE'],
-      material: ['STAINLESS'],
+      material: [null],
       capacity_l: [null, [Validators.required, Validators.min(0)]],
       current_volume_l: [0, Validators.min(0)],
       location: [''],

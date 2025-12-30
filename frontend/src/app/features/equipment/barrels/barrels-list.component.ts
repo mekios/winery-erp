@@ -12,7 +12,8 @@ import { DataTableComponent, TableColumn, TableAction } from '@shared/components
 import { FilterChipComponent, FilterOption } from '@shared/components/filter-chip/filter-chip.component';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { IconComponent } from '@shared/components/icon/icon.component';
-import { EquipmentService, Barrel, WOOD_TYPE_LABELS } from '../equipment.service';
+import { EquipmentService, Barrel } from '../equipment.service';
+import { MasterDataService, WoodType } from '@features/master-data/master-data.service';
 
 @Component({
   selector: 'app-barrels-list',
@@ -96,6 +97,7 @@ import { EquipmentService, Barrel, WOOD_TYPE_LABELS } from '../equipment.service
 })
 export class BarrelsListComponent implements OnInit {
   private equipmentService = inject(EquipmentService);
+  private masterDataService = inject(MasterDataService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
@@ -111,7 +113,7 @@ export class BarrelsListComponent implements OnInit {
   selectedWood: string | null = null;
   selectedStatus: string | null = null;
   
-  woodOptions: FilterOption[] = Object.entries(WOOD_TYPE_LABELS).map(([value, label]) => ({ value, label }));
+  woodOptions: FilterOption[] = [];
   statusOptions: FilterOption[] = [
     { value: 'EMPTY', label: 'Empty' },
     { value: 'IN_USE', label: 'In Use' },
@@ -121,7 +123,7 @@ export class BarrelsListComponent implements OnInit {
   
   columns: TableColumn[] = [
     { key: 'code', label: 'Code', sortable: true, width: '90px' },
-    { key: 'wood_type', label: 'Wood', sortable: true, format: (v) => WOOD_TYPE_LABELS[v as keyof typeof WOOD_TYPE_LABELS] || String(v) },
+    { key: 'wood_type_name', label: 'Wood', sortable: false },
     { key: 'toast_level', label: 'Toast', sortable: true },
     { key: 'volume_l', label: 'Volume', type: 'number', width: '100px', align: 'right', format: (v) => `${Number(v)} L` },
     { key: 'vintage_year', label: 'Vintage', width: '90px', align: 'center' },
@@ -141,7 +143,18 @@ export class BarrelsListComponent implements OnInit {
     { icon: 'delete', label: 'Delete', action: 'delete', color: 'warn' },
   ];
   
-  ngOnInit(): void { this.loadData(); }
+  ngOnInit(): void {
+    this.loadWoodTypes();
+    this.loadData();
+  }
+  
+  private loadWoodTypes(): void {
+    this.masterDataService.getWoodTypesDropdown().subscribe({
+      next: (types) => {
+        this.woodOptions = types.map(t => ({ value: t.id, label: t.name }));
+      }
+    });
+  }
   
   loadData(): void {
     this.loading.set(true);
