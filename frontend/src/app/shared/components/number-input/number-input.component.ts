@@ -299,8 +299,15 @@ export class NumberInputComponent implements ControlValueAccessor {
   
   value = signal<number | null>(null);
   focused = signal(false);
+  rawInputValue = signal<string>('');
   
   displayValue = computed(() => {
+    // While focused, show the raw input value
+    if (this.focused()) {
+      return this.rawInputValue();
+    }
+    
+    // When not focused, show formatted value
     const v = this.value();
     if (v === null || v === undefined) return '';
     return this.formatNumber(v);
@@ -333,25 +340,54 @@ export class NumberInputComponent implements ControlValueAccessor {
   
   onFocus(): void {
     this.focused.set(true);
+    // Set raw value to current number value for editing
+    const v = this.value();
+    if (v !== null && v !== undefined) {
+      this.rawInputValue.set(v.toString());
+    } else {
+      this.rawInputValue.set('');
+    }
   }
   
   onBlur(): void {
     this.focused.set(false);
+    this.rawInputValue.set('');
+    
+    // Apply formatting and clamping on blur
+    const v = this.value();
+    if (v !== null && v !== undefined) {
+      const formatted = this.clamp(v);
+      if (formatted !== v) {
+        this.value.set(formatted);
+        this.onChange(formatted);
+      }
+    }
+    
     this.onTouched();
   }
   
   onInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const raw = input.value.replace(/[^\d.-]/g, '');
-    const num = parseFloat(raw);
+    const raw = input.value;
     
-    if (isNaN(num)) {
+    // Update raw input value for display
+    this.rawInputValue.set(raw);
+    
+    // Parse and update actual value
+    const cleanedRaw = raw.replace(/[^\d.-]/g, '');
+    const num = parseFloat(cleanedRaw);
+    
+    if (cleanedRaw === '' || cleanedRaw === '-') {
+      // Allow empty or just minus sign while typing
       this.value.set(null);
       this.onChange(null);
+    } else if (isNaN(num)) {
+      // Invalid number, keep previous value but show what user typed
+      // Don't update value
     } else {
-      const clamped = this.clamp(num);
-      this.value.set(clamped);
-      this.onChange(clamped);
+      // Valid number - don't clamp while typing, just set the value
+      this.value.set(num);
+      this.onChange(num);
     }
   }
   
@@ -382,6 +418,15 @@ export class NumberInputComponent implements ControlValueAccessor {
   }
   
   private formatNumber(num: number): string {
+    // Only apply minimum fraction digits if decimals > 0
+    // This prevents adding ".00" to integers
+    if (this.decimals === 0) {
+      return num.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      });
+    }
+    
     return num.toLocaleString('en-US', {
       minimumFractionDigits: this.decimals,
       maximumFractionDigits: this.decimals,
