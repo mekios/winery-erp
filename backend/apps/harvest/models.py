@@ -126,7 +126,7 @@ class Batch(models.Model):
         decimal_places=2,
         default=0,
         validators=[MinValueValidator(0)],
-        help_text='Estimated must volume in liters'
+        help_text='Must volume in liters'
     )
     stage = models.CharField(
         max_length=20,

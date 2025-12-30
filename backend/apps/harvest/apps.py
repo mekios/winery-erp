@@ -5,6 +5,9 @@ class HarvestConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'apps.harvest'
     verbose_name = 'Harvest & Batches'
+    
+    def ready(self):
+        import apps.harvest.signals  # noqa
 
 
 

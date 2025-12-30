@@ -131,12 +131,12 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
               <label class="form-label">Area</label>
               <app-number-input
                 formControlName="area_ha"
-                unit="ha"
+                unit="acres"
                 placeholder="0.00"
                 [min]="0"
                 [step]="0.1"
                 [decimals]="2"
-                [quickValues]="[0.5, 1, 2, 5, 10]">
+                [quickValues]="[1, 5, 10, 20, 50]">
               </app-number-input>
             </div>
             <div class="form-group">

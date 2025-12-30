@@ -154,7 +154,7 @@ class VineyardBlock(models.Model):
         null=True,
         blank=True,
         validators=[MinValueValidator(0)],
-        help_text='Area in hectares'
+        help_text='Area in acres'
     )
     elevation_m = models.IntegerField(
         null=True,

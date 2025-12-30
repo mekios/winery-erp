@@ -164,7 +164,7 @@ export class BatchesListComponent implements OnInit {
     { key: 'intake_date', label: 'Intake Date', type: 'date', sortable: true },
     { key: 'primary_variety_name', label: 'Primary Variety' },
     { key: 'grape_weight_kg', label: 'Weight', type: 'number', sortable: true, align: 'right', format: (v) => `${Number(v).toLocaleString()} kg` },
-    { key: 'must_volume_l', label: 'Must', type: 'number', align: 'right', format: (v) => `${Number(v).toLocaleString()} L` },
+    { key: 'must_volume_l', label: 'Must Volume', type: 'number', align: 'right', format: (v) => `${Number(v).toLocaleString()} L` },
     { key: 'tank_code', label: 'Tank', width: '70px', align: 'center' },
     { key: 'stage', label: 'Stage', type: 'badge', badgeMap: {
       'INTAKE': { label: 'Intake', class: 'badge-info' },
@@ -180,7 +180,7 @@ export class BatchesListComponent implements OnInit {
   ];
   
   actions: TableAction[] = [
-    { icon: 'visibility', label: 'View', action: 'view' },
+    { icon: 'edit', label: 'Edit', action: 'edit' },
     { icon: 'delete', label: 'Delete', action: 'delete', color: 'warn' },
   ];
   
@@ -278,7 +278,7 @@ export class BatchesListComponent implements OnInit {
     const batch = event.row as BatchList;
     
     switch (event.action) {
-      case 'view':
+      case 'edit':
         this.viewBatch(batch);
         break;
       case 'delete':

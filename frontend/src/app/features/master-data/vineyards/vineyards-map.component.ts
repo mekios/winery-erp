@@ -87,7 +87,7 @@ import { IconComponent } from '@shared/components/icon/icon.component';
               @if (selectedVineyard()!.area_ha) {
                 <div class="detail-row">
                   <span class="label">Area</span>
-                  <span class="value">{{ selectedVineyard()!.area_ha }} ha</span>
+                  <span class="value">{{ selectedVineyard()!.area_ha }} acres</span>
                 </div>
               }
               @if (selectedVineyard()!.primary_variety_name) {
