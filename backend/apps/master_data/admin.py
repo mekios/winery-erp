@@ -2,7 +2,15 @@
 Django Admin configuration for Master Data models.
 """
 from django.contrib import admin
-from .models import GrapeVariety, Grower, VineyardBlock, TankMaterial, WoodType
+from .models import GrapeVariety, Grower, VineyardBlock, VineyardVariety, TankMaterial, WoodType
+
+
+class VineyardVarietyInline(admin.TabularInline):
+    """Inline admin for varieties within a vineyard."""
+    model = VineyardVariety
+    extra = 1
+    autocomplete_fields = ['variety']
+    fields = ['variety', 'percentage', 'is_primary', 'notes']
 
 
 @admin.register(GrapeVariety)
@@ -25,12 +33,23 @@ class GrowerAdmin(admin.ModelAdmin):
 
 @admin.register(VineyardBlock)
 class VineyardBlockAdmin(admin.ModelAdmin):
-    list_display = ['name', 'code', 'grower', 'region', 'primary_variety', 'area_ha', 'winery', 'is_active']
-    list_filter = ['winery', 'grower', 'region', 'primary_variety', 'is_active']
+    list_display = ['name', 'code', 'grower', 'region', 'area_acres', 'winery', 'is_active']
+    list_filter = ['winery', 'grower', 'region', 'is_active']
     search_fields = ['name', 'code', 'region', 'grower__name']
     ordering = ['winery', 'grower__name', 'name']
     readonly_fields = ['id', 'created_at', 'updated_at']
-    autocomplete_fields = ['grower', 'primary_variety']
+    autocomplete_fields = ['grower']
+    inlines = [VineyardVarietyInline]
+
+
+@admin.register(VineyardVariety)
+class VineyardVarietyAdmin(admin.ModelAdmin):
+    list_display = ['vineyard', 'variety', 'percentage', 'is_primary', 'created_at']
+    list_filter = ['is_primary', 'variety']
+    search_fields = ['vineyard__name', 'variety__name']
+    ordering = ['vineyard__name', '-is_primary', 'variety__name']
+    readonly_fields = ['id', 'created_at', 'updated_at']
+    autocomplete_fields = ['vineyard', 'variety']
 
 
 @admin.register(TankMaterial)

@@ -5,7 +5,7 @@ These are the foundational reference data for tracking grape sources.
 """
 import uuid
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class GrapeVariety(models.Model):
@@ -131,7 +131,7 @@ class WoodType(models.Model):
 class VineyardBlock(models.Model):
     """
     Vineyard blocks - specific vineyard areas that supply grapes.
-    Linked to a grower and optionally to a primary grape variety.
+    Linked to a grower and can have multiple grape varieties.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     winery = models.ForeignKey(
@@ -148,7 +148,7 @@ class VineyardBlock(models.Model):
     code = models.CharField(max_length=20, blank=True, null=True)
     region = models.CharField(max_length=100, blank=True)
     subregion = models.CharField(max_length=100, blank=True)
-    area_ha = models.DecimalField(
+    area_acres = models.DecimalField(
         max_digits=8,
         decimal_places=2,
         null=True,
@@ -177,12 +177,12 @@ class VineyardBlock(models.Model):
         blank=True,
         help_text='GPS longitude coordinate'
     )
-    primary_variety = models.ForeignKey(
+    varieties = models.ManyToManyField(
         GrapeVariety,
-        on_delete=models.SET_NULL,
-        null=True,
+        through='VineyardVariety',
+        related_name='vineyard_blocks',
         blank=True,
-        related_name='primary_blocks'
+        help_text='Grape varieties grown in this vineyard'
     )
     soil_type = models.CharField(max_length=100, blank=True)
     year_planted = models.IntegerField(null=True, blank=True)
@@ -206,6 +206,51 @@ class VineyardBlock(models.Model):
     
     def __str__(self):
         return f"{self.grower.name} - {self.name}"
+
+
+class VineyardVariety(models.Model):
+    """
+    Through model for vineyard-variety relationship.
+    Allows tracking percentage and notes for each variety in a vineyard.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    vineyard = models.ForeignKey(
+        VineyardBlock,
+        on_delete=models.CASCADE,
+        related_name='variety_plantings'
+    )
+    variety = models.ForeignKey(
+        GrapeVariety,
+        on_delete=models.CASCADE,
+        related_name='vineyard_plantings'
+    )
+    percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text='Percentage of vineyard area (optional)'
+    )
+    is_primary = models.BooleanField(
+        default=False,
+        help_text='Mark as the primary variety for this vineyard'
+    )
+    notes = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Vineyard Variety'
+        verbose_name_plural = 'Vineyard Varieties'
+        ordering = ['-is_primary', 'variety__name']
+        unique_together = ['vineyard', 'variety']
+    
+    def __str__(self):
+        primary = " (Primary)" if self.is_primary else ""
+        return f"{self.vineyard.name} - {self.variety.name}{primary}"
+
 
 
 

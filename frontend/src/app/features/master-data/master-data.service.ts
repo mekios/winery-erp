@@ -54,6 +54,25 @@ export interface GrowerCreate {
 // ===============================
 // Vineyard Block Types
 // ===============================
+export interface VineyardVariety {
+  id: string;
+  variety: string;
+  variety_name: string;
+  variety_color: string;
+  percentage: number | null;
+  is_primary: boolean;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VineyardVarietyCreate {
+  variety: string;
+  percentage?: number | null;
+  is_primary?: boolean;
+  notes?: string;
+}
+
 export interface VineyardBlock {
   id: string;
   grower: string;
@@ -62,12 +81,11 @@ export interface VineyardBlock {
   code: string;
   region: string;
   subregion: string;
-  area_ha: number | null;
+  area_acres: number | null;
   elevation_m: number | null;
   latitude: number | null;
   longitude: number | null;
-  primary_variety: string | null;
-  primary_variety_name: string | null;
+  varieties_data: VineyardVariety[];
   soil_type: string;
   year_planted: number | null;
   is_active: boolean;
@@ -82,11 +100,11 @@ export interface VineyardBlockCreate {
   code?: string;
   region?: string;
   subregion?: string;
-  area_ha?: number;
+  area_acres?: number;
   elevation_m?: number;
   latitude?: number | null;
   longitude?: number | null;
-  primary_variety?: string;
+  varieties?: VineyardVarietyCreate[];
   soil_type?: string;
   year_planted?: number;
   is_active?: boolean;
@@ -159,8 +177,8 @@ export interface VineyardBlockDropdown {
   region: string;
   latitude: number | null;
   longitude: number | null;
-  area_ha: number | null;
-  primary_variety_name: string | null;
+  area_acres: number | null;
+  varieties_summary: string;
 }
 
 export interface TankMaterialDropdown {
