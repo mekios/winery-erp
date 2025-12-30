@@ -132,7 +132,7 @@ class VineyardBlockViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = VineyardBlockSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['grower', 'primary_variety', 'region', 'is_active']
+    filterset_fields = ['grower', 'region', 'is_active']
     search_fields = ['name', 'code', 'region', 'subregion', 'grower__name']
     ordering_fields = ['name', 'grower__name', 'region', 'created_at']
     ordering = ['grower__name', 'name']
@@ -142,8 +142,8 @@ class VineyardBlockViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
         winery = getattr(self.request, 'winery', None)
         if winery:
             return VineyardBlock.objects.filter(winery=winery).select_related(
-                'grower', 'primary_variety'
-            )
+                'grower'
+            ).prefetch_related('variety_plantings__variety')
         return VineyardBlock.objects.none()
     
     def get_serializer_class(self):
