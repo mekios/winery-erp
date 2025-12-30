@@ -1,17 +1,20 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { FormPageComponent } from '@shared/components/form-page/form-page.component';
 import { NumberInputComponent } from '@shared/components/number-input/number-input.component';
 import { MapPickerComponent } from '@shared/components/map-picker/map-picker.component';
-import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown } from '../master-data.service';
+import { IconComponent } from '@shared/components/icon/icon.component';
+import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown, VineyardVarietyCreate } from '../master-data.service';
 
 @Component({
   selector: 'app-vineyard-form',
@@ -23,10 +26,13 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
     MatInputModule,
     MatSelectModule,
     MatCheckboxModule,
+    MatButtonModule,
+    MatIconModule,
     MatSnackBarModule,
     FormPageComponent,
     NumberInputComponent,
     MapPickerComponent,
+    IconComponent,
   ],
   template: `
     <app-form-page
@@ -107,30 +113,87 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
           </div>
         </section>
         
+        <!-- Grape Varieties -->
+        <section class="form-section">
+          <div class="section-header">
+            <h3 class="section-title">GRAPE VARIETIES</h3>
+            <button type="button" mat-stroked-button color="primary" (click)="addVariety()" class="add-variety-btn">
+              <mat-icon>add</mat-icon>
+              Add Variety
+            </button>
+          </div>
+          
+          @if (varietiesArray.length === 0) {
+            <div class="empty-state">
+              <app-icon name="grape" [size]="48" class="empty-icon"></app-icon>
+              <p>No varieties added yet</p>
+              <button type="button" mat-flat-button color="primary" (click)="addVariety()">
+                Add First Variety
+              </button>
+            </div>
+          } @else {
+            <div formArrayName="varieties" class="varieties-list">
+              @for (varietyForm of varietiesArray.controls; track $index) {
+                <div [formGroupName]="$index" class="variety-item">
+                  <div class="variety-fields">
+                    <div class="variety-main">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Variety</mat-label>
+                        <mat-select formControlName="variety" placeholder="Select variety">
+                          @for (v of varieties(); track v.id) {
+                            <mat-option [value]="v.id">
+                              <span class="variety-option">
+                                <span class="color-dot" [class]="v.color.toLowerCase()"></span>
+                                {{ v.name }}
+                              </span>
+                            </mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline" class="percentage-field">
+                        <mat-label>% of Area</mat-label>
+                        <input matInput type="number" formControlName="percentage" placeholder="Optional" min="0" max="100" step="0.1">
+                        <span matSuffix>%</span>
+                      </mat-form-field>
+                      
+                      <mat-checkbox formControlName="is_primary" class="primary-checkbox">
+                        Primary
+                      </mat-checkbox>
+                    </div>
+                    
+                    @if (varietyForm.get('notes')?.value || showVarietyNotes[$index]) {
+                      <mat-form-field appearance="outline" class="variety-notes">
+                        <mat-label>Notes</mat-label>
+                        <input matInput formControlName="notes" placeholder="Clone, rootstock, etc.">
+                      </mat-form-field>
+                    }
+                  </div>
+                  
+                  <div class="variety-actions">
+                    @if (!varietyForm.get('notes')?.value && !showVarietyNotes[$index]) {
+                      <button type="button" mat-icon-button (click)="toggleVarietyNotes($index)" matTooltip="Add notes">
+                        <mat-icon>note_add</mat-icon>
+                      </button>
+                    }
+                    <button type="button" mat-icon-button color="warn" (click)="removeVariety($index)" matTooltip="Remove variety">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </section>
+        
         <!-- Viticulture Details -->
         <section class="form-section">
           <h3 class="section-title">VITICULTURE DETAILS</h3>
-          <div class="form-group">
-            <label class="form-label">Primary Variety</label>
-            <mat-form-field appearance="outline">
-              <mat-select formControlName="primary_variety" placeholder="Select variety">
-                <mat-option [value]="null">— None —</mat-option>
-                @for (v of varieties(); track v.id) {
-                  <mat-option [value]="v.id">
-                    <span class="variety-option">
-                      <span class="color-dot" [class]="v.color.toLowerCase()"></span>
-                      {{ v.name }}
-                    </span>
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Area</label>
               <app-number-input
-                formControlName="area_ha"
+                formControlName="area_acres"
                 unit="acres"
                 placeholder="0.00"
                 [min]="0"
@@ -199,6 +262,12 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
       border: 1px solid var(--border-color);
       padding: 1.5rem;
     }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
     .section-title {
       font-size: 0.75rem;
       font-weight: 700;
@@ -206,6 +275,14 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
       color: var(--text-secondary);
       margin: 0 0 1rem 0;
       text-transform: uppercase;
+    }
+    .section-header .section-title {
+      margin-bottom: 0;
+    }
+    .add-variety-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
     }
     .form-row {
       display: grid;
@@ -223,6 +300,55 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
       &.required::after { content: ' *'; color: var(--danger); }
     }
     mat-form-field { width: 100%; }
+    
+    /* Varieties List */
+    .varieties-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .variety-item {
+      display: flex;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: var(--gray-50);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      &:hover {
+        border-color: var(--primary);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      }
+    }
+    .variety-fields {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .variety-main {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      mat-form-field:first-child { flex: 2; }
+    }
+    .percentage-field {
+      flex: 1;
+      min-width: 120px;
+    }
+    .primary-checkbox {
+      flex-shrink: 0;
+      align-self: center;
+      margin-top: 0.5rem;
+    }
+    .variety-notes {
+      width: 100%;
+    }
+    .variety-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
     .variety-option { display: flex; align-items: center; gap: 0.5rem; }
     .color-dot {
       width: 10px; height: 10px; border-radius: 50%;
@@ -230,6 +356,26 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
       &.white { background: linear-gradient(135deg, #fef3c7, #fcd34d); border: 1px solid #d4a500; }
       &.rose { background: linear-gradient(135deg, #fda4af, #fb7185); }
     }
+    
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+      text-align: center;
+      color: var(--text-secondary);
+      .empty-icon {
+        opacity: 0.3;
+        margin-bottom: 1rem;
+      }
+      p {
+        margin: 0 0 1rem 0;
+        font-size: 0.875rem;
+      }
+    }
+    
     .toggle-card {
       background: var(--gray-50);
       border: 1px solid var(--border-color);
@@ -255,9 +401,14 @@ export class VineyardFormComponent implements OnInit {
   vineyard = signal<VineyardBlock | null>(null);
   growers = signal<GrowerDropdown[]>([]);
   varieties = signal<GrapeVarietyDropdown[]>([]);
+  showVarietyNotes: boolean[] = [];
   
   get isEdit(): boolean {
     return !!this.vineyard();
+  }
+  
+  get varietiesArray(): FormArray {
+    return this.form.get('varieties') as FormArray;
   }
   
   ngOnInit(): void {
@@ -277,8 +428,8 @@ export class VineyardFormComponent implements OnInit {
       code: [''],
       region: [''],
       subregion: [''],
-      primary_variety: [null],
-      area_ha: [null],
+      varieties: this.fb.array([]),
+      area_acres: [null],
       elevation_m: [null],
       latitude: [null],
       longitude: [null],
@@ -287,6 +438,29 @@ export class VineyardFormComponent implements OnInit {
       notes: [''],
       is_active: [true],
     });
+  }
+  
+  private createVarietyFormGroup(variety?: any): FormGroup {
+    return this.fb.group({
+      variety: [variety?.variety || '', Validators.required],
+      percentage: [variety?.percentage || null],
+      is_primary: [variety?.is_primary || false],
+      notes: [variety?.notes || '']
+    });
+  }
+  
+  addVariety(): void {
+    this.varietiesArray.push(this.createVarietyFormGroup());
+    this.showVarietyNotes.push(false);
+  }
+  
+  removeVariety(index: number): void {
+    this.varietiesArray.removeAt(index);
+    this.showVarietyNotes.splice(index, 1);
+  }
+  
+  toggleVarietyNotes(index: number): void {
+    this.showVarietyNotes[index] = !this.showVarietyNotes[index];
   }
   
   onLocationChange(location: { latitude: number; longitude: number } | null): void {
@@ -317,7 +491,33 @@ export class VineyardFormComponent implements OnInit {
     this.masterDataService.getVineyard(id).subscribe({
       next: (vineyard) => {
         this.vineyard.set(vineyard);
-        this.form.patchValue(vineyard);
+        
+        // Populate varieties
+        this.varietiesArray.clear();
+        this.showVarietyNotes = [];
+        if (vineyard.varieties_data && vineyard.varieties_data.length > 0) {
+          vineyard.varieties_data.forEach(v => {
+            this.varietiesArray.push(this.createVarietyFormGroup(v));
+            this.showVarietyNotes.push(!!v.notes);
+          });
+        }
+        
+        // Patch other form values
+        this.form.patchValue({
+          grower: vineyard.grower,
+          name: vineyard.name,
+          code: vineyard.code,
+          region: vineyard.region,
+          subregion: vineyard.subregion,
+          area_acres: vineyard.area_acres,
+          elevation_m: vineyard.elevation_m,
+          latitude: vineyard.latitude,
+          longitude: vineyard.longitude,
+          soil_type: vineyard.soil_type,
+          year_planted: vineyard.year_planted,
+          notes: vineyard.notes,
+          is_active: vineyard.is_active
+        });
       },
       error: () => {
         this.snackBar.open('Failed to load vineyard', 'Close', { duration: 3000 });
@@ -352,4 +552,3 @@ export class VineyardFormComponent implements OnInit {
     });
   }
 }
-

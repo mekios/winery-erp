@@ -84,16 +84,16 @@ import { IconComponent } from '@shared/components/icon/icon.component';
                   <span class="value">{{ selectedVineyard()!.region }}</span>
                 </div>
               }
-              @if (selectedVineyard()!.area_ha) {
+              @if (selectedVineyard()!.area_acres) {
                 <div class="detail-row">
                   <span class="label">Area</span>
-                  <span class="value">{{ selectedVineyard()!.area_ha }} acres</span>
+                  <span class="value">{{ selectedVineyard()!.area_acres }} acres</span>
                 </div>
               }
-              @if (selectedVineyard()!.primary_variety_name) {
+              @if (selectedVineyard()!.varieties_summary) {
                 <div class="detail-row">
-                  <span class="label">Variety</span>
-                  <span class="value">{{ selectedVineyard()!.primary_variety_name }}</span>
+                  <span class="label">Varieties</span>
+                  <span class="value">{{ selectedVineyard()!.varieties_summary }}</span>
                 </div>
               }
             </div>

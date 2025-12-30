@@ -134,8 +134,8 @@ export class VineyardsListComponent implements OnInit {
     { key: 'name', label: 'Block Name', sortable: true },
     { key: 'code', label: 'Code', width: '80px' },
     { key: 'region', label: 'Region', sortable: true },
-    { key: 'primary_variety_name', label: 'Primary Variety' },
-    { key: 'area_ha', label: 'Area (acres)', type: 'number', width: '100px', align: 'right' },
+    { key: 'varieties_summary', label: 'Varieties' },
+    { key: 'area_acres', label: 'Area (acres)', type: 'number', width: '100px', align: 'right' },
     { key: 'is_active', label: 'Active', type: 'boolean', width: '80px', align: 'center' },
     { key: 'actions', label: '', type: 'actions', width: '90px', sortable: false },
   ];

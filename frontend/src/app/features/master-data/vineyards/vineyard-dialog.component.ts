@@ -59,8 +59,8 @@ export interface VineyardDialogData {
           </mat-form-field>
         </div>
         <mat-form-field appearance="outline">
-          <mat-label>Primary Variety</mat-label>
-          <mat-select formControlName="primary_variety">
+          <mat-label>Primary Variety (optional - for quick add)</mat-label>
+          <mat-select formControlName="variety">
             <mat-option [value]="null">-- None --</mat-option>
             @for (v of data.varieties; track v.id) {
               <mat-option [value]="v.id">{{ v.name }} ({{ v.color }})</mat-option>
@@ -69,8 +69,8 @@ export interface VineyardDialogData {
         </mat-form-field>
         <div class="form-row">
           <mat-form-field appearance="outline">
-            <mat-label>Area (hectares)</mat-label>
-            <input matInput type="number" formControlName="area_ha" min="0" step="0.01">
+            <mat-label>Area (acres)</mat-label>
+            <input matInput type="number" formControlName="area_acres" min="0" step="0.1">
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Elevation (m)</mat-label>
@@ -111,14 +111,19 @@ export class VineyardDialogComponent {
   form: FormGroup;
   
   constructor(private fb: FormBuilder, public dialogRef: MatDialogRef<VineyardDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: VineyardDialogData) {
+    //  Extract first variety if editing a vineyard with varieties
+    const primaryVariety = data.vineyard?.varieties_data && data.vineyard.varieties_data.length > 0
+      ? data.vineyard.varieties_data.find(v => v.is_primary)?.variety || data.vineyard.varieties_data[0].variety
+      : null;
+    
     this.form = this.fb.group({
       grower: [data.vineyard?.grower || '', Validators.required],
       name: [data.vineyard?.name || '', Validators.required],
       code: [data.vineyard?.code || ''],
       region: [data.vineyard?.region || ''],
       subregion: [data.vineyard?.subregion || ''],
-      primary_variety: [data.vineyard?.primary_variety || null],
-      area_ha: [data.vineyard?.area_ha || null],
+      variety: [primaryVariety],
+      area_acres: [data.vineyard?.area_acres || null],
       elevation_m: [data.vineyard?.elevation_m || null],
       soil_type: [data.vineyard?.soil_type || ''],
       year_planted: [data.vineyard?.year_planted || null],
@@ -128,7 +133,19 @@ export class VineyardDialogComponent {
   }
   
   onCancel(): void { this.dialogRef.close(); }
-  onSave(): void { if (this.form.valid) this.dialogRef.close(this.form.value as VineyardBlockCreate); }
+  
+  onSave(): void {
+    if (this.form.invalid) return;
+    
+    const formValue = this.form.value;
+    const data: VineyardBlockCreate = {
+      ...formValue,
+      varieties: formValue.variety ? [{ variety: formValue.variety, is_primary: true }] : []
+    };
+    delete (data as any).variety; // Remove the temporary 'variety' field
+    
+    this.dialogRef.close(data);
+  }
 }
 
 
