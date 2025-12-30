@@ -64,6 +64,8 @@ export interface VineyardBlock {
   subregion: string;
   area_ha: number | null;
   elevation_m: number | null;
+  latitude: number | null;
+  longitude: number | null;
   primary_variety: string | null;
   primary_variety_name: string | null;
   soil_type: string;
@@ -82,6 +84,8 @@ export interface VineyardBlockCreate {
   subregion?: string;
   area_ha?: number;
   elevation_m?: number;
+  latitude?: number | null;
+  longitude?: number | null;
   primary_variety?: string;
   soil_type?: string;
   year_planted?: number;
@@ -153,6 +157,10 @@ export interface VineyardBlockDropdown {
   grower_name: string;
   display_name: string;
   region: string;
+  latitude: number | null;
+  longitude: number | null;
+  area_ha: number | null;
+  primary_variety_name: string | null;
 }
 
 export interface TankMaterialDropdown {

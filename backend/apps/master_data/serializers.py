@@ -61,6 +61,7 @@ class VineyardBlockSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'grower', 'grower_name', 'name', 'code',
             'region', 'subregion', 'area_ha', 'elevation_m',
+            'latitude', 'longitude',
             'primary_variety', 'primary_variety_name',
             'soil_type', 'year_planted', 'is_active', 'notes',
             'created_at', 'updated_at'
@@ -72,10 +73,18 @@ class VineyardBlockListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for dropdown lists."""
     grower_name = serializers.CharField(source='grower.name', read_only=True)
     display_name = serializers.SerializerMethodField()
+    primary_variety_name = serializers.CharField(
+        source='primary_variety.name',
+        read_only=True,
+        allow_null=True
+    )
     
     class Meta:
         model = VineyardBlock
-        fields = ['id', 'name', 'code', 'grower_name', 'display_name', 'region']
+        fields = [
+            'id', 'name', 'code', 'grower_name', 'display_name', 'region',
+            'latitude', 'longitude', 'area_ha', 'primary_variety_name'
+        ]
     
     def get_display_name(self, obj):
         return f"{obj.grower.name} - {obj.name}"

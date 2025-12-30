@@ -10,6 +10,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { FormPageComponent } from '@shared/components/form-page/form-page.component';
 import { NumberInputComponent } from '@shared/components/number-input/number-input.component';
+import { MapPickerComponent } from '@shared/components/map-picker/map-picker.component';
 import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown } from '../master-data.service';
 
 @Component({
@@ -25,6 +26,7 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
     MatSnackBarModule,
     FormPageComponent,
     NumberInputComponent,
+    MapPickerComponent,
   ],
   template: `
     <app-form-page
@@ -89,6 +91,19 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
                 <input matInput formControlName="subregion" placeholder="e.g., Ancient Nemea">
               </mat-form-field>
             </div>
+          </div>
+        </section>
+        
+        <!-- Location -->
+        <section class="form-section">
+          <h3 class="section-title">LOCATION</h3>
+          <div class="form-group">
+            <label class="form-label">Vineyard Location</label>
+            <app-map-picker
+              [latitude]="form.get('latitude')?.value"
+              [longitude]="form.get('longitude')?.value"
+              (locationChange)="onLocationChange($event)">
+            </app-map-picker>
           </div>
         </section>
         
@@ -265,11 +280,32 @@ export class VineyardFormComponent implements OnInit {
       primary_variety: [null],
       area_ha: [null],
       elevation_m: [null],
+      latitude: [null],
+      longitude: [null],
       soil_type: [''],
       year_planted: [null],
       notes: [''],
       is_active: [true],
     });
+  }
+  
+  onLocationChange(location: { latitude: number; longitude: number } | null): void {
+    if (location) {
+      // Round to 8 decimal places to ensure it fits in the database
+      const lat = Math.round(location.latitude * 100000000) / 100000000;
+      const lng = Math.round(location.longitude * 100000000) / 100000000;
+      
+      this.form.patchValue({
+        latitude: lat,
+        longitude: lng
+      });
+    } else {
+      this.form.patchValue({
+        latitude: null,
+        longitude: null
+      });
+    }
+    this.form.markAsDirty();
   }
   
   private loadDropdowns(): void {

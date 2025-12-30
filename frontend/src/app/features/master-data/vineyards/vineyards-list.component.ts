@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
@@ -17,7 +17,7 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
 @Component({
   selector: 'app-vineyards-list',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatSnackBarModule, DataTableComponent, FilterChipComponent, IconComponent],
+  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatSnackBarModule, DataTableComponent, FilterChipComponent, IconComponent],
   template: `
     <div class="list-page">
       <header class="list-header">
@@ -30,10 +30,16 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
             <span class="subtitle">Parcels & their attributes</span>
           </div>
         </div>
-        <button mat-raised-button color="primary" (click)="navigateToCreate()">
-          <mat-icon>add</mat-icon>
-          Add Vineyard
-        </button>
+        <div class="header-actions">
+          <a mat-stroked-button routerLink="/master-data/vineyards/map" class="map-btn">
+            <app-icon name="map" [size]="18"></app-icon>
+            View Map
+          </a>
+          <button mat-raised-button color="primary" (click)="navigateToCreate()">
+            <mat-icon>add</mat-icon>
+            Add Vineyard
+          </button>
+        </div>
       </header>
       
       <ng-template #filtersTemplate>
@@ -83,12 +89,16 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
   styles: [`
     :host { display: block; height: 100%; }
     .list-page { display: flex; flex-direction: column; height: 100%; padding: 16px 20px; }
-    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 16px; flex-shrink: 0; }
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 16px; flex-shrink: 0; flex-wrap: wrap; }
     .header-title { display: flex; align-items: center; gap: 14px; }
     .title-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #7c4dff, #b47cff); display: flex; align-items: center; justify-content: center; color: #fff; }
     h1 { margin: 0; font-size: 22px; font-weight: 700; }
     .subtitle { color: #6b7280; font-size: 13px; }
     app-data-table { flex: 1; min-height: 0; }
+    
+    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+    .map-btn { display: flex; align-items: center; gap: 0.5rem; }
+    .map-btn app-icon { margin-right: 0.25rem; }
     
     .mobile-fab { display: none; }
     @media screen and (max-width: 768px) { .mobile-fab { display: flex !important; } }

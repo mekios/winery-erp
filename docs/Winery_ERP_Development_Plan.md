@@ -15,7 +15,18 @@
 | **Phase 3** | ⏳ Pending | - |
 | **Phase 4** | ⏳ Pending | - |
 
-### Recent Completed Work (Dec 23, 2024)
+### Recent Completed Work (Dec 30, 2024)
+- ✅ **Vineyard Location Mapping** — COMPLETE
+  - Added latitude/longitude fields to VineyardBlock model (8 decimal precision)
+  - Google Maps integration using @angular/google-maps
+  - MapPickerComponent for setting vineyard locations (click to place marker)
+  - VineyardsMapComponent for viewing all vineyards on a map
+  - Custom purple grape markers matching design system
+  - Coordinate validation and rounding (1.1mm precision)
+  - Map view route and sidebar navigation
+  - Documentation: `docs/GOOGLE_MAPS_SETUP.md`
+
+### Previously Completed (Dec 23, 2024)
 - ✅ **Sprint 2.3: Work Orders** — COMPLETE
   - WorkOrder model with status flow (PLANNED → IN_PROGRESS → COMPLETED → VERIFIED)
   - WorkOrderLine model for individual tasks
@@ -39,8 +50,6 @@
   - Winery selector persistence across sessions
   - Default winery selection on login
   - Full-width config lists page matching other pages
-
-### Previously Completed (Dec 18, 2024)
 - ✅ **Vultr Deployment**
   - Production Docker Compose with Nginx, Gunicorn, PostgreSQL, Redis
   - SSL/HTTPS via Let's Encrypt (certbot)
@@ -706,5 +715,5 @@ winery_erp/
 
 ---
 
-*Last updated: December 23, 2024*
+*Last updated: December 30, 2024*
 

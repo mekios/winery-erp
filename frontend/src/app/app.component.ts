@@ -99,10 +99,16 @@ import { IconComponent } from '@shared/components/icon/icon.component';
               <app-icon name="farmer" [size]="20"></app-icon>
               <span>Growers</span>
             </a>
-            <a class="nav-item" routerLink="/master-data/vineyards" routerLinkActive="active" matRipple
+            <a class="nav-item" routerLink="/master-data/vineyards" routerLinkActive="active" 
+               [routerLinkActiveOptions]="{exact: true}" matRipple
                [matTooltip]="sidebarCollapsed() ? 'Vineyards' : ''" matTooltipPosition="right">
               <app-icon name="vineyard" [size]="20"></app-icon>
               <span>Vineyards</span>
+            </a>
+            <a class="nav-item" routerLink="/master-data/vineyards/map" routerLinkActive="active" matRipple
+               [matTooltip]="sidebarCollapsed() ? 'Vineyard Map' : ''" matTooltipPosition="right">
+              <app-icon name="map" [size]="20"></app-icon>
+              <span>Vineyard Map</span>
             </a>
             
             <div class="nav-section">Harvest</div>

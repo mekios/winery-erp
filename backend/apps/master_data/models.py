@@ -162,6 +162,21 @@ class VineyardBlock(models.Model):
         validators=[MinValueValidator(0)],
         help_text='Elevation in meters'
     )
+    # GPS Coordinates for map location
+    latitude = models.DecimalField(
+        max_digits=11,
+        decimal_places=8,
+        null=True,
+        blank=True,
+        help_text='GPS latitude coordinate'
+    )
+    longitude = models.DecimalField(
+        max_digits=11,
+        decimal_places=8,
+        null=True,
+        blank=True,
+        help_text='GPS longitude coordinate'
+    )
     primary_variety = models.ForeignKey(
         GrapeVariety,
         on_delete=models.SET_NULL,

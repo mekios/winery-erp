@@ -60,6 +60,13 @@ export const MASTER_DATA_ROUTES: Routes = [
     title: 'Vineyard Blocks'
   },
   {
+    path: 'vineyards/map',
+    canActivate: [authGuard],
+    loadComponent: () => import('./vineyards/vineyards-map.component')
+      .then(m => m.VineyardsMapComponent),
+    title: 'Vineyard Map'
+  },
+  {
     path: 'vineyards/new',
     canActivate: [authGuard],
     loadComponent: () => import('./vineyards/vineyard-form.component')
