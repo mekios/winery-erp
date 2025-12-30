@@ -67,6 +67,12 @@ class VineyardBlockSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+    
+    def validate_code(self, value):
+        """Convert empty string to None for code field."""
+        if value == '':
+            return None
+        return value
 
 
 class VineyardBlockListSerializer(serializers.ModelSerializer):

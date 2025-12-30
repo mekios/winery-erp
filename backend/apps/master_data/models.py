@@ -145,7 +145,7 @@ class VineyardBlock(models.Model):
         related_name='vineyard_blocks'
     )
     name = models.CharField(max_length=100)
-    code = models.CharField(max_length=20, blank=True)
+    code = models.CharField(max_length=20, blank=True, null=True)
     region = models.CharField(max_length=100, blank=True)
     subregion = models.CharField(max_length=100, blank=True)
     area_ha = models.DecimalField(
@@ -196,7 +196,13 @@ class VineyardBlock(models.Model):
         verbose_name = 'Vineyard Block'
         verbose_name_plural = 'Vineyard Blocks'
         ordering = ['grower__name', 'name']
-        unique_together = ['winery', 'code']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['winery', 'code'],
+                condition=models.Q(code__isnull=False),
+                name='unique_winery_code_when_not_null'
+            )
+        ]
     
     def __str__(self):
         return f"{self.grower.name} - {self.name}"
