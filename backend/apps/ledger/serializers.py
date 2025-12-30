@@ -6,15 +6,24 @@ from .models import TankLedger
 class TankLedgerEntrySerializer(serializers.ModelSerializer):
     """Serializer for individual ledger entries."""
     tank_code = serializers.CharField(source='tank.code', read_only=True)
+    event_type = serializers.SerializerMethodField()
     
     class Meta:
         model = TankLedger
         fields = [
-            'id', 'event_datetime', 'tank', 'tank_code',
+            'id', 'event_datetime', 'tank', 'tank_code', 'event_type',
             'delta_volume_l', 'composition_key_type',
             'composition_key_id', 'composition_key_label',
             'derived_source', 'created_at'
         ]
+    
+    def get_event_type(self, obj):
+        """Return the type of event that created this entry."""
+        if obj.batch:
+            return 'batch_intake'
+        elif obj.transfer:
+            return 'transfer'
+        return 'unknown'
 
 
 class CompositionBatchSerializer(serializers.Serializer):

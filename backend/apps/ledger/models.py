@@ -43,15 +43,25 @@ class TankLedger(models.Model):
         related_name='tank_ledger_entries'
     )
     
-    # Link to the source transfer event
+    # Link to the source event (either transfer or batch intake)
     transfer = models.ForeignKey(
         'production.Transfer',
         on_delete=models.CASCADE,
         related_name='ledger_entries',
+        null=True,
+        blank=True,
         help_text='The transfer event that created this entry'
     )
+    batch = models.ForeignKey(
+        'harvest.Batch',
+        on_delete=models.CASCADE,
+        related_name='ledger_entries',
+        null=True,
+        blank=True,
+        help_text='The batch intake event that created this entry'
+    )
     event_datetime = models.DateTimeField(
-        help_text='Timestamp of the original transfer'
+        help_text='Timestamp of the original transfer or batch intake'
     )
     
     # Tank being affected
