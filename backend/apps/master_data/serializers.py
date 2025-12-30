@@ -70,6 +70,7 @@ class VineyardBlockSerializer(serializers.ModelSerializer):
         many=True,
         read_only=True
     )
+    varieties_summary = serializers.SerializerMethodField()
     # For create/update, accept a list of variety objects
     varieties = serializers.ListField(
         child=serializers.DictField(),
@@ -83,11 +84,16 @@ class VineyardBlockSerializer(serializers.ModelSerializer):
             'id', 'grower', 'grower_name', 'name', 'code',
             'region', 'subregion', 'area_acres', 'elevation_m',
             'latitude', 'longitude',
-            'varieties', 'varieties_data',
+            'varieties', 'varieties_data', 'varieties_summary',
             'soil_type', 'year_planted', 'is_active', 'notes',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+    
+    def get_varieties_summary(self, obj):
+        """Return a comma-separated list of variety names."""
+        varieties = obj.variety_plantings.select_related('variety').order_by('-is_primary', 'variety__name')
+        return ', '.join([vp.variety.name for vp in varieties])
     
     def validate_code(self, value):
         """Convert empty string to None for code field."""

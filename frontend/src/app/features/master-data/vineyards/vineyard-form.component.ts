@@ -137,29 +137,40 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown,
                 <div [formGroupName]="$index" class="variety-item">
                   <div class="variety-fields">
                     <div class="variety-main">
-                      <mat-form-field appearance="outline">
-                        <mat-label>Variety</mat-label>
-                        <mat-select formControlName="variety" placeholder="Select variety">
-                          @for (v of varieties(); track v.id) {
-                            <mat-option [value]="v.id">
-                              <span class="variety-option">
-                                <span class="color-dot" [class]="v.color.toLowerCase()"></span>
-                                {{ v.name }}
-                              </span>
-                            </mat-option>
-                          }
-                        </mat-select>
-                      </mat-form-field>
+                      <div class="variety-select">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Variety</mat-label>
+                          <mat-select formControlName="variety" placeholder="Select variety">
+                            @for (v of varieties(); track v.id) {
+                              <mat-option [value]="v.id">
+                                <span class="variety-option">
+                                  <span class="color-dot" [class]="v.color.toLowerCase()"></span>
+                                  {{ v.name }}
+                                </span>
+                              </mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
                       
-                      <mat-form-field appearance="outline" class="percentage-field">
-                        <mat-label>% of Area</mat-label>
-                        <input matInput type="number" formControlName="percentage" placeholder="Optional" min="0" max="100" step="0.1">
-                        <span matSuffix>%</span>
-                      </mat-form-field>
+                      <div class="percentage-input">
+                        <app-number-input
+                          formControlName="percentage"
+                          label="% of Area"
+                          unit="%"
+                          placeholder="Optional"
+                          [min]="0"
+                          [max]="100"
+                          [step]="0.1"
+                          [decimals]="1">
+                        </app-number-input>
+                      </div>
                       
-                      <mat-checkbox formControlName="is_primary" class="primary-checkbox">
-                        Primary
-                      </mat-checkbox>
+                      <div class="primary-checkbox-wrapper">
+                        <mat-checkbox formControlName="is_primary" class="primary-checkbox">
+                          Primary
+                        </mat-checkbox>
+                      </div>
                     </div>
                     
                     @if (varietyForm.get('notes')?.value || showVarietyNotes[$index]) {
@@ -310,7 +321,7 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown,
     .variety-item {
       display: flex;
       gap: 0.75rem;
-      padding: 1rem;
+      padding: 1.25rem;
       background: var(--gray-50);
       border: 1px solid var(--border-color);
       border-radius: 8px;
@@ -324,22 +335,33 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown,
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 1rem;
     }
     .variety-main {
-      display: flex;
+      display: grid;
+      grid-template-columns: 2fr 1fr auto;
       gap: 1rem;
       align-items: flex-start;
-      mat-form-field:first-child { flex: 2; }
+      @media (max-width: 768px) { 
+        grid-template-columns: 1fr;
+      }
     }
-    .percentage-field {
+    .variety-select {
       flex: 1;
-      min-width: 120px;
+    }
+    .percentage-input {
+      flex: 0 0 180px;
+      @media (max-width: 768px) { 
+        flex: 1;
+      }
+    }
+    .primary-checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      padding-top: 0.5rem;
     }
     .primary-checkbox {
       flex-shrink: 0;
-      align-self: center;
-      margin-top: 0.5rem;
     }
     .variety-notes {
       width: 100%;
