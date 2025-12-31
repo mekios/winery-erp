@@ -122,13 +122,24 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                     
                     <!-- Inner liquid cylinder (clipped to height) -->
                     <g clip-path="url(#liquidClip)" class="liquid-cylinder">
-                      <!-- Top ellipse -->
-                      <ellipse cx="100" cy="30" rx="78" ry="14" fill="url(#wineGradient)" opacity="0.9"/>
-                      <!-- Cylinder sides -->
+                      <!-- Cylinder body -->
                       <rect x="22" y="30" width="156" height="240" fill="url(#wineGradient)"/>
                       <!-- Bottom ellipse -->
                       <ellipse cx="100" cy="270" rx="78" ry="14" fill="#5e35d1"/>
                     </g>
+                    
+                    <!-- Liquid surface (top ellipse) - rendered outside clip -->
+                    @if (tank()!.fill_percentage > 0) {
+                      <ellipse 
+                        cx="100" 
+                        [attr.cy]="270 - (240 * tank()!.fill_percentage / 100)" 
+                        rx="78" 
+                        ry="14" 
+                        fill="url(#wineGradient)" 
+                        opacity="0.9"
+                        class="liquid-surface"
+                      />
+                    }
                   </svg>
                 </div>
                 

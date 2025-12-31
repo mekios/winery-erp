@@ -242,8 +242,9 @@ h1 {
     filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
   }
   
-  // Smooth transitions for the clipped elements
-  #liquidClip rect {
+  // Smooth transitions for the clipped elements and surface
+  #liquidClip rect,
+  .liquid-surface {
     transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
