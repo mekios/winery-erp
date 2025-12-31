@@ -164,7 +164,7 @@ export class TanksListComponent implements OnInit {
   ];
   
   actions: TableAction[] = [
-    { icon: 'visibility', label: 'View', action: 'view' },
+    { icon: 'book-open', label: 'Ledger', action: 'view' },
     { icon: 'edit', label: 'Edit', action: 'edit' },
     { icon: 'delete', label: 'Delete', action: 'delete', color: 'warn' },
   ];

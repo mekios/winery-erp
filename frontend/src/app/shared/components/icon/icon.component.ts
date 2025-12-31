@@ -251,6 +251,12 @@ const ICONS: Record<string, string> = {
     <path d="M8 16h.01"/>
   `,
   
+  // Book Open - Open book icon for ledger/history
+  'book-open': `
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+  `,
+  
   // Map Pin - Location marker
   'map-pin': `
     <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/>
