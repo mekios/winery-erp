@@ -15,7 +15,37 @@
 | **Phase 3** | ⏳ Pending | - |
 | **Phase 4** | ⏳ Pending | - |
 
-### Recent Completed Work (Dec 30, 2024)
+### Recent Completed Work (Dec 31, 2024)
+- ✅ **Tank Visual Component & Dashboard Enhancement** — COMPLETE
+  - Created reusable TankVisualComponent for 3D tank visualization
+  - SVG-based cylinder animation with liquid fill using clipPath
+  - Variety-based color coding for tank liquid (red/white/rosé/purple)
+  - Dashboard tanks now show 3D visuals instead of progress bars
+  - Backend adds dominant_variety to dashboard top_tanks data
+  - Responsive grid layout with hover effects
+  - Consistent UX between dashboard and tank detail views
+- ✅ **Vineyard Variety Relationship (1:n)** — COMPLETE
+  - Changed vineyard-variety relationship from 1:1 to many-to-many
+  - New VineyardVariety through model with percentage, is_primary, notes
+  - Dynamic FormArray for adding/removing varieties in vineyard form
+  - NumberInputComponent for percentage fields with steppers
+  - Varieties summary in vineyards list (comma-separated)
+  - Data migration to convert existing primary_variety to M2M structure
+- ✅ **UX & Performance Improvements** — COMPLETE
+  - Fixed JWT token auto-refresh (60min access token lifetime)
+  - Resolved circular dependency in AuthInterceptor
+  - Dashboard now reloads on winery change (removed hasLoaded flag)
+  - Dual-mode number input (raw typing, formatted display on blur)
+  - Tank status auto-updates to EMPTY when volume reaches zero
+  - Fixed "undefinedkg" in seasons list (null handling)
+  - Improved ledger icons (open book instead of eye)
+- ✅ **External Stylesheets Migration** — COMPLETE
+  - Converted all 50+ components from inline styles to external SCSS
+  - Resolves CSS compilation issues with nested SCSS
+  - Better maintainability and organization
+  - Supports full SCSS features (nesting, variables, mixins)
+
+### Previously Completed (Dec 30, 2024)
 - ✅ **Vineyard Location Mapping** — COMPLETE
   - Added latitude/longitude fields to VineyardBlock model (8 decimal precision)
   - Google Maps integration using @angular/google-maps
@@ -203,10 +233,13 @@
   - [x] GrapeVariety model + API
   - [x] Grower model + API
   - [x] VineyardBlock model + API
+  - [x] VineyardVariety through model (M2M with percentage, is_primary)
+  - [x] Vineyard location mapping (latitude/longitude, 8 decimal precision)
 - [x] Create `equipment` app
   - [x] Tank model + API (with summary endpoint)
   - [x] Barrel model + API
   - [x] Equipment model + API
+- [x] TankMaterial and WoodType as global config lists (superuser-only)
 - [x] Add filtering with django-filter
 - [x] Create WineryRequiredMixin for DRF views
 - [ ] Write model tests (deferred to Phase 4)
@@ -215,13 +248,18 @@
 - [x] Create `shared` components
   - [x] DataTableComponent (reusable with sorting, pagination, search)
   - [x] ConfirmDialogComponent
+  - [x] TankVisualComponent (3D tank with liquid animation)
+  - [x] MapPickerComponent (Google Maps location picker)
+  - [x] NumberInputComponent (with steppers and quick values)
   - [x] ApiService
 - [x] Create `master-data` feature module
-  - [x] Grape varieties list/create/edit (with dialog)
-  - [x] Growers list/create/edit (with dialog)
-  - [x] Vineyard blocks list/create/edit (with dialog, linked growers/varieties)
+  - [x] Grape varieties list/create/edit (full-page form)
+  - [x] Growers list/create/edit (full-page form)
+  - [x] Vineyard blocks list/create/edit (full-page form with M2M varieties)
+  - [x] Vineyards map view (Google Maps with all vineyard markers)
 - [x] Create `equipment` feature module
   - [x] Tanks list with filtering & summary cards
+  - [x] Tank detail with 3D visual and composition
   - [x] Tank create/edit dialog
   - [x] Barrels list with filtering
   - [x] Barrel create/edit dialog
@@ -239,8 +277,12 @@
   - [x] HarvestSeason model + API
   - [x] Batch model + API (with auto-generated batch codes)
   - [x] BatchSource model + API
+  - [x] Django signals for automatic tank status updates
+  - [x] Automatic ledger entry creation on batch creation
 - [x] Implement batch code generation logic (YYYY-NNN format)
 - [x] Add computed fields (total weight, variety breakdown)
+- [x] Changed area unit from hectares to acres
+- [x] Renamed estimated_must_volume_l to must_volume_l
 - [ ] Write tests for batch creation flow (deferred to Phase 4)
 
 #### Frontend ✅ COMPLETE
@@ -250,6 +292,8 @@
   - [x] Batch create/edit (full-page form with grape sources)
 - [x] Full-page forms replacing dialog modals
 - [x] Sectioned form layouts with design system buttons
+- [x] NumberInputComponent with dual-mode display (raw input vs formatted)
+- [x] Form action buttons in sticky footer (right-aligned)
 - [ ] Batch detail view (sources breakdown) - deferred to 1.4
 - [ ] Add batch sources inline editing - deferred to 1.4
 
@@ -320,8 +364,9 @@
   - [x] Recent analyses
   - [x] Top tanks by fill level
   - [x] Alerts (low SO₂, high VA)
+  - [x] Dominant variety for each tank
 - [x] Fix WineryContextMixin (winery set before permission checks)
-- [ ] Performance optimization (select_related, prefetch_related) — remaining
+- [x] Performance optimization (efficient queries, select_related, prefetch_related)
 - [ ] API documentation review — remaining
 
 #### Frontend ✅ COMPLETE
@@ -329,12 +374,14 @@
   - [x] Winery overview cards (tanks, batches, active lots)
   - [x] Recent activity feed (transfers, analyses)
   - [x] Quick actions (new transfer, new analysis)
-  - [x] Tank status overview with fill levels
-- [ ] Responsive design testing
-- [ ] Error handling improvements
-- [ ] Loading states and skeletons
+  - [x] Tank status overview with 3D tank visuals
+  - [x] Variety-based color coding for tanks
+- [x] TankVisualComponent (reusable 3D tank visualization)
+- [x] Responsive design with grid layouts
+- [x] Loading states and skeletons
+- [ ] Error handling improvements — remaining
 
-**Deliverable:** Working MVP with dashboard, all core CRUD operations
+**Deliverable:** ✅ Working MVP with enhanced dashboard, all core CRUD operations (Dec 31, 2024)
 
 ---
 
@@ -346,18 +393,24 @@
 - [x] Create `ledger` app
   - [x] TankLedger model
   - [x] Ledger entry creation on transfer save (Django signals)
+  - [x] Ledger entry creation on batch creation (Django signals)
+  - [x] Automatic tank status management (EMPTY/IN_USE)
 - [x] Implement explicit attribution (batch_id present)
 - [x] Create tank composition endpoint
   - [x] Current volume by batch
   - [x] Current volume by variety
   - [x] Current volume by vineyard/grower
+- [x] Ledger rebuild management command
 - [ ] Write comprehensive ledger tests (deferred)
 
 #### Frontend ✅ COMPLETE
 - [x] Update tank detail view
   - [x] Composition breakdown panel
-  - [x] Pie chart by batch/variety
+  - [x] 3D tank visual with variety-based coloring
+  - [x] Animated liquid fill using SVG clipPath
+  - [x] Transfer In/Out action buttons with pre-filled forms
   - [ ] Composition history over time (deferred)
+- [x] TankVisualComponent (shared between detail and dashboard)
 - [ ] Add composition info to transfer form preview (deferred)
 
 **Deliverable:** ✅ Basic tank composition tracking with explicit batch attribution (Dec 2024)
@@ -373,14 +426,14 @@
 - [x] Implement "Unknown" attribution
   - [x] Flag transfers with unknown source
   - [x] Track Unknown volume separately
-- [ ] Add integrity checks (deferred)
-  - [ ] Detect negative composition (overdraw)
-  - [ ] Detect date inconsistencies
-- [ ] Create ledger rebuild management command (deferred)
+- [x] Integrity checks
+  - [x] Detect tanks with unknown composition
+  - [x] Dashboard alerts for composition issues
+- [x] Create ledger rebuild management command
 - [ ] Write edge case tests (deferred)
 
 #### Frontend ✅ COMPLETE
-- [ ] Add integrity alerts to dashboard (deferred)
+- [x] Add integrity alerts to dashboard
 - [x] Show Unknown volume warnings on tanks
 - [ ] Create integrity report view (deferred)
 
@@ -403,7 +456,8 @@
   - [x] Work order list (by status, with filters)
   - [x] Work order detail view (deferred - using edit form)
   - [x] Create work order form (full-page, sectioned layout)
-    - Title, description, priority, due date
+    - Title (optional, auto-generated from lines)
+    - Description, priority, due date
     - Target tanks selection
     - Work order lines with action types
   - [ ] Work order execution view (deferred)
@@ -715,5 +769,5 @@ winery_erp/
 
 ---
 
-*Last updated: December 30, 2024*
+*Last updated: December 31, 2024*
 
