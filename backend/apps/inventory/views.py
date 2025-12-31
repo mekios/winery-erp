@@ -65,6 +65,24 @@ class MaterialViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
         movements = material.movements.all()[:50]  # Last 50 movements
         serializer = MaterialMovementListSerializer(movements, many=True)
         return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def categories(self, request):
+        """Get available material categories"""
+        from .models import MaterialCategory
+        return Response([
+            {'value': choice[0], 'label': choice[1]}
+            for choice in MaterialCategory.choices
+        ])
+    
+    @action(detail=False, methods=['get'])
+    def units(self, request):
+        """Get available material units"""
+        from .models import MaterialUnit
+        return Response([
+            {'value': choice[0], 'label': choice[1]}
+            for choice in MaterialUnit.choices
+        ])
 
 
 class MaterialStockViewSet(WineryRequiredMixin, viewsets.ReadOnlyModelViewSet):
@@ -85,6 +103,15 @@ class MaterialStockViewSet(WineryRequiredMixin, viewsets.ReadOnlyModelViewSet):
         queryset = queryset.filter(material__winery=self.request.winery)
         
         return queryset
+    
+    @action(detail=False, methods=['get'])
+    def locations(self, request):
+        """Get available stock locations"""
+        from .models import StockLocation
+        return Response([
+            {'value': choice[0], 'label': choice[1]}
+            for choice in StockLocation.choices
+        ])
 
 
 class MaterialMovementViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
@@ -114,6 +141,15 @@ class MaterialMovementViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+    
+    @action(detail=False, methods=['get'])
+    def types(self, request):
+        """Get available movement types"""
+        from .models import MovementType
+        return Response([
+            {'value': choice[0], 'label': choice[1]}
+            for choice in MovementType.choices
+        ])
 
 
 class AdditionViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
