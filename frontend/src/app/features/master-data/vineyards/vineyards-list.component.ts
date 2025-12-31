@@ -86,23 +86,7 @@ import { MasterDataService, VineyardBlock, GrowerDropdown, GrapeVarietyDropdown 
       </button>
     </div>
   `,
-  styles: [`
-    :host { display: block; height: 100%; }
-    .list-page { display: flex; flex-direction: column; height: 100%; padding: 16px 20px; }
-    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 16px; flex-shrink: 0; flex-wrap: wrap; }
-    .header-title { display: flex; align-items: center; gap: 14px; }
-    .title-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #7c4dff, #b47cff); display: flex; align-items: center; justify-content: center; color: #fff; }
-    h1 { margin: 0; font-size: 22px; font-weight: 700; }
-    .subtitle { color: #6b7280; font-size: 13px; }
-    app-data-table { flex: 1; min-height: 0; }
-    
-    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
-    .map-btn { display: flex; align-items: center; gap: 0.5rem; }
-    .map-btn app-icon { margin-right: 0.25rem; }
-    
-    .mobile-fab { display: none; }
-    @media screen and (max-width: 768px) { .mobile-fab { display: flex !important; } }
-  `]
+  styleUrls: ['./vineyards-list.component.scss']
 })
 export class VineyardsListComponent implements OnInit {
   private masterDataService = inject(MasterDataService);

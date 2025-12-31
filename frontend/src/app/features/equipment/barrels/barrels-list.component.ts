@@ -81,19 +81,7 @@ import { MasterDataService, WoodType } from '@features/master-data/master-data.s
       </button>
     </div>
   `,
-  styles: [`
-    :host { display: block; height: 100%; }
-    .list-page { display: flex; flex-direction: column; height: 100%; padding: 16px 20px; }
-    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 16px; flex-shrink: 0; }
-    .header-title { display: flex; align-items: center; gap: 14px; }
-    .title-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #7c4dff, #b47cff); display: flex; align-items: center; justify-content: center; color: #fff; }
-    h1 { margin: 0; font-size: 22px; font-weight: 700; }
-    .subtitle { color: #6b7280; font-size: 13px; }
-    app-data-table { flex: 1; min-height: 0; }
-    
-    .mobile-fab { display: none; }
-    @media screen and (max-width: 768px) { .mobile-fab { display: flex !important; } }
-  `]
+  styleUrls: ['./barrels-list.component.scss']
 })
 export class BarrelsListComponent implements OnInit {
   private equipmentService = inject(EquipmentService);

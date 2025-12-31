@@ -84,17 +84,7 @@ export interface SeasonDialogData {
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .season-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      min-width: 400px;
-      padding-top: 0.5rem;
-    }
-    mat-form-field { width: 100%; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  `]
+  styleUrls: ['./season-dialog.component.scss']
 })
 export class SeasonDialogComponent {
   form: FormGroup;

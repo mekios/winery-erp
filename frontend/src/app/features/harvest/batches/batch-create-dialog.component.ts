@@ -211,56 +211,7 @@ export interface BatchCreateDialogData {
       </mat-stepper>
     </mat-dialog-content>
   `,
-  styles: [`
-    mat-dialog-content { min-width: 550px; max-height: 70vh; }
-    
-    .step-form { padding: 1rem 0; display: flex; flex-direction: column; gap: 0.5rem; }
-    mat-form-field { width: 100%; }
-    
-    .step-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
-    
-    .sources-list { display: flex; flex-direction: column; gap: 1rem; }
-    .source-item {
-      display: flex; align-items: flex-start; gap: 0.5rem;
-      padding: 1rem; background: var(--gray-100); border-radius: 8px;
-    }
-    .source-fields { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    .source-fields mat-form-field { margin-bottom: 0; }
-    .source-fields mat-checkbox { grid-column: span 2; }
-    
-    .add-source-btn { margin-top: 0.5rem; }
-    
-    .total-weight {
-      margin-top: 1rem; padding: 1rem; background: var(--primary-light);
-      color: white; border-radius: 8px; text-align: center; font-size: 1.1rem;
-    }
-    
-    .review-step { padding: 1rem 0; }
-    .review-step h3 { margin: 0 0 1rem; }
-    .review-step h4 { margin: 1.5rem 0 0.75rem; }
-    
-    .review-section {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
-      padding: 1rem; background: var(--gray-100); border-radius: 8px;
-    }
-    .review-item {
-      display: flex; flex-direction: column;
-      .label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; }
-      .value { font-weight: 500; }
-    }
-    
-    .sources-review {
-      background: var(--gray-100); border-radius: 8px; overflow: hidden;
-    }
-    .source-review-item {
-      display: flex; justify-content: space-between; padding: 0.75rem 1rem;
-      border-bottom: 1px solid var(--gray-200);
-    }
-    .source-review-total {
-      display: flex; justify-content: space-between; padding: 0.75rem 1rem;
-      background: var(--gray-200);
-    }
-  `]
+  styleUrls: ['./batch-create-dialog.component.scss']
 })
 export class BatchCreateDialogComponent implements OnInit {
   private fb = inject(FormBuilder);

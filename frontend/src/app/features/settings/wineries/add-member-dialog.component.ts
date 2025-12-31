@@ -81,23 +81,7 @@ export interface AddMemberDialogData {
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .member-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      min-width: 400px;
-      padding-top: 0.5rem;
-    }
-    mat-form-field { width: 100%; }
-    .role-description {
-      background: var(--gray-100);
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      margin-top: 0.5rem;
-      p { margin: 0; font-size: 0.875rem; color: var(--text-secondary); }
-    }
-  `]
+  styleUrls: ['./add-member-dialog.component.scss']
 })
 export class AddMemberDialogComponent {
   form: FormGroup;

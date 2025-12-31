@@ -282,16 +282,7 @@ const ICONS: Record<string, string> = {
       [innerHTML]="iconSvg">
     </svg>
   `,
-  styles: [`
-    :host {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    svg {
-      display: block;
-    }
-  `]
+  styleUrls: ['./icon.component.scss']
 })
 export class IconComponent implements OnChanges {
   @Input() name: string = '';

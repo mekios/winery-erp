@@ -76,23 +76,7 @@ export interface VarietyDialogData {
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .variety-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      min-width: 400px;
-      padding-top: 0.5rem;
-    }
-    
-    mat-form-field {
-      width: 100%;
-    }
-    
-    mat-checkbox {
-      margin-top: 0.5rem;
-    }
-  `]
+  styleUrls: ['./variety-dialog.component.scss']
 })
 export class VarietyDialogComponent {
   form: FormGroup;

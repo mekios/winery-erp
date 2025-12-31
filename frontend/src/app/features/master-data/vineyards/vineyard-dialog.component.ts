@@ -101,11 +101,7 @@ export interface VineyardDialogData {
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .vineyard-form { display: flex; flex-direction: column; gap: 0.25rem; min-width: 500px; padding-top: 0.5rem; }
-    mat-form-field { width: 100%; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  `]
+  styleUrls: ['./vineyard-dialog.component.scss']
 })
 export class VineyardDialogComponent {
   form: FormGroup;

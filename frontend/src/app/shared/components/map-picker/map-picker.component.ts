@@ -38,68 +38,7 @@ import { GoogleMap, MapMarker, GoogleMapsModule } from '@angular/google-maps';
       }
     </div>
   `,
-  styles: [`
-    .map-picker-container {
-      width: 100%;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border-color);
-      background: var(--bg-card);
-    }
-    
-    google-map {
-      display: block;
-    }
-    
-    .coordinates-display {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1rem;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
-      border-top: 1px solid rgba(16, 185, 129, 0.2);
-    }
-    
-    .coord-label {
-      font-size: 1rem;
-    }
-    
-    .coord-value {
-      font-family: 'JetBrains Mono', 'Fira Code', monospace;
-      font-size: 0.875rem;
-      color: var(--text-primary);
-      flex: 1;
-    }
-    
-    .clear-btn {
-      background: none;
-      border: none;
-      font-size: 1.25rem;
-      cursor: pointer;
-      color: var(--text-secondary);
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 4px;
-      transition: all 0.2s ease;
-      
-      &:hover {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger);
-      }
-    }
-    
-    .coordinates-hint {
-      padding: 0.75rem 1rem;
-      font-size: 0.8125rem;
-      color: var(--text-secondary);
-      background: var(--gray-50);
-      border-top: 1px solid var(--border-color);
-      text-align: center;
-    }
-  `]
+  styleUrls: ['./map-picker.component.scss']
 })
 export class MapPickerComponent implements OnChanges {
   @ViewChild('googleMap', { static: false }) googleMap!: GoogleMap;

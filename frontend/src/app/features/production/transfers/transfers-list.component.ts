@@ -95,26 +95,7 @@ import {
       </button>
     </div>
   `,
-  styles: [`
-    :host { display: block; height: 100%; }
-    .list-page { display: flex; flex-direction: column; height: 100%; padding: 16px 20px; }
-    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 16px; flex-shrink: 0; flex-wrap: wrap; }
-    .header-title { display: flex; align-items: center; gap: 14px; }
-    .title-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #7c4dff, #b47cff); display: flex; align-items: center; justify-content: center; color: #fff; }
-    h1 { margin: 0; font-size: 22px; font-weight: 700; }
-    .subtitle { color: #6b7280; font-size: 13px; }
-    
-    .summary-pills { display: flex; gap: 8px; margin-left: auto; margin-right: 16px; }
-    .stat-pill { display: flex; align-items: center; gap: 6px; background: #f3f4f6; padding: 8px 14px; border-radius: 20px; }
-    .stat-pill.accent { background: linear-gradient(135deg, #7c4dff, #b47cff); .stat-value, .stat-label { color: #fff; } }
-    .stat-value { font-weight: 700; font-size: 14px; color: #374151; }
-    .stat-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px; }
-    
-    app-data-table { flex: 1; min-height: 0; }
-    
-    .mobile-fab { display: none; }
-    @media screen and (max-width: 768px) { .mobile-fab { display: flex !important; } }
-  `]
+  styleUrls: ['./transfers-list.component.scss']
 })
 export class TransfersListComponent implements OnInit {
   private productionService = inject(ProductionService);

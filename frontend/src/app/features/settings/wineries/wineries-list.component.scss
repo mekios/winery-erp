@@ -1,0 +1,84 @@
+.page-container { max-width: 1200px; margin: 0 auto; }
+.page-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 1.5rem;
+  h1 { margin: 0; }
+  .page-subtitle { margin: 0.25rem 0 0; color: var(--text-secondary); }
+}
+.loading-container { display: flex; justify-content: center; padding: 3rem; }
+
+.empty-card {
+  mat-card-content {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 3rem !important; text-align: center;
+  }
+  mat-icon { font-size: 4rem; width: 4rem; height: 4rem; color: var(--gray-400); margin-bottom: 1rem; }
+  h2 { margin: 0 0 0.5rem; color: var(--text-primary); }
+  p { margin: 0 0 1.5rem; color: var(--text-secondary); }
+}
+
+.wineries-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
+}
+
+.winery-card {
+  .winery-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    width: 100%; padding: 1rem 1rem 0;
+  }
+  .winery-info {
+    display: flex; flex-direction: column; gap: 0.25rem;
+  }
+  .winery-code {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    color: var(--primary); letter-spacing: 0.5px;
+  }
+  h3 { margin: 0; font-size: 1.25rem; }
+  .winery-location { font-size: 0.875rem; color: var(--text-secondary); }
+  
+  mat-card-content { padding: 0 !important; }
+}
+
+.members-panel {
+  box-shadow: none !important;
+  background: transparent !important;
+  
+  mat-panel-title {
+    display: flex; align-items: center; gap: 0.5rem;
+    mat-icon { font-size: 1.25rem; width: 1.25rem; height: 1.25rem; }
+  }
+}
+
+.members-content {
+  padding: 0.5rem 0;
+}
+
+.members-loading {
+  display: flex; justify-content: center; padding: 1rem;
+}
+
+.member-item {
+  display: flex; align-items: center; gap: 0.75rem; width: 100%;
+  .member-info {
+    flex: 1; display: flex; flex-direction: column;
+    .member-name { font-weight: 500; }
+    .member-email { font-size: 0.8rem; color: var(--text-secondary); }
+  }
+}
+
+.role-chip {
+  font-size: 0.7rem !important; font-weight: 600;
+  &.role-consultant { background: var(--primary-light) !important; color: white !important; }
+  &.role-winery_owner { background: var(--success) !important; color: white !important; }
+  &.role-winemaker { background: var(--info) !important; color: white !important; }
+  &.role-cellar_staff { background: var(--warning) !important; color: var(--dark) !important; }
+  &.role-lab { background: var(--gray-500) !important; color: white !important; }
+}
+
+.no-members { color: var(--text-muted); font-style: italic; }
+
+.add-member-btn {
+  margin: 0.5rem 1rem 1rem;
+}

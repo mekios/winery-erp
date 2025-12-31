@@ -1,0 +1,147 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+  
+  &:hover {
+    border-color: #d1d5db;
+    background: #fafafa;
+  }
+  
+  &.active {
+    background: linear-gradient(135deg, rgba(124,77,255,0.08), rgba(124,77,255,0.04));
+    border-color: #7c4dff;
+    color: #7c4dff;
+    
+    .chip-value {
+      font-weight: 600;
+      color: #5b21b6;
+    }
+    
+    .chip-arrow { color: #7c4dff; }
+  }
+  
+  .chip-label {
+    color: #9ca3af;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #7c4dff;
+  }
+  
+  .chip-value {
+    color: #374151;
+  }
+  
+  .chip-arrow {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #9ca3af;
+    transition: transform 0.2s;
+  }
+}
+
+/* Compact chips always for mobile-friendly grids */
+:host-context(.filters-row) .chip,
+:host-context(.mobile) .chip {
+  padding: 5px 8px;
+  border-radius: 8px;
+  gap: 3px;
+  border-width: 1px;
+  white-space: nowrap;
+  
+  .chip-label {
+    font-size: 10px;
+    letter-spacing: 0.3px;
+  }
+  
+  .chip-value {
+    font-size: 11px;
+    max-width: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .chip-arrow {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+  
+  .chip-dot {
+    width: 4px;
+    height: 4px;
+  }
+}
+
+::ng-deep .fresh-menu {
+  .mat-mdc-menu-content {
+    padding: 6px !important;
+  }
+  
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s;
+    
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #9ca3af;
+    }
+    
+    .check {
+      margin-left: auto;
+      color: #7c4dff;
+    }
+    
+    &:hover {
+      background: #f5f3ff;
+    }
+    
+    &.selected {
+      background: linear-gradient(135deg, rgba(124,77,255,0.12), rgba(124,77,255,0.06));
+      color: #7c4dff;
+      font-weight: 600;
+    }
+    
+    &.clear {
+      color: #6b7280;
+      mat-icon { color: #9ca3af; }
+      &:hover { background: #f3f4f6; }
+    }
+  }
+  
+  .menu-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 6px 0;
+  }
+}

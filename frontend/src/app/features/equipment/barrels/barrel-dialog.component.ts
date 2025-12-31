@@ -107,11 +107,7 @@ const STATUSES = [
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .barrel-form { display: flex; flex-direction: column; gap: 0.25rem; min-width: 400px; padding-top: 0.5rem; }
-    mat-form-field { width: 100%; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  `]
+  styleUrls: ['./barrel-dialog.component.scss']
 })
 export class BarrelDialogComponent implements OnInit {
   private masterDataService = inject(MasterDataService);

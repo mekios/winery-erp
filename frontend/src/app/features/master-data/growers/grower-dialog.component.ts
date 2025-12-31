@@ -60,11 +60,7 @@ export interface GrowerDialogData {
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .grower-form { display: flex; flex-direction: column; gap: 0.25rem; min-width: 400px; padding-top: 0.5rem; }
-    mat-form-field { width: 100%; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  `]
+  styleUrls: ['./grower-dialog.component.scss']
 })
 export class GrowerDialogComponent {
   form: FormGroup;

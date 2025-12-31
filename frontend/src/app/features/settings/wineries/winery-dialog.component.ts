@@ -98,17 +98,7 @@ const TIMEZONES = [
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .winery-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      min-width: 450px;
-      padding-top: 0.5rem;
-    }
-    mat-form-field { width: 100%; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  `]
+  styleUrls: ['./winery-dialog.component.scss']
 })
 export class WineryDialogComponent {
   form: FormGroup;

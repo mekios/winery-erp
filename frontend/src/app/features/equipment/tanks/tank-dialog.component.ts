@@ -125,31 +125,7 @@ export interface TankDialogData {
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .tank-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      min-width: 500px;
-      padding-top: 0.5rem;
-    }
-    
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    
-    mat-form-field {
-      width: 100%;
-    }
-    
-    .form-checkboxes {
-      display: flex;
-      gap: 1.5rem;
-      margin: 0.5rem 0;
-    }
-  `]
+  styleUrls: ['./tank-dialog.component.scss']
 })
 export class TankDialogComponent implements OnInit {
   private masterDataService = inject(MasterDataService);

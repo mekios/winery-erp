@@ -169,46 +169,7 @@ import { EquipmentService, TankDropdown, BarrelDropdown } from '@features/equipm
       
     </app-form-page>
   `,
-  styles: [`
-    .form-sections { display: flex; flex-direction: column; gap: 1.5rem; }
-    .form-section {
-      background: var(--bg-card);
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      padding: 1.5rem;
-    }
-    .section-title {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: var(--text-secondary);
-      margin: 0 0 1rem 0;
-      text-transform: uppercase;
-    }
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      
-      @media (max-width: 600px) { grid-template-columns: 1fr; }
-    }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-    .form-label {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
-      
-      &.required::after {
-        content: ' *';
-        color: var(--danger);
-      }
-    }
-    mat-form-field { width: 100%; }
-  `]
+  styleUrls: ['./wine-lot-form.component.scss']
 })
 export class WineLotFormComponent implements OnInit {
   private fb = inject(FormBuilder);
