@@ -22,7 +22,8 @@ const refreshTokenSubject = new BehaviorSubject<string | null>(null);
  */
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
   const router = inject(Router);
-  const authService = inject(AuthService);
+  // Don't inject AuthService here - it causes circular dependency during initialization
+  // Only inject it when we actually need it (in handle401Error)
   
   // Check if this request should skip auth intercept (used during initialization)
   const skipAuthIntercept = req.headers.has('X-Skip-Auth-Intercept');
@@ -64,8 +65,8 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
           return throwError(() => error);
         }
         
-        // Try to refresh the token
-        return handle401Error(req, next, authService, router);
+        // Try to refresh the token (inject AuthService only when needed)
+        return handle401Error(req, next, router);
       }
       
       return throwError(() => error);
@@ -79,9 +80,11 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
 function handle401Error(
   request: HttpRequest<unknown>,
   next: HttpHandlerFn,
-  authService: AuthService,
   router: Router
 ) {
+  // Inject AuthService only when we need it to avoid circular dependency during init
+  const authService = inject(AuthService);
+  
   if (!isRefreshing) {
     isRefreshing = true;
     refreshTokenSubject.next(null);

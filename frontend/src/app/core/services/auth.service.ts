@@ -144,26 +144,27 @@ export class AuthService {
     console.log('[AuthService] tryRefreshToken - refresh token exists:', !!refreshToken);
     
     if (!refreshToken) {
-      console.log('[AuthService] No refresh token, clearing tokens');
-      this.clearTokens();
+      console.log('[AuthService] No refresh token available');
       return of(null);
     }
     
+    console.log('[AuthService] Attempting to refresh token...');
     return this.http.post<TokenResponse>(`${environment.apiUrl}/auth/token/refresh/`, {
       refresh: refreshToken
     }, {
       headers: { 'X-Skip-Auth-Intercept': 'true' }
     }).pipe(
-      tap(response => console.log('[AuthService] Token refreshed successfully')),
+      tap(response => console.log('[AuthService] ✓ Token refreshed successfully, fetching user...')),
       switchMap(response => {
         this.setTokens(response);
+        console.log('[AuthService] New tokens stored, fetching user profile...');
         return this.http.get<User>(`${environment.apiUrl}/users/me/`, {
           headers: { 'X-Skip-Auth-Intercept': 'true' }
         });
       }),
+      tap(user => console.log('[AuthService] ✓ User profile fetched:', user.email)),
       catchError((err) => {
-        console.log('[AuthService] Token refresh failed:', err);
-        this.clearTokens();
+        console.error('[AuthService] ✗ Token refresh failed:', err.message || err);
         return of(null);
       })
     );
