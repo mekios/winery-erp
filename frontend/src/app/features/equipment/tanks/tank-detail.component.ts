@@ -25,6 +25,9 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
   ],
   template: `
     <div class="detail-page">
+      <!-- Animated Background Gradient -->
+      <div class="page-gradient"></div>
+      
       <!-- Header -->
       <header class="detail-header">
         <button mat-icon-button (click)="goBack()" class="back-btn">
@@ -40,29 +43,40 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
           <div class="header-content">
             <div class="title-row">
               <div class="tank-badge">
-                <app-icon name="tank" [size]="20"></app-icon>
+                <app-icon name="tank" [size]="24"></app-icon>
+                <div class="badge-glow"></div>
               </div>
-              <h1>{{ tank()!.code }}</h1>
-              @if (tank()!.name) {
-                <span class="tank-name">{{ tank()!.name }}</span>
-              }
+              <div class="title-group">
+                <h1>{{ tank()!.code }}</h1>
+                @if (tank()!.name) {
+                  <span class="tank-name">{{ tank()!.name }}</span>
+                }
+              </div>
               <span class="status-badge" [class]="getStatusClass(tank()!.status)">
+                <span class="status-dot"></span>
                 {{ TANK_STATUS_LABELS[tank()!.status] }}
               </span>
             </div>
             <div class="meta-row">
-              <span>{{ TANK_TYPE_LABELS[tank()!.tank_type] }}</span>
-              <span class="separator">•</span>
-              <span>{{ tank()!.material_name || 'Unknown material' }}</span>
-              <span class="separator">•</span>
-              <span>{{ tank()!.location || 'No location' }}</span>
+              <div class="meta-item">
+                <app-icon name="flask" [size]="14"></app-icon>
+                <span>{{ TANK_TYPE_LABELS[tank()!.tank_type] }}</span>
+              </div>
+              <div class="meta-item">
+                <app-icon name="layers" [size]="14"></app-icon>
+                <span>{{ tank()!.material_name || 'Unknown material' }}</span>
+              </div>
+              <div class="meta-item">
+                <app-icon name="map-pin" [size]="14"></app-icon>
+                <span>{{ tank()!.location || 'No location' }}</span>
+              </div>
             </div>
           </div>
           
           <div class="header-actions">
-            <button mat-stroked-button [routerLink]="['/equipment/tanks', tankId, 'edit']">
+            <button mat-flat-button color="primary" [routerLink]="['/equipment/tanks', tankId, 'edit']">
               <mat-icon>edit</mat-icon>
-              Edit
+              Edit Tank
             </button>
           </div>
         }
@@ -77,34 +91,101 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
       } @else {
         <!-- Main Content -->
         <div class="detail-content">
-          <!-- Volume Card -->
+          <!-- Volume Card with Liquid Animation -->
           <div class="volume-card">
             @if (loading()) {
-              <app-skeleton width="100%" height="120px"></app-skeleton>
+              <app-skeleton width="100%" height="200px"></app-skeleton>
             } @else if (tank()) {
-              <div class="volume-header">
-                <div class="volume-info">
-                  <span class="volume-label">Current Volume</span>
-                  <span class="volume-value">{{ tank()!.current_volume_l | number:'1.0-0' }} L</span>
+              <div class="volume-visual">
+                <div class="tank-illustration">
+                  <svg viewBox="0 0 200 300" class="tank-svg">
+                    <!-- Tank outline -->
+                    <ellipse cx="100" cy="30" rx="80" ry="15" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <line x1="20" y1="30" x2="20" y2="270" stroke="currentColor" stroke-width="2"/>
+                    <line x1="180" y1="30" x2="180" y2="270" stroke="currentColor" stroke-width="2"/>
+                    <ellipse cx="100" cy="270" rx="80" ry="15" fill="none" stroke="currentColor" stroke-width="2"/>
+                    
+                    <!-- Wine liquid with gradient -->
+                    <defs>
+                      <linearGradient id="wineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#7c4dff;stop-opacity:0.9" />
+                        <stop offset="100%" style="stop-color:#5e35d1;stop-opacity:1" />
+                      </linearGradient>
+                      <clipPath id="tankClip">
+                        <rect x="20" y="30" width="160" height="240"/>
+                      </clipPath>
+                    </defs>
+                    
+                    <!-- Animated liquid level -->
+                    <g clip-path="url(#tankClip)">
+                      <rect 
+                        x="20" 
+                        [attr.y]="30 + (240 * (1 - tank()!.fill_percentage / 100))" 
+                        width="160" 
+                        [attr.height]="240 * (tank()!.fill_percentage / 100)"
+                        fill="url(#wineGradient)"
+                        class="liquid-fill"
+                      />
+                      <!-- Liquid surface wave -->
+                      <ellipse 
+                        cx="100" 
+                        [attr.cy]="30 + (240 * (1 - tank()!.fill_percentage / 100))" 
+                        rx="80" 
+                        ry="8" 
+                        fill="#9575ff"
+                        opacity="0.6"
+                        class="liquid-surface"
+                      />
+                    </g>
+                  </svg>
                 </div>
-                <div class="capacity-info">
-                  <span>of {{ tank()!.capacity_l | number:'1.0-0' }} L capacity</span>
-                </div>
-              </div>
-              <mat-progress-bar 
-                mode="determinate" 
-                [value]="tank()!.fill_percentage"
-                [class.warning]="tank()!.fill_percentage > 90"
-                [class.low]="tank()!.fill_percentage < 10">
-              </mat-progress-bar>
-              <div class="volume-stats">
-                <div class="stat">
-                  <span class="stat-value">{{ tank()!.fill_percentage }}%</span>
-                  <span class="stat-label">Fill Level</span>
-                </div>
-                <div class="stat">
-                  <span class="stat-value">{{ tank()!.available_capacity_l | number:'1.0-0' }} L</span>
-                  <span class="stat-label">Available</span>
+                
+                <div class="volume-info-panel">
+                  <div class="volume-header">
+                    <div class="volume-main">
+                      <span class="volume-label">Current Volume</span>
+                      <span class="volume-value">{{ tank()!.current_volume_l | number:'1.0-0' }}</span>
+                      <span class="volume-unit">Liters</span>
+                    </div>
+                    <div class="capacity-badge">
+                      <span class="capacity-label">Total Capacity</span>
+                      <span class="capacity-value">{{ tank()!.capacity_l | number:'1.0-0' }} L</span>
+                    </div>
+                  </div>
+                  
+                  <div class="progress-section">
+                    <div class="progress-header">
+                      <span class="fill-label">Fill Level</span>
+                      <span class="fill-percentage">{{ tank()!.fill_percentage }}%</span>
+                    </div>
+                    <div class="progress-bar-wrapper">
+                      <div class="progress-bar-bg">
+                        <div 
+                          class="progress-bar-fill" 
+                          [style.width.%]="tank()!.fill_percentage"
+                          [class.warning]="tank()!.fill_percentage > 90"
+                          [class.low]="tank()!.fill_percentage < 10">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="volume-stats-grid">
+                    <div class="stat-card">
+                      <app-icon name="droplet" [size]="20"></app-icon>
+                      <div class="stat-content">
+                        <span class="stat-value">{{ tank()!.current_volume_l | number:'1.0-0' }} L</span>
+                        <span class="stat-label">Current</span>
+                      </div>
+                    </div>
+                    <div class="stat-card">
+                      <app-icon name="zap" [size]="20"></app-icon>
+                      <div class="stat-content">
+                        <span class="stat-value">{{ tank()!.available_capacity_l | number:'1.0-0' }} L</span>
+                        <span class="stat-label">Available</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             }
@@ -113,8 +194,12 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
           <!-- Tabs -->
           <mat-tab-group animationDuration="200ms" class="composition-tabs">
             <!-- Composition Tab -->
-            <mat-tab label="Composition">
-              <div class="tab-content">
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <app-icon name="pie-chart" [size]="18"></app-icon>
+                <span>Composition</span>
+              </ng-template>
+              <div class="tab-content composition-content">
                 @if (compositionLoading()) {
                   <div class="composition-skeleton">
                     <app-skeleton width="100%" height="200px"></app-skeleton>
@@ -128,24 +213,35 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                 } @else if (composition()) {
                   @if (composition()!.has_integrity_issues) {
                     <div class="integrity-warning">
-                      <app-icon name="alert-triangle" [size]="20"></app-icon>
-                      <span>This tank has composition integrity issues. Some wine may be from unknown sources.</span>
+                      <app-icon name="alert" [size]="20"></app-icon>
+                      <div class="warning-content">
+                        <strong>Composition Integrity Issue</strong>
+                        <span>This tank has some wine from unknown sources.</span>
+                      </div>
                     </div>
                   }
                   
                   @if (composition()!.total_volume_l > 0) {
                     <!-- By Variety -->
-                    <div class="composition-section">
-                      <h3>By Variety</h3>
+                    <div class="composition-section variety-section">
+                      <div class="section-header">
+                        <h3>
+                          <app-icon name="grape" [size]="18"></app-icon>
+                          Grape Varieties
+                        </h3>
+                      </div>
                       @if (composition()!.by_variety.length > 0) {
-                        <div class="composition-bars">
+                        <div class="composition-grid">
                           @for (v of composition()!.by_variety; track v.variety) {
-                            <div class="comp-row">
-                              <div class="comp-label">{{ v.variety }}</div>
-                              <div class="comp-bar-wrap">
-                                <div class="comp-bar" [style.width.%]="v.percentage" [style.background]="getVarietyColor($index)"></div>
+                            <div class="comp-card" [style.--card-color]="getVarietyColor($index)">
+                              <div class="comp-card-header">
+                                <span class="comp-name">{{ v.variety }}</span>
+                                <span class="comp-pct">{{ v.percentage | number:'1.1-1' }}%</span>
                               </div>
-                              <div class="comp-value">{{ v.percentage | number:'1.1-1' }}%</div>
+                              <div class="comp-bar-modern">
+                                <div class="comp-bar-fill" [style.width.%]="v.percentage"></div>
+                              </div>
+                              <span class="comp-volume">{{ v.volume_l | number:'1.0-0' }} L</span>
                             </div>
                           }
                         </div>
@@ -155,15 +251,25 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                     </div>
                     
                     <!-- By Batch -->
-                    <div class="composition-section">
-                      <h3>By Batch</h3>
+                    <div class="composition-section batch-section">
+                      <div class="section-header">
+                        <h3>
+                          <app-icon name="batch" [size]="18"></app-icon>
+                          Batches
+                        </h3>
+                      </div>
                       @if (composition()!.by_batch.length > 0) {
-                        <div class="batch-list">
+                        <div class="batch-grid">
                           @for (b of composition()!.by_batch; track b.batch_id) {
-                            <div class="batch-item">
-                              <div class="batch-code">{{ b.label }}</div>
-                              <div class="batch-volume">{{ b.volume_l | number:'1.0-0' }} L</div>
-                              <div class="batch-pct">{{ b.percentage | number:'1.1-1' }}%</div>
+                            <div class="batch-card">
+                              <div class="batch-header">
+                                <span class="batch-label">{{ b.label }}</span>
+                                <span class="batch-badge">{{ b.percentage | number:'1.1-1' }}%</span>
+                              </div>
+                              <div class="batch-volume">
+                                <app-icon name="droplet" [size]="14"></app-icon>
+                                {{ b.volume_l | number:'1.0-0' }} L
+                              </div>
                             </div>
                           }
                         </div>
@@ -173,19 +279,30 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                     </div>
                     
                     <!-- By Vineyard -->
-                    <div class="composition-section">
-                      <h3>By Vineyard</h3>
+                    <div class="composition-section vineyard-section">
+                      <div class="section-header">
+                        <h3>
+                          <app-icon name="vineyard" [size]="18"></app-icon>
+                          Vineyards
+                        </h3>
+                      </div>
                       @if (composition()!.by_vineyard.length > 0) {
-                        <div class="vineyard-list">
+                        <div class="vineyard-grid">
                           @for (v of composition()!.by_vineyard; track v.vineyard) {
-                            <div class="vineyard-item">
-                              <div class="vineyard-info">
-                                <span class="vineyard-name">{{ v.vineyard }}</span>
-                                <span class="grower-name">{{ v.grower }}</span>
+                            <div class="vineyard-card">
+                              <div class="vineyard-header">
+                                <div class="vineyard-names">
+                                  <span class="vineyard-name">{{ v.vineyard }}</span>
+                                  <span class="grower-name">
+                                    <app-icon name="farmer" [size]="12"></app-icon>
+                                    {{ v.grower }}
+                                  </span>
+                                </div>
+                                <div class="vineyard-badge">{{ v.percentage | number:'1.1-1' }}%</div>
                               </div>
-                              <div class="vineyard-stats">
-                                <span class="vineyard-volume">{{ v.volume_l | number:'1.0-0' }} L</span>
-                                <span class="vineyard-pct">{{ v.percentage | number:'1.1-1' }}%</span>
+                              <div class="vineyard-volume">
+                                <app-icon name="droplet" [size]="14"></app-icon>
+                                {{ v.volume_l | number:'1.0-0' }} L
                               </div>
                             </div>
                           }
@@ -198,16 +315,20 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                     <!-- Unknown -->
                     @if (composition()!.unknown_volume_l > 0) {
                       <div class="composition-section unknown-section">
-                        <h3>Unknown Origin</h3>
-                        <div class="unknown-info">
-                          <app-icon name="alert-triangle" [size]="16"></app-icon>
-                          <span>{{ composition()!.unknown_volume_l | number:'1.0-0' }} L ({{ composition()!.unknown_percentage | number:'1.1-1' }}%)</span>
+                        <div class="unknown-card">
+                          <app-icon name="help-circle" [size]="24"></app-icon>
+                          <div class="unknown-content">
+                            <h4>Unknown Origin</h4>
+                            <p>{{ composition()!.unknown_volume_l | number:'1.0-0' }} L ({{ composition()!.unknown_percentage | number:'1.1-1' }}%)</p>
+                          </div>
                         </div>
                       </div>
                     }
                   } @else {
                     <div class="empty-composition">
-                      <app-icon name="wine" [size]="48"></app-icon>
+                      <div class="empty-icon-wrapper">
+                        <app-icon name="wine" [size]="64"></app-icon>
+                      </div>
                       <h4>Tank is Empty</h4>
                       <p>No composition data to display.</p>
                     </div>
@@ -217,7 +338,11 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
             </mat-tab>
             
             <!-- History Tab -->
-            <mat-tab label="Ledger & History">
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <app-icon name="book-open" [size]="18"></app-icon>
+                <span>Ledger & History</span>
+              </ng-template>
               <div class="tab-content history-tab">
                 @if (historyLoading()) {
                   <app-skeleton width="100%" height="300px"></app-skeleton>

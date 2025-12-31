@@ -264,6 +264,36 @@ const ICONS: Record<string, string> = {
     <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>
   `,
   
+  // Droplet - Water drop icon
+  'droplet': `
+    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+  `,
+  
+  // Zap - Lightning bolt icon
+  'zap': `
+    <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>
+  `,
+  
+  // Pie Chart - Pie chart icon
+  'pie-chart': `
+    <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+    <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+  `,
+  
+  // Help Circle - Question mark in circle
+  'help-circle': `
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+    <path d="M12 17h.01"/>
+  `,
+  
+  // Layers - Stacked layers icon
+  'layers': `
+    <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/>
+    <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/>
+    <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>
+  `,
+  
   // Map Pin - Location marker
   'map-pin': `
     <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/>
