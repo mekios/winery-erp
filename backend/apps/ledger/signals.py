@@ -38,10 +38,16 @@ def create_ledger_entries(sender, instance, created, **kwargs):
     # Handle outflow from source tank
     if transfer.source_tank:
         _create_outflow_entries(transfer)
+        # Update source tank status if it becomes empty
+        _update_tank_status_if_empty(transfer.source_tank)
     
     # Handle inflow to destination tank
     if transfer.destination_tank:
         _create_inflow_entries(transfer)
+        # Update destination tank status to IN_USE if it receives volume
+        if transfer.destination_tank.status == 'EMPTY' and transfer.volume_l > 0:
+            transfer.destination_tank.status = 'IN_USE'
+            transfer.destination_tank.save(update_fields=['status'])
 
 
 def _create_outflow_entries(transfer):
@@ -197,6 +203,18 @@ def delete_ledger_entries(sender, instance, **kwargs):
     Instead, we'd create adjustment transfers. This is here for data cleanup.
     """
     TankLedger.objects.filter(transfer=instance).delete()
+
+
+def _update_tank_status_if_empty(tank):
+    """
+    Update tank status to EMPTY if current_volume_l is 0 or less.
+    This ensures tanks are automatically marked as empty after all content is transferred out.
+    """
+    if tank.current_volume_l <= 0 and tank.status == 'IN_USE':
+        tank.status = 'EMPTY'
+        tank.current_volume_l = 0  # Ensure it's exactly 0, not negative
+        tank.save(update_fields=['status', 'current_volume_l'])
+        print(f'[Signal] Tank {tank.code} marked as EMPTY (volume: {tank.current_volume_l}L)')
 
 
 
