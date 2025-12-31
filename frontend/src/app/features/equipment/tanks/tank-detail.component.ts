@@ -103,6 +103,15 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                         <stop offset="0%" style="stop-color:#7c4dff;stop-opacity:0.9" />
                         <stop offset="100%" style="stop-color:#5e35d1;stop-opacity:1" />
                       </linearGradient>
+                      <!-- Dynamic clipPath based on fill percentage -->
+                      <clipPath id="liquidClip">
+                        <rect 
+                          x="0" 
+                          [attr.y]="270 - (240 * tank()!.fill_percentage / 100)" 
+                          width="200" 
+                          [attr.height]="270 + (240 * tank()!.fill_percentage / 100)"
+                        />
+                      </clipPath>
                     </defs>
                     
                     <!-- Tank outline -->
@@ -111,8 +120,8 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                     <line x1="180" y1="30" x2="180" y2="270" stroke="#cbd5e1" stroke-width="2"/>
                     <ellipse cx="100" cy="270" rx="80" ry="15" fill="none" stroke="#cbd5e1" stroke-width="2"/>
                     
-                    <!-- Inner liquid cylinder with animated height -->
-                    <g class="liquid-cylinder" [style.--liquid-height.%]="tank()!.fill_percentage">
+                    <!-- Inner liquid cylinder (clipped to height) -->
+                    <g clip-path="url(#liquidClip)" class="liquid-cylinder">
                       <!-- Top ellipse -->
                       <ellipse cx="100" cy="30" rx="78" ry="14" fill="url(#wineGradient)" opacity="0.9"/>
                       <!-- Cylinder sides -->

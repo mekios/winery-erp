@@ -242,12 +242,9 @@ h1 {
     filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
   }
   
-  // Liquid cylinder that scales from bottom
-  .liquid-cylinder {
-    --liquid-height: 0%;
-    transform-origin: center bottom;
-    transform: translateY(calc((100% - var(--liquid-height)) * 2.4px)) scaleY(calc(var(--liquid-height) / 100));
-    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+  // Smooth transitions for the clipped elements
+  #liquidClip rect {
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
