@@ -319,6 +319,18 @@ class DashboardView(WineryContextMixin, APIView):
         top_tanks = []
         for t in tanks_qs.filter(status='IN_USE').order_by('-current_volume_l')[:6]:
             fill_pct = (t.current_volume_l / t.capacity_l * 100) if t.capacity_l > 0 else 0
+            
+            # Get dominant variety from tank composition
+            dominant_variety = None
+            try:
+                from apps.ledger.models import TankLedger
+                composition = TankLedger.get_tank_composition(t)
+                if composition['by_variety']:
+                    # Get the variety with the highest percentage
+                    dominant_variety = max(composition['by_variety'], key=lambda x: x['percentage'])['variety']
+            except (ImportError, Exception):
+                pass
+            
             top_tanks.append({
                 'id': str(t.id),
                 'code': t.code,
@@ -326,6 +338,7 @@ class DashboardView(WineryContextMixin, APIView):
                 'capacity_l': float(t.capacity_l),
                 'current_volume_l': float(t.current_volume_l),
                 'fill_percentage': round(fill_pct, 1),
+                'dominant_variety': dominant_variety,
             })
 
         # === ALERTS ===

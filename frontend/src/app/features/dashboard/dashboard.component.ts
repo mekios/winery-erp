@@ -310,7 +310,7 @@ import {
                         <app-tank-visual
                           [tankId]="tank.id"
                           [fillPercentage]="tank.fill_percentage"
-                          [colors]="{ start: '#7c4dff', end: '#5e35d1' }"
+                          [colors]="getTankColor(tank.dominant_variety)"
                           [compact]="true">
                         </app-tank-visual>
                       </div>
@@ -458,6 +458,38 @@ export class DashboardComponent implements OnInit {
   
   formatRole(role: string): string {
     return role.replace('_', ' ');
+  }
+  
+  getTankColor(variety: string | null): { start: string; end: string } {
+    if (!variety) {
+      // Default purple for unknown/empty
+      return { start: '#7c4dff', end: '#5e35d1' };
+    }
+    
+    const varietyName = variety.toLowerCase();
+    
+    // Check if it's a red variety
+    if (varietyName.includes('merlot') || varietyName.includes('cabernet') ||
+        varietyName.includes('syrah') || varietyName.includes('shiraz') ||
+        varietyName.includes('pinot noir') || varietyName.includes('grenache') ||
+        varietyName.includes('tempranillo') || varietyName.includes('malbec') ||
+        varietyName.includes('sangiovese') || varietyName.includes('zinfandel')) {
+      // Red wine
+      return { start: '#dc2626', end: '#991b1b' };
+    }
+    
+    // Check if it's a white variety
+    if (varietyName.includes('chardonnay') || varietyName.includes('sauvignon') ||
+        varietyName.includes('riesling') || varietyName.includes('pinot gris') ||
+        varietyName.includes('pinot grigio') || varietyName.includes('viognier') ||
+        varietyName.includes('gewurztraminer') || varietyName.includes('moscato') ||
+        varietyName.includes('semillon') || varietyName.includes('albarino')) {
+      // White wine
+      return { start: '#fde047', end: '#facc15' };
+    }
+    
+    // Default to rosé/blend color for others
+    return { start: '#f472b6', end: '#db2777' };
   }
   
   getAlertLink(alert: DashboardAlert): string[] {

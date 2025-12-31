@@ -64,6 +64,7 @@ export interface TopTank {
   capacity_l: number;
   current_volume_l: number;
   fill_percentage: number;
+  dominant_variety: string | null;
 }
 
 export interface DashboardAlert {
