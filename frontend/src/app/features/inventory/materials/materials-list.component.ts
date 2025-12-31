@@ -28,28 +28,33 @@ import { InventoryService, Material } from '../inventory.service';
           </div>
         </div>
         
-        <div class="header-actions">
-          <button class="btn btn-primary" (click)="router.navigate(['/inventory/materials/new'])">
-            <mat-icon>add</mat-icon>
-            Add Material
-          </button>
-        </div>
+        <button mat-raised-button color="primary" (click)="navigateToCreate()">
+          <mat-icon>add</mat-icon>
+          Add Material
+        </button>
       </header>
       
-      <main class="list-content">
-        @if (error()) {
-          <div class="error-message">{{ error() }}</div>
-        } @else {
-          <app-data-table
-            [data]="materials()"
-            [columns]="columns"
-            [actions]="actions"
-            [loading]="loading()"
-            editRoute="/inventory/materials"
-            (actionClick)="onAction($event)">
-          </app-data-table>
-        }
-      </main>
+      <app-data-table
+        [columns]="columns"
+        [data]="materials()"
+        [actions]="actions"
+        [loading]="loading()"
+        searchPlaceholder="Search materials..."
+        emptyIcon="flask"
+        emptyTitle="No materials yet"
+        emptyMessage="Add your first winemaking material to get started."
+        (search)="onSearch($event)"
+        (actionClick)="onAction($event)">
+        
+        <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
+          <mat-icon>add</mat-icon>
+          Add Material
+        </button>
+      </app-data-table>
+      
+      <button class="mobile-fab" mat-fab color="primary" (click)="navigateToCreate()">
+        <mat-icon>add</mat-icon>
+      </button>
     </div>
   `,
   styleUrls: ['./materials-list.component.scss']
@@ -61,8 +66,9 @@ export class MaterialsListComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
 
   materials = signal<Material[]>([]);
+  filteredMaterials = signal<Material[]>([]);
   loading = signal(true);
-  error = signal<string | null>(null);
+  searchTerm = '';
 
   columns: TableColumn[] = [
     { key: 'name', label: 'Name', sortable: true },
@@ -107,25 +113,48 @@ export class MaterialsListComponent implements OnInit {
 
   loadMaterials(): void {
     this.loading.set(true);
-    this.error.set(null);
 
     this.inventoryService.getMaterials({ is_active: true }).subscribe({
       next: (data) => {
         this.materials.set(data);
+        this.applyFilters();
         this.loading.set(false);
       },
       error: (err: any) => {
         console.error('Error loading materials:', err);
-        this.error.set('Failed to load materials');
         this.loading.set(false);
       },
     });
   }
 
+  onSearch(term: string): void {
+    this.searchTerm = term.toLowerCase();
+    this.applyFilters();
+  }
+
+  applyFilters(): void {
+    let filtered = [...this.materials()];
+
+    if (this.searchTerm) {
+      filtered = filtered.filter(m =>
+        m.name.toLowerCase().includes(this.searchTerm) ||
+        m.code?.toLowerCase().includes(this.searchTerm) ||
+        m.category_display.toLowerCase().includes(this.searchTerm) ||
+        m.supplier?.toLowerCase().includes(this.searchTerm)
+      );
+    }
+
+    this.filteredMaterials.set(filtered);
+  }
+
+  navigateToCreate(): void {
+    this.router.navigate(['/inventory/materials/new']);
+  }
+
   onAction(event: { action: string; row: unknown }): void {
     const material = event.row as Material;
     if (event.action === 'edit') {
-      // Navigation is handled by the data table component
+      this.router.navigate(['/inventory/materials', material.id]);
     } else if (event.action === 'delete') {
       this.deleteMaterial(material);
     }
