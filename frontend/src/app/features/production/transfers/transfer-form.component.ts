@@ -261,6 +261,16 @@ export class TransferFormComponent implements OnInit {
       this.isEdit = true;
       this.transferId = id;
       this.loadTransfer(id);
+    } else {
+      // Check for query parameters to pre-fill tanks
+      this.route.queryParams.subscribe(params => {
+        if (params['sourceTank']) {
+          this.form.patchValue({ source_tank: params['sourceTank'] });
+        }
+        if (params['destinationTank']) {
+          this.form.patchValue({ destination_tank: params['destinationTank'] });
+        }
+      });
     }
   }
   
