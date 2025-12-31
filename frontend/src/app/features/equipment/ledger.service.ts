@@ -50,6 +50,7 @@ export interface LedgerEntry {
   composition_key_id: string | null;
   composition_key_label: string;
   derived_source: 'EXPLICIT' | 'INHERITED' | 'UNKNOWN';
+  event_type: 'batch_intake' | 'transfer' | 'unknown';
   created_at: string;
 }
 

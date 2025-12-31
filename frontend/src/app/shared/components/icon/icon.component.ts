@@ -241,6 +241,13 @@ const ICONS: Record<string, string> = {
     <path d="M12 17h.01"/>
   `,
   
+  // Info - Information circle icon
+  'info': `
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M12 16v-4"/>
+    <path d="M12 8h.01"/>
+  `,
+  
   // Clipboard List - Clipboard with list icon
   'clipboard-list': `
     <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>

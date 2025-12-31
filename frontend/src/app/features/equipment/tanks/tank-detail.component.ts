@@ -217,33 +217,69 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
             </mat-tab>
             
             <!-- History Tab -->
-            <mat-tab label="History">
-              <div class="tab-content">
+            <mat-tab label="Ledger & History">
+              <div class="tab-content history-tab">
                 @if (historyLoading()) {
                   <app-skeleton width="100%" height="300px"></app-skeleton>
                 } @else if (history().length > 0) {
-                  <div class="history-list">
-                    @for (entry of history(); track entry.id) {
-                      <div class="history-item" [class.inflow]="entry.delta_volume_l > 0" [class.outflow]="entry.delta_volume_l < 0">
-                        <div class="history-icon">
-                          @if (entry.delta_volume_l > 0) {
-                            <mat-icon>arrow_downward</mat-icon>
-                          } @else {
-                            <mat-icon>arrow_upward</mat-icon>
-                          }
-                        </div>
-                        <div class="history-content">
-                          <div class="history-main">
-                            <span class="history-volume" [class.positive]="entry.delta_volume_l > 0" [class.negative]="entry.delta_volume_l < 0">
-                              {{ entry.delta_volume_l > 0 ? '+' : '' }}{{ entry.delta_volume_l | number:'1.0-0' }} L
-                            </span>
-                            <span class="history-key">{{ entry.composition_key_label }}</span>
+                  <div class="ledger-timeline">
+                    @for (entry of history(); track entry.id; let i = $index) {
+                      <div class="timeline-entry" 
+                           [class.entry-inflow]="entry.delta_volume_l > 0" 
+                           [class.entry-outflow]="entry.delta_volume_l < 0"
+                           [style.animation-delay]="i * 0.05 + 's'">
+                        <!-- Timeline line connector -->
+                        @if (i < history().length - 1) {
+                          <div class="timeline-connector"></div>
+                        }
+                        
+                        <!-- Timeline node (icon) -->
+                        <div class="timeline-node">
+                          <div class="node-pulse"></div>
+                          <div class="node-icon">
+                            @if (entry.event_type === 'batch_intake') {
+                              <app-icon name="wine" [size]="16"></app-icon>
+                            } @else if (entry.delta_volume_l > 0) {
+                              <mat-icon>arrow_downward</mat-icon>
+                            } @else {
+                              <mat-icon>arrow_upward</mat-icon>
+                            }
                           </div>
-                          <div class="history-meta">
-                            <span class="history-date">{{ entry.event_datetime | date:'MMM d, y h:mm a' }}</span>
-                            <span class="history-source" [class]="'source-' + entry.derived_source.toLowerCase()">
-                              {{ entry.derived_source }}
-                            </span>
+                        </div>
+                        
+                        <!-- Entry card -->
+                        <div class="entry-card">
+                          <div class="card-header">
+                            <div class="volume-badge">
+                              <span class="volume-value">
+                                {{ entry.delta_volume_l > 0 ? '+' : '' }}{{ entry.delta_volume_l | number:'1.0-0' }} L
+                              </span>
+                              <span class="volume-label">
+                                {{ entry.delta_volume_l > 0 ? 'Inflow' : 'Outflow' }}
+                              </span>
+                            </div>
+                            <div class="event-badge" [class]="'event-' + entry.event_type">
+                              {{ entry.event_type === 'batch_intake' ? 'Batch Intake' : 'Transfer' }}
+                            </div>
+                          </div>
+                          
+                          <div class="card-body">
+                            <div class="composition-info">
+                              <span class="label-tag" [class]="'tag-' + entry.composition_key_type.toLowerCase()">
+                                {{ entry.composition_key_type }}
+                              </span>
+                              <span class="composition-label">{{ entry.composition_key_label }}</span>
+                            </div>
+                            
+                            <div class="source-info">
+                              <app-icon name="info" [size]="12"></app-icon>
+                              <span>Source: <strong>{{ entry.derived_source }}</strong></span>
+                            </div>
+                          </div>
+                          
+                          <div class="card-footer">
+                            <app-icon name="calendar" [size]="14"></app-icon>
+                            <span class="timestamp">{{ entry.event_datetime | date:'MMM d, y · h:mm a' }}</span>
                           </div>
                         </div>
                       </div>
@@ -251,9 +287,11 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                   </div>
                 } @else {
                   <div class="empty-history">
-                    <app-icon name="clipboard" [size]="48"></app-icon>
-                    <h4>No History</h4>
-                    <p>No ledger entries for this tank yet.</p>
+                    <div class="empty-icon-wrapper">
+                      <app-icon name="book-open" [size]="64"></app-icon>
+                    </div>
+                    <h4>No Ledger Entries Yet</h4>
+                    <p>When wine is added or transferred, the tank's history will appear here as a beautiful timeline.</p>
                   </div>
                 }
               </div>
