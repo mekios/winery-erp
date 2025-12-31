@@ -71,38 +71,63 @@ export class AuthService {
   private async initializeAuth(): Promise<void> {
     const token = this.getAccessToken();
     const refreshToken = this.getRefreshToken();
-    console.log('[AuthService] initializeAuth - token:', !!token, 'refresh:', !!refreshToken);
+    console.log('[AuthService] initializeAuth - access token exists:', !!token, ', refresh token exists:', !!refreshToken);
     
-    if (!token) {
-      console.log('[AuthService] No token, setting initialized');
+    if (!token && !refreshToken) {
+      console.log('[AuthService] No tokens, setting initialized');
       this._initialized$.next(true);
+      return;
+    }
+    
+    // If we have a refresh token but no access token, try refresh first
+    if (!token && refreshToken) {
+      console.log('[AuthService] No access token but have refresh token, attempting refresh...');
+      try {
+        const user = await firstValueFrom(this.tryRefreshToken());
+        if (user) {
+          this._currentUser.set(user);
+          this._isAuthenticated.set(true);
+          console.log('[AuthService] Authenticated via refresh!');
+        } else {
+          console.log('[AuthService] Refresh returned null, clearing tokens');
+          this.clearTokens();
+        }
+      } catch (err) {
+        console.error('[AuthService] Refresh failed:', err);
+        this.clearTokens();
+      } finally {
+        this._initialized$.next(true);
+      }
       return;
     }
 
     try {
-      console.log('[AuthService] Validating token with /users/me/');
+      console.log('[AuthService] Validating access token with /users/me/');
       // Try to validate the token - use skipAuthIntercept to prevent interceptor interference
       const user = await firstValueFrom(
         this.http.get<User>(`${environment.apiUrl}/users/me/`, {
           headers: { 'X-Skip-Auth-Intercept': 'true' }
         }).pipe(
-          tap(u => console.log('[AuthService] User fetched:', u)),
+          tap(u => console.log('[AuthService] User fetched successfully:', u.email)),
           catchError((err) => {
-            console.log('[AuthService] Token validation failed:', err?.status, '- trying refresh');
+            console.log('[AuthService] Token validation failed (status:', err?.status, '), trying refresh...');
             // Token invalid, try refresh
             return this.tryRefreshToken();
           })
         )
       );
       
-      console.log('[AuthService] Got user:', user);
+      console.log('[AuthService] Got user after validation/refresh:', user ? user.email : 'null');
       if (user) {
         this._currentUser.set(user);
         this._isAuthenticated.set(true);
-        console.log('[AuthService] Authenticated!');
+        console.log('[AuthService] ✓ Authenticated successfully!');
+      } else {
+        console.warn('[AuthService] ✗ User is null after validation/refresh, clearing tokens');
+        this.clearTokens();
       }
     } catch (err) {
-      console.error('[AuthService] All auth attempts failed:', err);
+      console.error('[AuthService] ✗ All auth attempts failed:', err);
       // All attempts failed, clear tokens
       this.clearTokens();
     } finally {
