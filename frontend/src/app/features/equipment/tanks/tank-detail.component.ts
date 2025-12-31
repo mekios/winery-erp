@@ -108,8 +108,8 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                     <!-- Outer tank (outline) -->
                     <defs>
                       <linearGradient id="wineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" style="stop-color:#7c4dff;stop-opacity:0.9" />
-                        <stop offset="100%" style="stop-color:#5e35d1;stop-opacity:1" />
+                        <stop offset="0%" [attr.style]="'stop-color:' + getDominantVarietyColor().start + ';stop-opacity:0.9'" />
+                        <stop offset="100%" [attr.style]="'stop-color:' + getDominantVarietyColor().end + ';stop-opacity:1'" />
                       </linearGradient>
                       <!-- Dynamic clipPath based on fill percentage -->
                       <clipPath id="liquidClip">
@@ -134,7 +134,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                         <!-- Cylinder body -->
                         <rect x="22" y="30" width="156" height="240" fill="url(#wineGradient)"/>
                         <!-- Bottom ellipse -->
-                        <ellipse cx="100" cy="270" rx="78" ry="14" fill="#5e35d1"/>
+                        <ellipse cx="100" cy="270" rx="78" ry="14" [attr.fill]="getDominantVarietyColor().end"/>
                       </g>
                     }
                     
@@ -154,7 +154,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                         [attr.cy]="270 - (240 * tank()!.fill_percentage / 100)" 
                         rx="78" 
                         ry="14" 
-                        fill="#9575ff" 
+                        [attr.fill]="getDominantVarietyColor().start" 
                         opacity="0.3"
                         class="liquid-highlight"
                       />
@@ -550,6 +550,57 @@ export class TankDetailComponent implements OnInit {
   getVarietyColor(index: number): string {
     return this.varietyColors[index % this.varietyColors.length];
   }
+  
+  /**
+   * Get the dominant variety color from composition
+   * Returns appropriate gradient colors based on variety mix
+   */
+  getDominantVarietyColor(): { start: string; end: string } {
+    const comp = this.composition();
+    if (!comp || comp.by_variety.length === 0) {
+      // Default purple for unknown/no variety
+      return { start: '#7c4dff', end: '#5e35d1' };
+    }
+    
+    // Get total percentages by color
+    let redTotal = 0;
+    let whiteTotal = 0;
+    let roseTotal = 0;
+    
+    for (const v of comp.by_variety) {
+      const varietyName = v.variety.toLowerCase();
+      // Simple heuristic based on common variety names
+      if (varietyName.includes('merlot') || varietyName.includes('cabernet') || 
+          varietyName.includes('syrah') || varietyName.includes('shiraz') ||
+          varietyName.includes('pinot noir') || varietyName.includes('grenache') ||
+          varietyName.includes('tempranillo') || varietyName.includes('malbec') ||
+          varietyName.includes('sangiovese') || varietyName.includes('zinfandel')) {
+        redTotal += v.percentage;
+      } else if (varietyName.includes('chardonnay') || varietyName.includes('sauvignon') ||
+                 varietyName.includes('riesling') || varietyName.includes('pinot gris') ||
+                 varietyName.includes('pinot grigio') || varietyName.includes('viognier') ||
+                 varietyName.includes('gewurztraminer') || varietyName.includes('moscato') ||
+                 varietyName.includes('semillon') || varietyName.includes('albarino')) {
+        whiteTotal += v.percentage;
+      } else {
+        roseTotal += v.percentage;
+      }
+    }
+    
+    // Determine dominant color
+    if (redTotal > 50) {
+      // Red wine - deep red/purple
+      return { start: '#dc2626', end: '#991b1b' };
+    } else if (whiteTotal > 50) {
+      // White wine - golden yellow
+      return { start: '#fbbf24', end: '#d97706' };
+    } else if (roseTotal > 50 || (redTotal > 0 && whiteTotal > 0)) {
+      // Rosé or blend - pink
+      return { start: '#f472b6', end: '#db2777' };
+    } else {
+      // Mixed blend - purple
+      return { start: '#7c4dff', end: '#5e35d1' };
+    }
+  }
 }
-
 
