@@ -28,7 +28,126 @@ import { InventoryService, MaterialDropdown, MovementType, StockLocation } from 
     IconComponent,
     NumberInputComponent,
   ],
-  templateUrl: './movement-form-dialog.component.html',
+  template: `
+    <h2 mat-dialog-title>
+      <app-icon name="truck" [size]="20"></app-icon>
+      Record Stock Movement
+    </h2>
+
+    <mat-dialog-content>
+      <form [formGroup]="form" id="movementForm">
+        <div class="form-grid">
+          <!-- Material -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Material</mat-label>
+            <mat-select formControlName="material">
+              @for (material of materials(); track material.id) {
+                <mat-option [value]="material.id">
+                  {{ material.name }} ({{ material.current_stock }} {{ material.unit_display }})
+                </mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ getErrorMessage('material') }}</mat-error>
+          </mat-form-field>
+
+          <!-- Movement Type -->
+          <mat-form-field appearance="outline">
+            <mat-label>Movement Type</mat-label>
+            <mat-select formControlName="movement_type">
+              @for (type of movementTypes(); track type.value) {
+                <mat-option [value]="type.value">{{ type.label }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ getErrorMessage('movement_type') }}</mat-error>
+          </mat-form-field>
+
+          <!-- Quantity -->
+          <app-number-input
+            formControlName="quantity"
+            label="Quantity"
+            [decimals]="3"
+            [min]="0.001"
+            [required]="true">
+          </app-number-input>
+
+          <!-- Location -->
+          <mat-form-field appearance="outline">
+            <mat-label>Location</mat-label>
+            <mat-select formControlName="location">
+              @for (location of locations(); track location.value) {
+                <mat-option [value]="location.value">{{ location.label }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ getErrorMessage('location') }}</mat-error>
+          </mat-form-field>
+
+          <!-- Destination Location (only for transfers) -->
+          @if (isTransfer()) {
+            <mat-form-field appearance="outline">
+              <mat-label>Destination Location</mat-label>
+              <mat-select formControlName="destination_location">
+                @for (location of locations(); track location.value) {
+                  <mat-option [value]="location.value">{{ location.label }}</mat-option>
+                }
+              </mat-select>
+              <mat-error>{{ getErrorMessage('destination_location') }}</mat-error>
+            </mat-form-field>
+          }
+
+          <!-- Movement Date -->
+          <mat-form-field appearance="outline">
+            <mat-label>Movement Date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="movement_date" />
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error>{{ getErrorMessage('movement_date') }}</mat-error>
+          </mat-form-field>
+
+          <!-- Reference Number -->
+          <mat-form-field appearance="outline">
+            <mat-label>Reference Number (Optional)</mat-label>
+            <input matInput formControlName="reference_number" placeholder="e.g., PO-12345" />
+          </mat-form-field>
+
+          <!-- Unit Cost -->
+          <app-number-input
+            formControlName="unit_cost"
+            label="Unit Cost (Optional)"
+            [decimals]="2"
+            [min]="0"
+            placeholder="Cost per unit">
+          </app-number-input>
+
+          <!-- Notes -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Notes (Optional)</mat-label>
+            <textarea
+              matInput
+              formControlName="notes"
+              rows="3"
+              placeholder="Additional details"></textarea>
+          </mat-form-field>
+        </div>
+      </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-stroked-button (click)="onCancel()" [disabled]="saving()">
+        Cancel
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="onSubmit()"
+        [disabled]="saving()">
+        @if (saving()) {
+          <span>Recording...</span>
+        } @else {
+          <span>Record Movement</span>
+        }
+      </button>
+    </mat-dialog-actions>
+  `,
   styleUrl: './movement-form-dialog.component.scss'
 })
 export class MovementFormDialogComponent implements OnInit {

@@ -1,33 +1,65 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { DataTableComponent, TableColumn, TableAction } from '@shared/components/data-table/data-table.component';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
-import { IconComponent } from '@shared/components/icon/icon.component';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { IconComponent } from '@shared/components/icon/icon.component';
 import { InventoryService, Material } from '../inventory.service';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-materials-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatButtonModule,
-    MatChipsModule,
-    DataTableComponent,
-    PageHeaderComponent,
-    IconComponent,
-  ],
-  templateUrl: './materials-list.component.html',
-  styleUrl: './materials-list.component.scss'
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatSnackBarModule, DataTableComponent, IconComponent],
+  template: `
+    <div class="list-page">
+      <header class="list-header">
+        <div class="header-title">
+          <div class="title-icon">
+            <app-icon name="flask" [size]="24"></app-icon>
+          </div>
+          <div>
+            <h1>Materials & Supplies</h1>
+            <span class="subtitle">Manage inventory of winemaking materials</span>
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <button class="btn btn-primary" (click)="router.navigate(['/inventory/materials/new'])">
+            <mat-icon>add</mat-icon>
+            Add Material
+          </button>
+        </div>
+      </header>
+      
+      <main class="list-content">
+        @if (error()) {
+          <div class="error-message">{{ error() }}</div>
+        } @else {
+          <app-data-table
+            [data]="materials()"
+            [columns]="columns"
+            [actions]="actions"
+            [loading]="loading()"
+            editRoute="/inventory/materials"
+            (actionClick)="onAction($event)">
+          </app-data-table>
+        }
+      </main>
+    </div>
+  `,
+  styleUrls: ['./materials-list.component.scss']
 })
 export class MaterialsListComponent implements OnInit {
+  router = inject(Router);
+  private inventoryService = inject(InventoryService);
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
+
   materials = signal<Material[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
@@ -69,12 +101,6 @@ export class MaterialsListComponent implements OnInit {
     { icon: 'delete', label: 'Delete', action: 'delete', color: 'warn' },
   ];
 
-  constructor(
-    private inventoryService: InventoryService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) {}
-
   ngOnInit(): void {
     this.loadMaterials();
   }
@@ -88,7 +114,7 @@ export class MaterialsListComponent implements OnInit {
         this.materials.set(data);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error loading materials:', err);
         this.error.set('Failed to load materials');
         this.loading.set(false);
@@ -122,7 +148,7 @@ export class MaterialsListComponent implements OnInit {
             this.snackBar.open('Material deleted successfully', 'Close', { duration: 3000 });
             this.loadMaterials();
           },
-          error: (err) => {
+          error: (err: any) => {
             console.error('Error deleting material:', err);
             this.snackBar.open('Failed to delete material', 'Close', { duration: 3000 });
           },
@@ -131,4 +157,3 @@ export class MaterialsListComponent implements OnInit {
     });
   }
 }
-

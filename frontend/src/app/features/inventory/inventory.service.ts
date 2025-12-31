@@ -56,6 +56,8 @@ export interface MaterialDropdown {
   code: string;
   category: MaterialCategory;
   unit: MaterialUnit;
+  unit_display: string;
+  current_stock: number;
   label: string;
 }
 

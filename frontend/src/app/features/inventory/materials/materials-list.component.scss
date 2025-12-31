@@ -1,24 +1,4 @@
-.content-container {
-  padding: 1.5rem;
-  max-width: var(--max-content-width);
-  margin: 0 auto;
-}
-
-.error-message {
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background-color: var(--danger-light);
-  color: var(--danger);
-  border-radius: var(--border-radius-sm);
-}
-
-.header-action-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-// Stock status chips
+// Stock status badges (part of data-table)
 ::ng-deep {
   .status-ok {
     background-color: var(--success-light) !important;
@@ -36,3 +16,10 @@
   }
 }
 
+.error-message {
+  padding: 1rem;
+  margin: 1rem;
+  background-color: var(--danger-light);
+  color: var(--danger);
+  border-radius: var(--border-radius-sm);
+}

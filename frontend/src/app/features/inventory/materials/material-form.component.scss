@@ -1,20 +1,17 @@
-.form-container {
-  max-width: var(--form-width);
+.form-content {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 2rem;
 }
 
-.loading-skeleton {
-  max-width: var(--form-width);
-  margin: 0 auto;
-  padding: 1.5rem;
+.form-section {
+  margin-bottom: 2rem;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
-  margin-bottom: 2rem;
 }
 
 .full-width {
@@ -27,31 +24,12 @@
   padding-top: 0.5rem;
 }
 
-.form-actions {
-  position: sticky;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--background);
-  border-radius: var(--border-radius-md);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-}
-
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;
   }
 
-  .form-actions {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-radius: 0;
+  .form-content {
+    padding: 1rem;
   }
 }
-
