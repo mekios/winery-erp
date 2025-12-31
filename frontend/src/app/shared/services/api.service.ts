@@ -100,6 +100,16 @@ export class ApiService {
   }
   
   /**
+   * Custom action endpoint with GET method
+   */
+  actionGet<T>(endpoint: string, action: string, params?: QueryParams): Observable<T> {
+    return this.http.get<T>(
+      `${this.baseUrl}/${endpoint}/${action}/`,
+      { params: this.buildParams(params) }
+    );
+  }
+  
+  /**
    * Custom action endpoint with DELETE method
    */
   actionDelete<T>(endpoint: string, action: string): Observable<T> {

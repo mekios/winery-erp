@@ -73,10 +73,12 @@ class MaterialCreateUpdateSerializer(serializers.ModelSerializer):
 class MaterialDropdownSerializer(serializers.ModelSerializer):
     """Compact serializer for dropdowns"""
     label = serializers.SerializerMethodField()
+    unit_display = serializers.CharField(source='get_unit_display', read_only=True)
+    current_stock = serializers.DecimalField(max_digits=10, decimal_places=3, read_only=True)
     
     class Meta:
         model = Material
-        fields = ['id', 'name', 'code', 'category', 'unit', 'label']
+        fields = ['id', 'name', 'code', 'category', 'unit', 'unit_display', 'current_stock', 'label']
     
     def get_label(self, obj):
         if obj.code:

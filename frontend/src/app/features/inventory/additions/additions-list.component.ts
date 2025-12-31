@@ -1,20 +1,19 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
 
+import { DataTableComponent, TableColumn } from '@shared/components/data-table/data-table.component';
 import { IconComponent } from '@shared/components/icon/icon.component';
 import { InventoryService, Addition } from '../inventory.service';
 
 @Component({
   selector: 'app-additions-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    DatePipe,
-    DecimalPipe,
-    MatIconModule,
-    IconComponent,
-  ],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatTabsModule, DataTableComponent, IconComponent],
   template: `
     <div class="list-page">
       <header class="list-header">
@@ -29,92 +28,58 @@ import { InventoryService, Addition } from '../inventory.service';
         </div>
       </header>
       
-      <main class="list-content">
-        @if (loading()) {
-          <div class="loading-state">
-            <mat-icon class="loading-icon">hourglass_empty</mat-icon>
-            <p>Loading additions...</p>
-          </div>
-        } @else if (additions().length === 0) {
-          <div class="empty-state">
-            <app-icon name="flask" [size]="48"></app-icon>
-            <h3>No Additions Recorded</h3>
-            <p>Material additions are created when you add SO₂, yeast, or other materials to tanks or barrels from their detail pages.</p>
-          </div>
-        } @else {
-          <div class="additions-list">
-            @for (addition of additions(); track addition.id) {
-              <div class="addition-card">
-                <div class="addition-header">
-                  <div class="addition-info">
-                    <h3 class="material-name">{{ addition.material_name }}</h3>
-                    <div class="category-badge">{{ addition.material_category_display }}</div>
-                  </div>
-                  <div class="addition-quantity">
-                    {{ addition.quantity | number:'1.0-2' }} {{ addition.unit_display }}
-                  </div>
-                </div>
-
-                <div class="addition-details">
-                  <div class="detail-row">
-                    <span class="label">Target:</span>
-                    <span class="value target">{{ addition.target_display }}</span>
-                  </div>
-
-                  @if (addition.purpose) {
-                    <div class="detail-row">
-                      <span class="label">Purpose:</span>
-                      <span class="value">{{ addition.purpose }}</span>
-                    </div>
-                  }
-
-                  @if (addition.dosage_rate) {
-                    <div class="detail-row">
-                      <span class="label">Dosage Rate:</span>
-                      <span class="value dosage">{{ addition.dosage_rate }}</span>
-                    </div>
-                  }
-
-                  @if (addition.target_volume_l) {
-                    <div class="detail-row">
-                      <span class="label">Target Volume:</span>
-                      <span class="value">{{ addition.target_volume_l | number:'1.0-0' }} L</span>
-                    </div>
-                  }
-
-                  <div class="detail-row">
-                    <span class="label">Date:</span>
-                    <span class="value">{{ addition.addition_date | date:'medium' }}</span>
-                  </div>
-
-                  @if (addition.notes) {
-                    <div class="detail-row notes">
-                      <span class="label">Notes:</span>
-                      <span class="value">{{ addition.notes }}</span>
-                    </div>
-                  }
-
-                  @if (addition.added_by_name) {
-                    <div class="detail-row meta">
-                      <span class="label">Added by:</span>
-                      <span class="value">{{ addition.added_by_name }}</span>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-        }
-      </main>
+      <mat-tab-group class="inventory-tabs" [selectedIndex]="2" (selectedTabChange)="onTabChange($event)">
+        <mat-tab label="Materials">
+        </mat-tab>
+        <mat-tab label="Movements">
+        </mat-tab>
+        <mat-tab label="Additions">
+          <ng-template matTabContent>
+            <app-data-table
+              [columns]="columns"
+              [data]="filteredAdditions()"
+              [loading]="loading()"
+              searchPlaceholder="Search additions..."
+              emptyIcon="flask"
+              emptyTitle="No additions yet"
+              emptyMessage="Material additions are created when you add SO₂, yeast, or other materials to tanks or barrels from their detail pages."
+              (search)="onSearch($event)">
+            </app-data-table>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
     </div>
   `,
   styleUrls: ['./additions-list.component.scss']
 })
 export class AdditionsListComponent implements OnInit {
   private inventoryService = inject(InventoryService);
+  private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
 
   additions = signal<Addition[]>([]);
+  filteredAdditions = signal<Addition[]>([]);
   loading = signal(true);
+  searchTerm = '';
+
+  columns: TableColumn[] = [
+    { key: 'material_name', label: 'Material', sortable: true },
+    { key: 'material_category_display', label: 'Category', sortable: true },
+    { 
+      key: 'quantity', 
+      label: 'Quantity', 
+      align: 'right',
+      format: (value: any, row: any) => `${Number(value).toFixed(2)} ${row.unit_display || ''}`
+    },
+    { key: 'target_display', label: 'Target' },
+    { key: 'purpose', label: 'Purpose' },
+    { 
+      key: 'addition_date', 
+      label: 'Date', 
+      sortable: true,
+      format: (value: any) => new Date(value).toLocaleDateString()
+    },
+  ];
 
   ngOnInit(): void {
     this.loadAdditions();
@@ -126,12 +91,38 @@ export class AdditionsListComponent implements OnInit {
     this.inventoryService.getAdditions().subscribe({
       next: (data) => {
         this.additions.set(data);
+        this.filteredAdditions.set(data);
         this.loading.set(false);
       },
       error: (err: any) => {
         console.error('Error loading additions:', err);
+        this.snackBar.open('Failed to load additions', 'Close', { duration: 3000 });
         this.loading.set(false);
       },
     });
+  }
+
+  onSearch(term: string): void {
+    this.searchTerm = term.toLowerCase();
+    let filtered = [...this.additions()];
+
+    if (this.searchTerm) {
+      filtered = filtered.filter(a =>
+        a.material_name.toLowerCase().includes(this.searchTerm) ||
+        a.target_display.toLowerCase().includes(this.searchTerm) ||
+        a.purpose?.toLowerCase().includes(this.searchTerm)
+      );
+    }
+
+    this.filteredAdditions.set(filtered);
+  }
+
+  onTabChange(event: any): void {
+    const tabIndex = event.index;
+    if (tabIndex === 0) {
+      this.router.navigate(['/inventory/materials']);
+    } else if (tabIndex === 1) {
+      this.router.navigate(['/inventory/movements']);
+    }
   }
 }

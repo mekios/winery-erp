@@ -1,10 +1,14 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
 
+import { DataTableComponent, TableColumn, TableAction } from '@shared/components/data-table/data-table.component';
+import { FilterChipComponent, FilterOption } from '@shared/components/filter-chip/filter-chip.component';
 import { IconComponent } from '@shared/components/icon/icon.component';
 import { InventoryService, MaterialMovement } from '../inventory.service';
 import { MovementFormDialogComponent } from './movement-form-dialog.component';
@@ -12,15 +16,7 @@ import { MovementFormDialogComponent } from './movement-form-dialog.component';
 @Component({
   selector: 'app-movements-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    DatePipe,
-    DecimalPipe,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    IconComponent,
-  ],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatTabsModule, DataTableComponent, FilterChipComponent, IconComponent],
   template: `
     <div class="list-page">
       <header class="list-header">
@@ -34,101 +30,51 @@ import { MovementFormDialogComponent } from './movement-form-dialog.component';
           </div>
         </div>
         
-        <div class="header-actions">
-          <button class="btn btn-primary" (click)="openMovementDialog()">
-            <mat-icon>add</mat-icon>
-            Record Movement
-          </button>
-        </div>
+        <button mat-raised-button color="primary" (click)="openMovementDialog()">
+          <mat-icon>add</mat-icon>
+          Record Movement
+        </button>
       </header>
       
-      <main class="list-content">
-        @if (loading()) {
-          <div class="loading-state">
-            <mat-icon class="loading-icon">hourglass_empty</mat-icon>
-            <p>Loading movements...</p>
-          </div>
-        } @else if (movements().length === 0) {
-          <div class="empty-state">
-            <app-icon name="truck" [size]="48"></app-icon>
-            <h3>No Stock Movements</h3>
-            <p>Record purchases, adjustments, or transfers to track inventory</p>
-            <button class="btn btn-primary" (click)="openMovementDialog()">
-              <mat-icon>add</mat-icon>
-              Record Movement
-            </button>
-          </div>
-        } @else {
-          <div class="movements-list">
-            @for (movement of movements(); track movement.id) {
-              <div class="movement-card">
-                <div class="movement-header">
-                  <div class="movement-info">
-                    <mat-chip [ngClass]="getMovementTypeClass(movement.movement_type)">
-                      {{ movement.movement_type_display }}
-                    </mat-chip>
-                    <h3 class="material-name">{{ movement.material_name }}</h3>
-                  </div>
-                  <div class="movement-quantity" [ngClass]="getQuantityClass(movement)">
-                    {{ movement.quantity > 0 ? '+' : '' }}{{ movement.quantity | number:'1.0-2' }} {{ movement.unit_display }}
-                  </div>
-                </div>
-
-                <div class="movement-details">
-                  <div class="detail-row">
-                    <span class="label">Location:</span>
-                    <span class="value">{{ movement.location_display }}</span>
-                  </div>
-
-                  @if (movement.destination_location_display) {
-                    <div class="detail-row">
-                      <span class="label">Destination:</span>
-                      <span class="value">{{ movement.destination_location_display }}</span>
-                    </div>
-                  }
-
-                  @if (movement.reference_number) {
-                    <div class="detail-row">
-                      <span class="label">Reference:</span>
-                      <span class="value">{{ movement.reference_number }}</span>
-                    </div>
-                  }
-
-                  @if (movement.unit_cost) {
-                    <div class="detail-row">
-                      <span class="label">Unit Cost:</span>
-                      <span class="value">€{{ movement.unit_cost | number:'1.2-2' }}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="label">Total Cost:</span>
-                      <span class="value total-cost">€{{ (movement.unit_cost * movement.quantity) | number:'1.2-2' }}</span>
-                    </div>
-                  }
-
-                  <div class="detail-row">
-                    <span class="label">Date:</span>
-                    <span class="value">{{ movement.movement_date | date:'medium' }}</span>
-                  </div>
-
-                  @if (movement.notes) {
-                    <div class="detail-row notes">
-                      <span class="label">Notes:</span>
-                      <span class="value">{{ movement.notes }}</span>
-                    </div>
-                  }
-
-                  @if (movement.created_by_name) {
-                    <div class="detail-row meta">
-                      <span class="label">Recorded by:</span>
-                      <span class="value">{{ movement.created_by_name }}</span>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-        }
-      </main>
+      <mat-tab-group class="inventory-tabs" [selectedIndex]="1" (selectedTabChange)="onTabChange($event)">
+        <mat-tab label="Materials">
+        </mat-tab>
+        <mat-tab label="Movements">
+          <ng-template matTabContent>
+            <ng-template #filtersTemplate>
+              <app-filter-chip
+                label="Type"
+                [options]="typeOptions"
+                [value]="selectedType"
+                (valueChange)="onTypeChange($event)">
+              </app-filter-chip>
+            </ng-template>
+            
+            <app-data-table
+              [columns]="columns"
+              [data]="filteredMovements()"
+              [loading]="loading()"
+              [filterTemplate]="filtersTemplate"
+              searchPlaceholder="Search movements..."
+              emptyIcon="truck"
+              emptyTitle="No movements yet"
+              emptyMessage="Record purchases, adjustments, or transfers to track inventory."
+              (search)="onSearch($event)">
+              
+              <button empty-action mat-raised-button color="primary" (click)="openMovementDialog()">
+                <mat-icon>add</mat-icon>
+                Record Movement
+              </button>
+            </app-data-table>
+          </ng-template>
+        </mat-tab>
+        <mat-tab label="Additions">
+        </mat-tab>
+      </mat-tab-group>
+      
+      <button class="mobile-fab" mat-fab color="primary" (click)="openMovementDialog()">
+        <mat-icon>add</mat-icon>
+      </button>
     </div>
   `,
   styleUrls: ['./movements-list.component.scss']
@@ -136,9 +82,49 @@ import { MovementFormDialogComponent } from './movement-form-dialog.component';
 export class MovementsListComponent implements OnInit {
   private inventoryService = inject(InventoryService);
   private dialog = inject(MatDialog);
+  private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
 
   movements = signal<MaterialMovement[]>([]);
+  filteredMovements = signal<MaterialMovement[]>([]);
   loading = signal(true);
+  searchTerm = '';
+  selectedType: string | null = null;
+
+  typeOptions: FilterOption[] = [
+    { value: 'PURCHASE', label: 'Purchase' },
+    { value: 'ADJUSTMENT', label: 'Adjustment' },
+    { value: 'TRANSFER', label: 'Transfer' },
+    { value: 'USAGE', label: 'Usage' },
+    { value: 'WASTE', label: 'Waste' },
+    { value: 'RETURN', label: 'Return' },
+  ];
+
+  columns: TableColumn[] = [
+    { key: 'material_name', label: 'Material', sortable: true },
+    { key: 'movement_type_display', label: 'Type', sortable: true, type: 'badge', badgeMap: {
+      'Purchase': { label: 'Purchase', class: 'badge-success' },
+      'Adjustment': { label: 'Adjustment', class: 'badge-info' },
+      'Transfer': { label: 'Transfer', class: 'badge-warning' },
+      'Usage': { label: 'Usage', class: 'badge-secondary' },
+      'Waste': { label: 'Waste', class: 'badge-danger' },
+      'Return': { label: 'Return', class: 'badge-info' },
+    }},
+    { 
+      key: 'quantity', 
+      label: 'Quantity', 
+      align: 'right',
+      format: (value: any, row: any) => `${Number(value).toFixed(2)} ${row.unit_display || ''}`
+    },
+    { key: 'location_display', label: 'Location', sortable: true },
+    { key: 'reference_number', label: 'Reference' },
+    { 
+      key: 'movement_date', 
+      label: 'Date', 
+      sortable: true,
+      format: (value: any) => new Date(value).toLocaleDateString()
+    },
+  ];
 
   ngOnInit(): void {
     this.loadMovements();
@@ -150,13 +136,54 @@ export class MovementsListComponent implements OnInit {
     this.inventoryService.getMovements().subscribe({
       next: (data) => {
         this.movements.set(data);
+        this.applyFilters();
         this.loading.set(false);
       },
       error: (err: any) => {
         console.error('Error loading movements:', err);
+        this.snackBar.open('Failed to load movements', 'Close', { duration: 3000 });
         this.loading.set(false);
       },
     });
+  }
+
+  onSearch(term: string): void {
+    this.searchTerm = term.toLowerCase();
+    this.applyFilters();
+  }
+
+  onTypeChange(value: string | boolean | null): void {
+    this.selectedType = typeof value === 'string' ? value : null;
+    this.applyFilters();
+  }
+
+  onTabChange(event: any): void {
+    const tabIndex = event.index;
+    if (tabIndex === 0) {
+      this.router.navigate(['/inventory/materials']);
+    } else if (tabIndex === 2) {
+      this.router.navigate(['/inventory/additions']);
+    }
+  }
+
+  applyFilters(): void {
+    let filtered = [...this.movements()];
+
+    // Type filter
+    if (this.selectedType) {
+      filtered = filtered.filter(m => m.movement_type === this.selectedType);
+    }
+
+    // Search filter
+    if (this.searchTerm) {
+      filtered = filtered.filter(m =>
+        m.material_name.toLowerCase().includes(this.searchTerm) ||
+        m.reference_number?.toLowerCase().includes(this.searchTerm) ||
+        m.location_display.toLowerCase().includes(this.searchTerm)
+      );
+    }
+
+    this.filteredMovements.set(filtered);
   }
 
   openMovementDialog(): void {
@@ -170,32 +197,5 @@ export class MovementsListComponent implements OnInit {
         this.loadMovements();
       }
     });
-  }
-
-  getMovementTypeClass(type: string): string {
-    switch (type) {
-      case 'PURCHASE':
-        return 'type-purchase';
-      case 'ADJUSTMENT':
-        return 'type-adjustment';
-      case 'TRANSFER':
-        return 'type-transfer';
-      case 'USAGE':
-        return 'type-usage';
-      case 'WASTE':
-        return 'type-waste';
-      case 'RETURN':
-        return 'type-return';
-      default:
-        return '';
-    }
-  }
-
-  getQuantityClass(movement: MaterialMovement): string {
-    const positiveTypes = ['PURCHASE', 'ADJUSTMENT', 'TRANSFER'];
-    if (positiveTypes.includes(movement.movement_type)) {
-      return 'quantity-positive';
-    }
-    return 'quantity-negative';
   }
 }

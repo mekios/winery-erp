@@ -5,16 +5,20 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
 
 import { DataTableComponent, TableColumn, TableAction } from '@shared/components/data-table/data-table.component';
+import { FilterChipComponent, FilterOption } from '@shared/components/filter-chip/filter-chip.component';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { IconComponent } from '@shared/components/icon/icon.component';
 import { InventoryService, Material } from '../inventory.service';
+import { AdditionFormDialogComponent } from '../additions/addition-form-dialog.component';
+import { MovementFormDialogComponent } from '../movements/movement-form-dialog.component';
 
 @Component({
   selector: 'app-materials-list',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatSnackBarModule, DataTableComponent, IconComponent],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatTabsModule, DataTableComponent, FilterChipComponent, IconComponent],
   template: `
     <div class="list-page">
       <header class="list-header">
@@ -34,23 +38,51 @@ import { InventoryService, Material } from '../inventory.service';
         </button>
       </header>
       
-      <app-data-table
-        [columns]="columns"
-        [data]="filteredMaterials()"
-        [actions]="actions"
-        [loading]="loading()"
-        searchPlaceholder="Search materials..."
-        emptyIcon="flask"
-        emptyTitle="No materials yet"
-        emptyMessage="Add your first winemaking material to get started."
-        (search)="onSearch($event)"
-        (actionClick)="onAction($event)">
+      <mat-tab-group class="inventory-tabs" [selectedIndex]="0" (selectedTabChange)="onTabChange($event)">
+        <mat-tab label="Materials">
+          <ng-template matTabContent>
+            <ng-template #filtersTemplate>
+              <app-filter-chip
+                label="Category"
+                [options]="categoryOptions()"
+                [value]="selectedCategory"
+                (valueChange)="onCategoryChange($event)">
+              </app-filter-chip>
+              <app-filter-chip
+                label="Stock"
+                [options]="stockOptions"
+                [value]="selectedStockStatus"
+                (valueChange)="onStockStatusChange($event)">
+              </app-filter-chip>
+            </ng-template>
+            
+            <app-data-table
+              [columns]="columns"
+              [data]="filteredMaterials()"
+              [actions]="actions"
+              [loading]="loading()"
+              [filterTemplate]="filtersTemplate"
+              searchPlaceholder="Search materials..."
+              emptyIcon="flask"
+              emptyTitle="No materials yet"
+              emptyMessage="Add your first winemaking material to get started."
+              (search)="onSearch($event)"
+              (actionClick)="onAction($event)">
+              
+              <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
+                <mat-icon>add</mat-icon>
+                Add Material
+              </button>
+            </app-data-table>
+          </ng-template>
+        </mat-tab>
         
-        <button empty-action mat-raised-button color="primary" (click)="navigateToCreate()">
-          <mat-icon>add</mat-icon>
-          Add Material
-        </button>
-      </app-data-table>
+        <mat-tab label="Movements">
+        </mat-tab>
+        
+        <mat-tab label="Additions">
+        </mat-tab>
+      </mat-tab-group>
       
       <button class="mobile-fab" mat-fab color="primary" (click)="navigateToCreate()">
         <mat-icon>add</mat-icon>
@@ -69,6 +101,17 @@ export class MaterialsListComponent implements OnInit {
   filteredMaterials = signal<Material[]>([]);
   loading = signal(true);
   searchTerm = '';
+  selectedCategory: string | null = null;
+  selectedStockStatus: string | null = null;
+  
+  categories = signal<{ value: string; label: string }[]>([]);
+  
+  categoryOptions = signal<FilterOption[]>([]);
+  stockOptions: FilterOption[] = [
+    { value: 'in_stock', label: 'In Stock' },
+    { value: 'low_stock', label: 'Low Stock' },
+    { value: 'out_of_stock', label: 'Out of Stock' },
+  ];
 
   columns: TableColumn[] = [
     { key: 'name', label: 'Name', sortable: true },
@@ -100,15 +143,29 @@ export class MaterialsListComponent implements OnInit {
         return 'false';
       }
     },
+    { key: 'actions', label: '', type: 'actions', width: '120px', sortable: false },
   ];
 
   actions: TableAction[] = [
+    { icon: 'truck', label: 'Move Stock', action: 'move' },
+    { icon: 'plus', label: 'Add to Tank/Barrel', action: 'add' },
     { icon: 'edit', label: 'Edit', action: 'edit' },
     { icon: 'delete', label: 'Delete', action: 'delete', color: 'warn' },
   ];
 
   ngOnInit(): void {
+    this.loadCategories();
     this.loadMaterials();
+  }
+  
+  loadCategories(): void {
+    this.inventoryService.getMaterialCategories().subscribe({
+      next: (data) => {
+        this.categories.set(data);
+        this.categoryOptions.set(data.map(c => ({ value: c.value, label: c.label })));
+      },
+      error: (err: any) => console.error('Error loading categories:', err),
+    });
   }
 
   loadMaterials(): void {
@@ -131,10 +188,44 @@ export class MaterialsListComponent implements OnInit {
     this.searchTerm = term.toLowerCase();
     this.applyFilters();
   }
+  
+  onCategoryChange(value: string | boolean | null): void {
+    this.selectedCategory = typeof value === 'string' ? value : null;
+    this.applyFilters();
+  }
+  
+  onStockStatusChange(value: string | boolean | null): void {
+    this.selectedStockStatus = typeof value === 'string' ? value : null;
+    this.applyFilters();
+  }
+  
+  onTabChange(event: any): void {
+    const tabIndex = event.index;
+    if (tabIndex === 1) {
+      this.router.navigate(['/inventory/movements']);
+    } else if (tabIndex === 2) {
+      this.router.navigate(['/inventory/additions']);
+    }
+  }
 
   applyFilters(): void {
     let filtered = [...this.materials()];
 
+    // Category filter
+    if (this.selectedCategory) {
+      filtered = filtered.filter(m => m.category === this.selectedCategory);
+    }
+    
+    // Stock status filter
+    if (this.selectedStockStatus === 'low_stock') {
+      filtered = filtered.filter(m => m.is_low_stock && m.current_stock > 0);
+    } else if (this.selectedStockStatus === 'out_of_stock') {
+      filtered = filtered.filter(m => m.current_stock === 0);
+    } else if (this.selectedStockStatus === 'in_stock') {
+      filtered = filtered.filter(m => !m.is_low_stock && m.current_stock > 0);
+    }
+
+    // Search filter
     if (this.searchTerm) {
       filtered = filtered.filter(m =>
         m.name.toLowerCase().includes(this.searchTerm) ||
@@ -153,11 +244,44 @@ export class MaterialsListComponent implements OnInit {
 
   onAction(event: { action: string; row: unknown }): void {
     const material = event.row as Material;
-    if (event.action === 'edit') {
+    if (event.action === 'move') {
+      this.openMovementDialog(material);
+    } else if (event.action === 'add') {
+      this.openAdditionDialog(material);
+    } else if (event.action === 'edit') {
       this.router.navigate(['/inventory/materials', material.id]);
     } else if (event.action === 'delete') {
       this.deleteMaterial(material);
     }
+  }
+  
+  openMovementDialog(material: Material): void {
+    const dialogRef = this.dialog.open(MovementFormDialogComponent, {
+      width: '600px',
+      data: { materialId: material.id },
+      disableClose: false,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.snackBar.open('Material movement recorded successfully', 'Close', { duration: 3000 });
+        this.loadMaterials(); // Reload to update stock levels
+      }
+    });
+  }
+
+  openAdditionDialog(material: Material): void {
+    const dialogRef = this.dialog.open(AdditionFormDialogComponent, {
+      width: '600px',
+      data: { materialId: material.id },
+      disableClose: false,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.snackBar.open('Material addition recorded successfully', 'Close', { duration: 3000 });
+      }
+    });
   }
 
   deleteMaterial(material: Material): void {

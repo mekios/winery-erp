@@ -204,7 +204,7 @@ export class WorkOrdersService {
   }
   
   getSummary(): Observable<WorkOrderSummary> {
-    return this.api.action<WorkOrderSummary>('work-orders', 'summary');
+    return this.api.actionGet<WorkOrderSummary>('work-orders', 'summary');
   }
   
   // Status actions (use direct http calls since they need ID in the path)

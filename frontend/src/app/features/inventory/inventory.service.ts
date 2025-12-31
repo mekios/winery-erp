@@ -1,7 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+
+// Paginated response interface
+interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
 
 // Enums
 export type MaterialCategory = 'ADDITIVE' | 'STABILIZER' | 'FINING_AGENT' | 'YEAST' | 'NUTRIENT' | 'ENZYME' | 'ACID' | 'TANNIN' | 'OAK' | 'CLEANING' | 'PACKAGING' | 'OTHER';
@@ -56,7 +65,7 @@ export interface MaterialDropdown {
   code: string;
   category: MaterialCategory;
   unit: MaterialUnit;
-  unit_display: string;
+  unit_display?: string; // Optional since API might not return it
   current_stock: number;
   label: string;
 }
@@ -179,7 +188,8 @@ export class InventoryService {
     if (params?.is_active !== undefined) httpParams = httpParams.set('is_active', params.is_active.toString());
     if (params?.search) httpParams = httpParams.set('search', params.search);
     
-    return this.http.get<Material[]>(`${this.baseUrl}/materials/`, { params: httpParams });
+    return this.http.get<PaginatedResponse<Material>>(`${this.baseUrl}/materials/`, { params: httpParams })
+      .pipe(map(response => response.results));
   }
 
   getMaterial(id: string): Observable<MaterialDetail> {
@@ -217,7 +227,8 @@ export class InventoryService {
     if (params?.material) httpParams = httpParams.set('material', params.material);
     if (params?.location) httpParams = httpParams.set('location', params.location);
     
-    return this.http.get<MaterialStock[]>(`${this.baseUrl}/stock/`, { params: httpParams });
+    return this.http.get<PaginatedResponse<MaterialStock>>(`${this.baseUrl}/stock/`, { params: httpParams })
+      .pipe(map(response => response.results));
   }
 
   // === MOVEMENTS ===
@@ -228,7 +239,8 @@ export class InventoryService {
     if (params?.movement_type) httpParams = httpParams.set('movement_type', params.movement_type);
     if (params?.location) httpParams = httpParams.set('location', params.location);
     
-    return this.http.get<MaterialMovement[]>(`${this.baseUrl}/movements/`, { params: httpParams });
+    return this.http.get<PaginatedResponse<MaterialMovement>>(`${this.baseUrl}/movements/`, { params: httpParams })
+      .pipe(map(response => response.results));
   }
 
   getMovement(id: string): Observable<MaterialMovement> {
@@ -255,7 +267,8 @@ export class InventoryService {
     if (params?.tank) httpParams = httpParams.set('tank', params.tank);
     if (params?.barrel) httpParams = httpParams.set('barrel', params.barrel);
     
-    return this.http.get<Addition[]>(`${this.baseUrl}/additions/`, { params: httpParams });
+    return this.http.get<PaginatedResponse<Addition>>(`${this.baseUrl}/additions/`, { params: httpParams })
+      .pipe(map(response => response.results));
   }
 
   getAddition(id: string): Observable<AdditionDetail> {

@@ -191,7 +191,7 @@ export interface TableAction {
                       <button class="item-action-btn" 
                               [class.danger]="action.color === 'warn'"
                               (click)="onAction(action.action, row); $event.stopPropagation()">
-                        <mat-icon>{{ action.icon }}</mat-icon>
+                        <app-icon [name]="action.icon" [size]="18"></app-icon>
                       </button>
                     }
                   }
@@ -289,7 +289,7 @@ export interface TableAction {
                           [matTooltip]="action.label"
                           matRipple
                           (click)="onAction(action.action, row); $event.stopPropagation()">
-                    <mat-icon>{{ action.icon }}</mat-icon>
+                    <app-icon [name]="action.icon" [size]="18"></app-icon>
                   </button>
                 }
               }

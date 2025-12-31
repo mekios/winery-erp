@@ -6,7 +6,37 @@
 h1 { margin: 0; font-size: 22px; font-weight: 700; }
 .subtitle { color: #6b7280; font-size: 13px; }
 
-app-data-table { flex: 1; min-height: 0; }
+.inventory-tabs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  
+  ::ng-deep {
+    .mat-mdc-tab-body-wrapper {
+      flex: 1;
+      min-height: 0;
+    }
+    
+    .mat-mdc-tab-body-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+
+app-data-table {
+  flex: 1;
+  min-height: 0;
+  display: block;
+}
+
+.tab-content-placeholder {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
 
 .mobile-fab { 
   display: none; 
