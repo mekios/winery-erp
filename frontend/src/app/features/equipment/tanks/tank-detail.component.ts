@@ -3,9 +3,7 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
@@ -19,8 +17,8 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
   selector: 'app-tank-detail',
   standalone: true,
   imports: [
-    CommonModule, RouterModule, MatButtonModule, MatIconModule, MatTabsModule,
-    MatCardModule, MatProgressBarModule, MatTooltipModule, MatSnackBarModule,
+    CommonModule, RouterModule, MatButtonModule, MatIconModule,
+    MatCardModule, MatTooltipModule, MatSnackBarModule,
     IconComponent, SkeletonComponent, ErrorStateComponent, DecimalPipe
   ],
   template: `
@@ -191,237 +189,235 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
             }
           </div>
           
-          <!-- Tabs -->
-          <mat-tab-group animationDuration="200ms" class="composition-tabs">
-            <!-- Composition Tab -->
-            <mat-tab>
-              <ng-template mat-tab-label>
-                <app-icon name="pie-chart" [size]="18"></app-icon>
-                <span>Composition</span>
-              </ng-template>
-              <div class="tab-content composition-content">
-                @if (compositionLoading()) {
-                  <div class="composition-skeleton">
-                    <app-skeleton width="100%" height="200px"></app-skeleton>
-                  </div>
-                } @else if (compositionError()) {
-                  <app-error-state
-                    title="Composition unavailable"
-                    message="Could not load tank composition data."
-                    (retry)="loadComposition()">
-                  </app-error-state>
-                } @else if (composition()) {
-                  @if (composition()!.has_integrity_issues) {
-                    <div class="integrity-warning">
-                      <app-icon name="alert" [size]="20"></app-icon>
-                      <div class="warning-content">
-                        <strong>Composition Integrity Issue</strong>
-                        <span>This tank has some wine from unknown sources.</span>
-                      </div>
-                    </div>
-                  }
-                  
-                  @if (composition()!.total_volume_l > 0) {
-                    <!-- By Variety -->
-                    <div class="composition-section variety-section">
-                      <div class="section-header">
-                        <h3>
-                          <app-icon name="grape" [size]="18"></app-icon>
-                          Grape Varieties
-                        </h3>
-                      </div>
-                      @if (composition()!.by_variety.length > 0) {
-                        <div class="composition-grid">
-                          @for (v of composition()!.by_variety; track v.variety) {
-                            <div class="comp-card" [style.--card-color]="getVarietyColor($index)">
-                              <div class="comp-card-header">
-                                <span class="comp-name">{{ v.variety }}</span>
-                                <span class="comp-pct">{{ v.percentage | number:'1.1-1' }}%</span>
-                              </div>
-                              <div class="comp-bar-modern">
-                                <div class="comp-bar-fill" [style.width.%]="v.percentage"></div>
-                              </div>
-                              <span class="comp-volume">{{ v.volume_l | number:'1.0-0' }} L</span>
-                            </div>
-                          }
-                        </div>
-                      } @else {
-                        <p class="no-data">No variety data available</p>
-                      }
-                    </div>
-                    
-                    <!-- By Batch -->
-                    <div class="composition-section batch-section">
-                      <div class="section-header">
-                        <h3>
-                          <app-icon name="batch" [size]="18"></app-icon>
-                          Batches
-                        </h3>
-                      </div>
-                      @if (composition()!.by_batch.length > 0) {
-                        <div class="batch-grid">
-                          @for (b of composition()!.by_batch; track b.batch_id) {
-                            <div class="batch-card">
-                              <div class="batch-header">
-                                <span class="batch-label">{{ b.label }}</span>
-                                <span class="batch-badge">{{ b.percentage | number:'1.1-1' }}%</span>
-                              </div>
-                              <div class="batch-volume">
-                                <app-icon name="droplet" [size]="14"></app-icon>
-                                {{ b.volume_l | number:'1.0-0' }} L
-                              </div>
-                            </div>
-                          }
-                        </div>
-                      } @else {
-                        <p class="no-data">No batch data available</p>
-                      }
-                    </div>
-                    
-                    <!-- By Vineyard -->
-                    <div class="composition-section vineyard-section">
-                      <div class="section-header">
-                        <h3>
-                          <app-icon name="vineyard" [size]="18"></app-icon>
-                          Vineyards
-                        </h3>
-                      </div>
-                      @if (composition()!.by_vineyard.length > 0) {
-                        <div class="vineyard-grid">
-                          @for (v of composition()!.by_vineyard; track v.vineyard) {
-                            <div class="vineyard-card">
-                              <div class="vineyard-header">
-                                <div class="vineyard-names">
-                                  <span class="vineyard-name">{{ v.vineyard }}</span>
-                                  <span class="grower-name">
-                                    <app-icon name="farmer" [size]="12"></app-icon>
-                                    {{ v.grower }}
-                                  </span>
-                                </div>
-                                <div class="vineyard-badge">{{ v.percentage | number:'1.1-1' }}%</div>
-                              </div>
-                              <div class="vineyard-volume">
-                                <app-icon name="droplet" [size]="14"></app-icon>
-                                {{ v.volume_l | number:'1.0-0' }} L
-                              </div>
-                            </div>
-                          }
-                        </div>
-                      } @else {
-                        <p class="no-data">No vineyard data available</p>
-                      }
-                    </div>
-                    
-                    <!-- Unknown -->
-                    @if (composition()!.unknown_volume_l > 0) {
-                      <div class="composition-section unknown-section">
-                        <div class="unknown-card">
-                          <app-icon name="help-circle" [size]="24"></app-icon>
-                          <div class="unknown-content">
-                            <h4>Unknown Origin</h4>
-                            <p>{{ composition()!.unknown_volume_l | number:'1.0-0' }} L ({{ composition()!.unknown_percentage | number:'1.1-1' }}%)</p>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  } @else {
-                    <div class="empty-composition">
-                      <div class="empty-icon-wrapper">
-                        <app-icon name="wine" [size]="64"></app-icon>
-                      </div>
-                      <h4>Tank is Empty</h4>
-                      <p>No composition data to display.</p>
-                    </div>
-                  }
-                }
+          <!-- Two Column Layout: Composition + Ledger -->
+          <div class="main-grid">
+            <!-- Left Column: Composition -->
+            <div class="composition-column">
+              <div class="section-title">
+                <app-icon name="pie-chart" [size]="24"></app-icon>
+                <h2>Composition</h2>
               </div>
-            </mat-tab>
-            
-            <!-- History Tab -->
-            <mat-tab>
-              <ng-template mat-tab-label>
-                <app-icon name="book-open" [size]="18"></app-icon>
-                <span>Ledger & History</span>
-              </ng-template>
-              <div class="tab-content history-tab">
-                @if (historyLoading()) {
+              
+              @if (compositionLoading()) {
+                <div class="composition-skeleton">
                   <app-skeleton width="100%" height="300px"></app-skeleton>
-                } @else if (history().length > 0) {
-                  <div class="ledger-timeline">
-                    @for (entry of history(); track entry.id; let i = $index) {
-                      <div class="timeline-entry" 
-                           [class.entry-inflow]="entry.delta_volume_l > 0" 
-                           [class.entry-outflow]="entry.delta_volume_l < 0"
-                           [style.animation-delay]="i * 0.05 + 's'">
-                        <!-- Timeline line connector -->
-                        @if (i < history().length - 1) {
-                          <div class="timeline-connector"></div>
-                        }
-                        
-                        <!-- Timeline node (icon) -->
-                        <div class="timeline-node">
-                          <div class="node-pulse"></div>
-                          <div class="node-icon">
-                            @if (entry.event_type === 'batch_intake') {
-                              <app-icon name="wine" [size]="16"></app-icon>
-                            } @else if (entry.delta_volume_l > 0) {
-                              <mat-icon>arrow_downward</mat-icon>
-                            } @else {
-                              <mat-icon>arrow_upward</mat-icon>
-                            }
-                          </div>
-                        </div>
-                        
-                        <!-- Entry card -->
-                        <div class="entry-card">
-                          <div class="card-header">
-                            <div class="volume-badge">
-                              <span class="volume-value">
-                                {{ entry.delta_volume_l > 0 ? '+' : '' }}{{ entry.delta_volume_l | number:'1.0-0' }} L
-                              </span>
-                              <span class="volume-label">
-                                {{ entry.delta_volume_l > 0 ? 'Inflow' : 'Outflow' }}
-                              </span>
-                            </div>
-                            <div class="event-badge" [class]="'event-' + entry.event_type">
-                              {{ entry.event_type === 'batch_intake' ? 'Batch Intake' : 'Transfer' }}
-                            </div>
-                          </div>
-                          
-                          <div class="card-body">
-                            <div class="composition-info">
-                              <span class="label-tag" [class]="'tag-' + entry.composition_key_type.toLowerCase()">
-                                {{ entry.composition_key_type }}
-                              </span>
-                              <span class="composition-label">{{ entry.composition_key_label }}</span>
-                            </div>
-                            
-                            <div class="source-info">
-                              <app-icon name="info" [size]="12"></app-icon>
-                              <span>Source: <strong>{{ entry.derived_source }}</strong></span>
-                            </div>
-                          </div>
-                          
-                          <div class="card-footer">
-                            <app-icon name="calendar" [size]="14"></app-icon>
-                            <span class="timestamp">{{ entry.event_datetime | date:'MMM d, y · h:mm a' }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                } @else {
-                  <div class="empty-history">
-                    <div class="empty-icon-wrapper">
-                      <app-icon name="book-open" [size]="64"></app-icon>
+                </div>
+              } @else if (compositionError()) {
+                <app-error-state
+                  title="Composition unavailable"
+                  message="Could not load tank composition data."
+                  (retry)="loadComposition()">
+                </app-error-state>
+              } @else if (composition()) {
+                @if (composition()!.has_integrity_issues) {
+                  <div class="integrity-warning">
+                    <app-icon name="alert" [size]="20"></app-icon>
+                    <div class="warning-content">
+                      <strong>Composition Integrity Issue</strong>
+                      <span>This tank has some wine from unknown sources.</span>
                     </div>
-                    <h4>No Ledger Entries Yet</h4>
-                    <p>When wine is added or transferred, the tank's history will appear here as a beautiful timeline.</p>
                   </div>
                 }
+                
+                @if (composition()!.total_volume_l > 0) {
+                  <!-- By Variety -->
+                  <div class="composition-section variety-section">
+                    <div class="section-header">
+                      <h3>
+                        <app-icon name="grape" [size]="18"></app-icon>
+                        Grape Varieties
+                      </h3>
+                    </div>
+                    @if (composition()!.by_variety.length > 0) {
+                      <div class="composition-grid">
+                        @for (v of composition()!.by_variety; track v.variety) {
+                          <div class="comp-card" [style.--card-color]="getVarietyColor($index)">
+                            <div class="comp-card-header">
+                              <span class="comp-name">{{ v.variety }}</span>
+                              <span class="comp-pct">{{ v.percentage | number:'1.1-1' }}%</span>
+                            </div>
+                            <div class="comp-bar-modern">
+                              <div class="comp-bar-fill" [style.width.%]="v.percentage"></div>
+                            </div>
+                            <span class="comp-volume">{{ v.volume_l | number:'1.0-0' }} L</span>
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <p class="no-data">No variety data available</p>
+                    }
+                  </div>
+                  
+                  <!-- By Batch -->
+                  <div class="composition-section batch-section">
+                    <div class="section-header">
+                      <h3>
+                        <app-icon name="batch" [size]="18"></app-icon>
+                        Batches
+                      </h3>
+                    </div>
+                    @if (composition()!.by_batch.length > 0) {
+                      <div class="batch-grid">
+                        @for (b of composition()!.by_batch; track b.batch_id) {
+                          <div class="batch-card">
+                            <div class="batch-header">
+                              <span class="batch-label">{{ b.label }}</span>
+                              <span class="batch-badge">{{ b.percentage | number:'1.1-1' }}%</span>
+                            </div>
+                            <div class="batch-volume">
+                              <app-icon name="droplet" [size]="14"></app-icon>
+                              {{ b.volume_l | number:'1.0-0' }} L
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <p class="no-data">No batch data available</p>
+                    }
+                  </div>
+                  
+                  <!-- By Vineyard -->
+                  <div class="composition-section vineyard-section">
+                    <div class="section-header">
+                      <h3>
+                        <app-icon name="vineyard" [size]="18"></app-icon>
+                        Vineyards
+                      </h3>
+                    </div>
+                    @if (composition()!.by_vineyard.length > 0) {
+                      <div class="vineyard-grid">
+                        @for (v of composition()!.by_vineyard; track v.vineyard) {
+                          <div class="vineyard-card">
+                            <div class="vineyard-header">
+                              <div class="vineyard-names">
+                                <span class="vineyard-name">{{ v.vineyard }}</span>
+                                <span class="grower-name">
+                                  <app-icon name="farmer" [size]="12"></app-icon>
+                                  {{ v.grower }}
+                                </span>
+                              </div>
+                              <div class="vineyard-badge">{{ v.percentage | number:'1.1-1' }}%</div>
+                            </div>
+                            <div class="vineyard-volume">
+                              <app-icon name="droplet" [size]="14"></app-icon>
+                              {{ v.volume_l | number:'1.0-0' }} L
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <p class="no-data">No vineyard data available</p>
+                    }
+                  </div>
+                  
+                  <!-- Unknown -->
+                  @if (composition()!.unknown_volume_l > 0) {
+                    <div class="composition-section unknown-section">
+                      <div class="unknown-card">
+                        <app-icon name="help-circle" [size]="24"></app-icon>
+                        <div class="unknown-content">
+                          <h4>Unknown Origin</h4>
+                          <p>{{ composition()!.unknown_volume_l | number:'1.0-0' }} L ({{ composition()!.unknown_percentage | number:'1.1-1' }}%)</p>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                } @else {
+                  <div class="empty-composition">
+                    <div class="empty-icon-wrapper">
+                      <app-icon name="wine" [size]="64"></app-icon>
+                    </div>
+                    <h4>Tank is Empty</h4>
+                    <p>No composition data to display.</p>
+                  </div>
+                }
+              }
+            </div>
+            
+            <!-- Right Column: Ledger & History -->
+            <div class="ledger-column">
+              <div class="section-title">
+                <app-icon name="book-open" [size]="24"></app-icon>
+                <h2>Ledger & History</h2>
               </div>
-            </mat-tab>
-          </mat-tab-group>
+              
+              @if (historyLoading()) {
+                <app-skeleton width="100%" height="400px"></app-skeleton>
+              } @else if (history().length > 0) {
+                <div class="ledger-timeline">
+                  @for (entry of history(); track entry.id; let i = $index) {
+                    <div class="timeline-entry" 
+                         [class.entry-inflow]="entry.delta_volume_l > 0" 
+                         [class.entry-outflow]="entry.delta_volume_l < 0"
+                         [style.animation-delay]="i * 0.05 + 's'">
+                      <!-- Timeline line connector -->
+                      @if (i < history().length - 1) {
+                        <div class="timeline-connector"></div>
+                      }
+                      
+                      <!-- Timeline node (icon) -->
+                      <div class="timeline-node">
+                        <div class="node-pulse"></div>
+                        <div class="node-icon">
+                          @if (entry.event_type === 'batch_intake') {
+                            <app-icon name="wine" [size]="16"></app-icon>
+                          } @else if (entry.delta_volume_l > 0) {
+                            <mat-icon>arrow_downward</mat-icon>
+                          } @else {
+                            <mat-icon>arrow_upward</mat-icon>
+                          }
+                        </div>
+                      </div>
+                      
+                      <!-- Entry card -->
+                      <div class="entry-card">
+                        <div class="card-header">
+                          <div class="volume-badge">
+                            <span class="volume-value">
+                              {{ entry.delta_volume_l > 0 ? '+' : '' }}{{ entry.delta_volume_l | number:'1.0-0' }} L
+                            </span>
+                            <span class="volume-label">
+                              {{ entry.delta_volume_l > 0 ? 'Inflow' : 'Outflow' }}
+                            </span>
+                          </div>
+                          <div class="event-badge" [class]="'event-' + entry.event_type">
+                            {{ entry.event_type === 'batch_intake' ? 'Batch Intake' : 'Transfer' }}
+                          </div>
+                        </div>
+                        
+                        <div class="card-body">
+                          <div class="composition-info">
+                            <span class="label-tag" [class]="'tag-' + entry.composition_key_type.toLowerCase()">
+                              {{ entry.composition_key_type }}
+                            </span>
+                            <span class="composition-label">{{ entry.composition_key_label }}</span>
+                          </div>
+                          
+                          <div class="source-info">
+                            <app-icon name="info" [size]="12"></app-icon>
+                            <span>Source: <strong>{{ entry.derived_source }}</strong></span>
+                          </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                          <app-icon name="calendar" [size]="14"></app-icon>
+                          <span class="timestamp">{{ entry.event_datetime | date:'MMM d, y · h:mm a' }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="empty-history">
+                  <div class="empty-icon-wrapper">
+                    <app-icon name="book-open" [size]="64"></app-icon>
+                  </div>
+                  <h4>No Ledger Entries Yet</h4>
+                  <p>When wine is added or transferred, the tank's history will appear here as a beautiful timeline.</p>
+                </div>
+              }
+            </div>
+          </div>
         </div>
       }
     </div>
