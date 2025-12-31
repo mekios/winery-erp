@@ -49,9 +49,8 @@ api_v1_patterns = [
     # Work Orders (Phase 2 - Sprint 2.3)
     path('work-orders/', include('apps.work_orders.urls')),
     
-    # Inventory (Phase 2)
-    # path('materials/', include('apps.inventory.urls.materials')),
-    # path('additions/', include('apps.inventory.urls.additions')),
+    # Inventory (Phase 2 - Sprint 2.5)
+    path('inventory/', include('apps.inventory.urls')),
     
     # Packaging (Phase 3)
     # path('packaging-skus/', include('apps.packaging.urls.skus')),

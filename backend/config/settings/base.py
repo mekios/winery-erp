@@ -60,7 +60,7 @@ LOCAL_APPS = [
     'apps.lab',          # Phase 1 - Sprint 1.5
     'apps.ledger',       # Phase 2 - Sprint 2.1
     'apps.work_orders',  # Phase 2 - Sprint 2.3
-    # 'apps.inventory',    # Phase 2
+    'apps.inventory.apps.InventoryConfig',  # Phase 2 - Sprint 2.5 - explicit AppConfig path
     # 'apps.packaging',    # Phase 3
 ]
 
