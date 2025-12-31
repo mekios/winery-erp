@@ -97,55 +97,29 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
               <div class="volume-visual">
                 <div class="tank-illustration">
                   <svg viewBox="0 0 200 300" class="tank-svg">
-                    <!-- Tank outline -->
-                    <ellipse cx="100" cy="30" rx="80" ry="15" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <line x1="20" y1="30" x2="20" y2="270" stroke="currentColor" stroke-width="2"/>
-                    <line x1="180" y1="30" x2="180" y2="270" stroke="currentColor" stroke-width="2"/>
-                    <ellipse cx="100" cy="270" rx="80" ry="15" fill="none" stroke="currentColor" stroke-width="2"/>
-                    
-                    <!-- Wine liquid with gradient -->
+                    <!-- Outer tank (outline) -->
                     <defs>
                       <linearGradient id="wineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                         <stop offset="0%" style="stop-color:#7c4dff;stop-opacity:0.9" />
                         <stop offset="100%" style="stop-color:#5e35d1;stop-opacity:1" />
                       </linearGradient>
-                      <clipPath id="tankClip">
-                        <rect x="20" y="30" width="160" height="250"/>
-                      </clipPath>
                     </defs>
                     
-                    <!-- Animated liquid level -->
-                    <g clip-path="url(#tankClip)">
-                      <!-- Main liquid rectangle -->
-                      <rect 
-                        x="20" 
-                        [attr.y]="270 - (240 * tank()!.fill_percentage / 100)"
-                        width="160" 
-                        [attr.height]="240 * tank()!.fill_percentage / 100 + 15"
-                        fill="url(#wineGradient)"
-                        class="liquid-fill"
-                      />
-                      <!-- Liquid surface wave (top ellipse) -->
-                      <ellipse 
-                        cx="100" 
-                        [attr.cy]="270 - (240 * tank()!.fill_percentage / 100)" 
-                        rx="80" 
-                        ry="8" 
-                        fill="#9575ff"
-                        opacity="0.7"
-                        class="liquid-surface"
-                      />
+                    <!-- Tank outline -->
+                    <ellipse cx="100" cy="30" rx="80" ry="15" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+                    <line x1="20" y1="30" x2="20" y2="270" stroke="#cbd5e1" stroke-width="2"/>
+                    <line x1="180" y1="30" x2="180" y2="270" stroke="#cbd5e1" stroke-width="2"/>
+                    <ellipse cx="100" cy="270" rx="80" ry="15" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+                    
+                    <!-- Inner liquid cylinder with animated height -->
+                    <g class="liquid-cylinder" [style.--liquid-height.%]="tank()!.fill_percentage">
+                      <!-- Top ellipse -->
+                      <ellipse cx="100" cy="30" rx="78" ry="14" fill="url(#wineGradient)" opacity="0.9"/>
+                      <!-- Cylinder sides -->
+                      <rect x="22" y="30" width="156" height="240" fill="url(#wineGradient)"/>
+                      <!-- Bottom ellipse -->
+                      <ellipse cx="100" cy="270" rx="78" ry="14" fill="#5e35d1"/>
                     </g>
-                    <!-- Bottom ellipse (rendered outside clip for proper rounding) -->
-                    <ellipse 
-                      cx="100" 
-                      cy="270"
-                      rx="80" 
-                      ry="15" 
-                      fill="url(#wineGradient)"
-                      class="liquid-bottom"
-                      [style.opacity]="tank()!.fill_percentage > 0 ? 1 : 0"
-                    />
                   </svg>
                 </div>
                 
