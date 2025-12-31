@@ -36,7 +36,7 @@ import { InventoryService, Material } from '../inventory.service';
       
       <app-data-table
         [columns]="columns"
-        [data]="materials()"
+        [data]="filteredMaterials()"
         [actions]="actions"
         [loading]="loading()"
         searchPlaceholder="Search materials..."

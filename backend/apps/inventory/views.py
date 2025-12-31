@@ -39,6 +39,9 @@ class MaterialViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
         queryset = queryset.prefetch_related('stock_locations')
         return queryset
     
+    def perform_create(self, serializer):
+        serializer.save(winery=self.request.winery)
+    
     @action(detail=False, methods=['get'])
     def dropdown(self, request):
         """Get compact material list for dropdowns"""
