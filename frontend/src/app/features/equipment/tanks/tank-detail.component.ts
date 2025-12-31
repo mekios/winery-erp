@@ -10,6 +10,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { IconComponent } from '@shared/components/icon/icon.component';
 import { SkeletonComponent } from '@shared/components/skeleton/skeleton.component';
 import { ErrorStateComponent } from '@shared/components/error-state/error-state.component';
+import { TankVisualComponent } from '@shared/components/tank-visual/tank-visual.component';
 import { EquipmentService, Tank, TANK_TYPE_LABELS, TANK_STATUS_LABELS } from '../equipment.service';
 import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
 
@@ -19,7 +20,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
   imports: [
     CommonModule, RouterModule, MatButtonModule, MatIconModule,
     MatCardModule, MatTooltipModule, MatSnackBarModule,
-    IconComponent, SkeletonComponent, ErrorStateComponent, DecimalPipe
+    IconComponent, SkeletonComponent, ErrorStateComponent, TankVisualComponent, DecimalPipe
   ],
   template: `
     <div class="detail-page">
@@ -104,62 +105,12 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
             } @else if (tank()) {
               <div class="volume-visual">
                 <div class="tank-illustration">
-                  <svg viewBox="0 0 200 300" class="tank-svg">
-                    <!-- Outer tank (outline) -->
-                    <defs>
-                      <linearGradient id="wineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" [attr.style]="'stop-color:' + getDominantVarietyColor().start + ';stop-opacity:0.9'" />
-                        <stop offset="100%" [attr.style]="'stop-color:' + getDominantVarietyColor().end + ';stop-opacity:1'" />
-                      </linearGradient>
-                      <!-- Dynamic clipPath based on fill percentage -->
-                      <clipPath id="liquidClip">
-                        <rect 
-                          x="0" 
-                          [attr.y]="270 - (240 * tank()!.fill_percentage / 100)" 
-                          width="200" 
-                          [attr.height]="270 + (240 * tank()!.fill_percentage / 100)"
-                        />
-                      </clipPath>
-                    </defs>
-                    
-                    <!-- Tank outline -->
-                    <ellipse cx="100" cy="30" rx="80" ry="15" fill="none" stroke="#cbd5e1" stroke-width="2"/>
-                    <line x1="20" y1="30" x2="20" y2="270" stroke="#cbd5e1" stroke-width="2"/>
-                    <line x1="180" y1="30" x2="180" y2="270" stroke="#cbd5e1" stroke-width="2"/>
-                    <ellipse cx="100" cy="270" rx="80" ry="15" fill="none" stroke="#cbd5e1" stroke-width="2"/>
-                    
-                    <!-- Inner liquid cylinder (clipped to height) -->
-                    @if (tank()!.fill_percentage > 0) {
-                      <g clip-path="url(#liquidClip)" class="liquid-cylinder">
-                        <!-- Cylinder body -->
-                        <rect x="22" y="30" width="156" height="240" fill="url(#wineGradient)"/>
-                        <!-- Bottom ellipse -->
-                        <ellipse cx="100" cy="270" rx="78" ry="14" [attr.fill]="getDominantVarietyColor().end"/>
-                      </g>
-                    }
-                    
-                    <!-- Liquid surface (top ellipse) - rendered outside clip -->
-                    @if (tank()!.fill_percentage > 0) {
-                      <ellipse 
-                        cx="100" 
-                        [attr.cy]="270 - (240 * tank()!.fill_percentage / 100)" 
-                        rx="78" 
-                        ry="14" 
-                        fill="url(#wineGradient)" 
-                        class="liquid-surface"
-                      />
-                      <!-- Surface highlight for 3D effect -->
-                      <ellipse 
-                        cx="100" 
-                        [attr.cy]="270 - (240 * tank()!.fill_percentage / 100)" 
-                        rx="78" 
-                        ry="14" 
-                        [attr.fill]="getDominantVarietyColor().start" 
-                        opacity="0.3"
-                        class="liquid-highlight"
-                      />
-                    }
-                  </svg>
+                  <app-tank-visual
+                    [tankId]="tankId"
+                    [fillPercentage]="tank()!.fill_percentage"
+                    [colors]="getDominantVarietyColor()"
+                    [compact]="false">
+                  </app-tank-visual>
                 </div>
                 
                 <div class="volume-info-panel">

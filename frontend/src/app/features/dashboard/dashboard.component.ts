@@ -12,6 +12,7 @@ import { WineryService } from '@core/services/winery.service';
 import { IconComponent } from '@shared/components/icon/icon.component';
 import { SkeletonComponent } from '@shared/components/skeleton/skeleton.component';
 import { ErrorStateComponent } from '@shared/components/error-state/error-state.component';
+import { TankVisualComponent } from '@shared/components/tank-visual/tank-visual.component';
 import { 
   DashboardService, 
   DashboardData,
@@ -37,6 +38,7 @@ import {
     IconComponent,
     SkeletonComponent,
     ErrorStateComponent,
+    TankVisualComponent,
   ],
   template: `
     <div class="dashboard stagger">
@@ -303,26 +305,29 @@ import {
               <div class="card-body">
                 <div class="tank-grid">
                   @for (tank of data()!.top_tanks; track tank.id) {
-                    <div class="tank-item">
-                      <div class="tank-header">
-                        <span class="tank-name">{{ tank.code }}</span>
-                        <span class="tank-volume">{{ tank.current_volume_l | number:'1.0-0' }} / {{ tank.capacity_l | number:'1.0-0' }} L</span>
+                    <div class="tank-item" [routerLink]="['/equipment/tanks', tank.id]">
+                      <div class="tank-visual-wrapper">
+                        <app-tank-visual
+                          [tankId]="tank.id"
+                          [fillPercentage]="tank.fill_percentage"
+                          [colors]="{ start: '#7c4dff', end: '#5e35d1' }"
+                          [compact]="true">
+                        </app-tank-visual>
                       </div>
-                      <div class="progress">
-                        <div class="progress-bar" 
-                             [class.danger]="tank.fill_percentage < 20"
-                             [class.warning]="tank.fill_percentage >= 20 && tank.fill_percentage < 50"
-                             [class.info]="tank.fill_percentage >= 50 && tank.fill_percentage < 80"
-                             [style.width.%]="tank.fill_percentage"></div>
-                      </div>
-                      <div class="tank-meta">
-                        <span>{{ tank.name }}</span>
-                        <span [class.text-danger]="tank.fill_percentage < 20"
-                              [class.text-warning]="tank.fill_percentage >= 20 && tank.fill_percentage < 50"
-                              [class.text-info]="tank.fill_percentage >= 50 && tank.fill_percentage < 80"
-                              [class.text-success]="tank.fill_percentage >= 80">
-                          {{ tank.fill_percentage }}%
-                        </span>
+                      <div class="tank-info">
+                        <div class="tank-code">{{ tank.code }}</div>
+                        <div class="tank-name-small">{{ tank.name }}</div>
+                        <div class="tank-volume-info">
+                          <span class="volume-current">{{ tank.current_volume_l | number:'1.0-0' }} L</span>
+                          <span class="volume-separator">/</span>
+                          <span class="volume-capacity">{{ tank.capacity_l | number:'1.0-0' }} L</span>
+                        </div>
+                        <div class="tank-percentage" 
+                             [class.low]="tank.fill_percentage < 20"
+                             [class.medium]="tank.fill_percentage >= 20 && tank.fill_percentage < 80"
+                             [class.high]="tank.fill_percentage >= 80">
+                          {{ tank.fill_percentage }}% full
+                        </div>
                       </div>
                     </div>
                   }

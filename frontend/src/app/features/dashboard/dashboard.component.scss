@@ -443,69 +443,107 @@
    =========================================== */
 .tank-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.25rem;
 }
 
 @media (max-width: 992px) {
   .tank-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 }
 
 @media (max-width: 576px) {
   .tank-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 .tank-item {
-  padding: 1rem;
-  background: var(--gray-50);
-  border-radius: var(--border-radius-sm);
-}
-
-.tank-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 0.5rem;
+  padding: 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  
+  &:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(124, 77, 255, 0.15);
+    transform: translateY(-2px);
+  }
 }
 
-.tank-name {
+.tank-visual-wrapper {
+  width: 100%;
+  max-width: 100px;
+  margin-bottom: 0.75rem;
+}
+
+.tank-info {
+  width: 100%;
+}
+
+.tank-code {
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
+  margin-bottom: 0.25rem;
 }
 
-.tank-volume {
+.tank-name-small {
   font-size: 0.75rem;
   color: var(--text-secondary);
-}
-
-.progress {
-  height: 8px;
-  background: var(--gray-200);
-  border-radius: 4px;
+  margin-bottom: 0.5rem;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.progress-bar {
-  height: 100%;
-  background: var(--success);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-  
-  &.danger { background: var(--danger); }
-  &.warning { background: var(--warning); }
-  &.info { background: var(--info); }
-}
-
-.tank-meta {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 0.5rem;
+.tank-volume-info {
   font-size: 0.75rem;
   color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  
+  .volume-current {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  
+  .volume-separator {
+    margin: 0 0.25rem;
+  }
+  
+  .volume-capacity {
+    color: var(--text-muted);
+  }
+}
+
+.tank-percentage {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  display: inline-block;
+  
+  &.low {
+    background: rgba(255, 82, 82, 0.1);
+    color: var(--danger);
+  }
+  
+  &.medium {
+    background: rgba(124, 77, 255, 0.1);
+    color: var(--primary);
+  }
+  
+  &.high {
+    background: rgba(25, 216, 149, 0.1);
+    color: var(--success);
+  }
 }
 
 /* ===========================================
