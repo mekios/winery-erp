@@ -25,17 +25,7 @@
     [actions]="actions"
     [loading]="loading()"
     editRoute="/inventory/materials"
-    (actionClicked)="onAction($event)">
-    <!-- Custom template for stock status -->
-    <ng-template #customTemplate let-column="column" let-row="row">
-      @if (column.key === 'is_low_stock') {
-        <mat-chip
-          [ngClass]="getStockStatus(row).class"
-          [disabled]="true">
-          {{ getStockStatus(row).label }}
-        </mat-chip>
-      }
-    </ng-template>
+    (actionClick)="onAction($event)">
   </app-data-table>
 </div>
 

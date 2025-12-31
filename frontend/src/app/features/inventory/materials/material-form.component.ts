@@ -41,8 +41,8 @@ export class MaterialFormComponent implements OnInit {
   materialId: string | null = null;
   isEditMode = false;
 
-  categories = signal<MaterialCategory[]>([]);
-  units = signal<MaterialUnit[]>([]);
+  categories = signal<{ value: string; label: string }[]>([]);
+  units = signal<{ value: string; label: string }[]>([]);
 
   constructor(
     private fb: FormBuilder,

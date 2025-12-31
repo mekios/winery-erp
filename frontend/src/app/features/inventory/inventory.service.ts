@@ -75,6 +75,7 @@ export interface MaterialMovement {
   material: string;
   material_name: string;
   material_unit: MaterialUnit;
+  unit_display: string;
   movement_type: MovementType;
   movement_type_display: string;
   quantity: number;
@@ -108,7 +109,9 @@ export interface Addition {
   material: string;
   material_name: string;
   material_unit: MaterialUnit;
+  unit_display: string;
   material_category: string;
+  material_category_display: string;
   quantity: number;
   target_display: string;
   tank: string | null;
@@ -119,6 +122,7 @@ export interface Addition {
   purpose: string;
   dosage_rate: string;
   target_volume_l: number | null;
+  notes?: string;
   added_by: string | null;
   added_by_name: string;
   created_at: string;
@@ -282,6 +286,24 @@ export class InventoryService {
 
   getAdditionsSummary(): Observable<AdditionSummary> {
     return this.http.get<AdditionSummary>(`${this.baseUrl}/additions/summary/`);
+  }
+
+  // ===== Enum / Dropdown Options =====
+  
+  getMaterialCategories(): Observable<{ value: string; label: string }[]> {
+    return this.http.get<{ value: string; label: string }[]>(`${this.baseUrl}/materials/categories/`);
+  }
+
+  getMaterialUnits(): Observable<{ value: string; label: string }[]> {
+    return this.http.get<{ value: string; label: string }[]>(`${this.baseUrl}/materials/units/`);
+  }
+
+  getMovementTypes(): Observable<{ value: string; label: string }[]> {
+    return this.http.get<{ value: string; label: string }[]>(`${this.baseUrl}/movements/types/`);
+  }
+
+  getStockLocations(): Observable<{ value: string; label: string }[]> {
+    return this.http.get<{ value: string; label: string }[]>(`${this.baseUrl}/stock/locations/`);
   }
 }
 

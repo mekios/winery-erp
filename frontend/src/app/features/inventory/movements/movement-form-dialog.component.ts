@@ -36,8 +36,8 @@ export class MovementFormDialogComponent implements OnInit {
   saving = signal(false);
   
   materials = signal<MaterialDropdown[]>([]);
-  movementTypes = signal<MovementType[]>([]);
-  locations = signal<StockLocation[]>([]);
+  movementTypes = signal<{ value: string; label: string }[]>([]);
+  locations = signal<{ value: string; label: string }[]>([]);
 
   constructor(
     private fb: FormBuilder,
@@ -81,17 +81,17 @@ export class MovementFormDialogComponent implements OnInit {
   loadDropdownOptions(): void {
     this.inventoryService.getMaterialsDropdown().subscribe({
       next: (materials) => this.materials.set(materials),
-      error: (err) => console.error('Error loading materials:', err),
+      error: (err: any) => console.error('Error loading materials:', err),
     });
 
     this.inventoryService.getMovementTypes().subscribe({
       next: (types) => this.movementTypes.set(types),
-      error: (err) => console.error('Error loading movement types:', err),
+      error: (err: any) => console.error('Error loading movement types:', err),
     });
 
     this.inventoryService.getStockLocations().subscribe({
       next: (locations) => this.locations.set(locations),
-      error: (err) => console.error('Error loading locations:', err),
+      error: (err: any) => console.error('Error loading locations:', err),
     });
   }
 

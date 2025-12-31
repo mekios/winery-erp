@@ -26,7 +26,7 @@
     </app-error-state>
   } @else if (movements().length === 0) {
     <div class="empty-state">
-      <app-icon name="truck" size="48" />
+      <app-icon name="truck" [size]="48" />
       <h3>No Stock Movements</h3>
       <p>Record purchases, adjustments, or transfers to track inventory</p>
       <button mat-flat-button color="primary" (click)="openMovementDialog()">

@@ -36,10 +36,32 @@ export class MaterialsListComponent implements OnInit {
     { key: 'name', label: 'Name', sortable: true },
     { key: 'code', label: 'Code' },
     { key: 'category_display', label: 'Category', sortable: true },
-    { key: 'current_stock', label: 'Stock', sortable: true, pipe: 'number', pipeArgs: '1.0-2' },
-    { key: 'unit_display', label: 'Unit' },
+    { 
+      key: 'current_stock', 
+      label: 'Stock', 
+      sortable: true,
+      format: (value: any, row: any) => {
+        const stock = typeof value === 'number' ? value : 0;
+        return `${stock.toFixed(2)} ${row.unit_display || ''}`;
+      }
+    },
     { key: 'supplier', label: 'Supplier' },
-    { key: 'is_low_stock', label: 'Status', type: 'custom' },
+    { 
+      key: 'is_low_stock', 
+      label: 'Status', 
+      type: 'badge',
+      badgeMap: {
+        'true': { label: 'Low Stock', class: 'status-low' },
+        'false_zero': { label: 'Out of Stock', class: 'status-out' },
+        'false': { label: 'In Stock', class: 'status-ok' }
+      },
+      format: (value: any, row: any) => {
+        const material = row as Material;
+        if (material.is_low_stock) return 'true';
+        if (material.current_stock === 0) return 'false_zero';
+        return 'false';
+      }
+    },
   ];
 
   actions: TableAction[] = [
@@ -74,11 +96,12 @@ export class MaterialsListComponent implements OnInit {
     });
   }
 
-  onAction(event: { action: string; row: Material }): void {
+  onAction(event: { action: string; row: unknown }): void {
+    const material = event.row as Material;
     if (event.action === 'edit') {
       // Navigation is handled by the data table component
     } else if (event.action === 'delete') {
-      this.deleteMaterial(event.row);
+      this.deleteMaterial(material);
     }
   }
 
@@ -106,16 +129,6 @@ export class MaterialsListComponent implements OnInit {
         });
       }
     });
-  }
-
-  getStockStatus(material: Material): { class: string; label: string } {
-    if (material.is_low_stock) {
-      return { class: 'status-low', label: 'Low Stock' };
-    }
-    if (material.current_stock === 0) {
-      return { class: 'status-out', label: 'Out of Stock' };
-    }
-    return { class: 'status-ok', label: 'In Stock' };
   }
 }
 
