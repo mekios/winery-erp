@@ -27,7 +27,7 @@ import { InventoryService, Material } from '../inventory.service';
   ],
   template: `
     <app-form-page
-      [title]="isEditMode ? 'Edit Material' : 'Add Material'"
+      [title]="isEditMode ? 'Edit Material' : 'New Material'"
       [subtitle]="isEditMode ? 'Update material information' : 'Add a new winemaking material'"
       icon="flask"
       [saveLabel]="isEditMode ? 'Update' : 'Create'"
@@ -35,83 +35,105 @@ import { InventoryService, Material } from '../inventory.service';
       [canSave]="form.valid"
       (save)="onSubmit()">
       
-      <form [formGroup]="form" class="form-content">
-        <div class="form-section">
-          <div class="form-grid">
-            <!-- Name -->
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Material Name</mat-label>
-              <input matInput formControlName="name" placeholder="e.g., Potassium Metabisulfite" />
-              @if (form.get('name')?.hasError('required')) {
-                <mat-error>Material name is required</mat-error>
-              }
-            </mat-form-field>
-
-            <!-- Code -->
-            <mat-form-field appearance="outline">
-              <mat-label>Product Code (Optional)</mat-label>
-              <input matInput formControlName="code" placeholder="e.g., SO2-KMS-100" />
-            </mat-form-field>
-
-            <!-- Category -->
-            <mat-form-field appearance="outline">
-              <mat-label>Category</mat-label>
-              <mat-select formControlName="category">
-                @for (category of categories(); track category.value) {
-                  <mat-option [value]="category.value">{{ category.label }}</mat-option>
+      <form [formGroup]="form" class="form-sections">
+        <!-- Basic Information -->
+        <section class="form-section">
+          <h3 class="section-title">BASIC INFORMATION</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">Material Name</label>
+              <mat-form-field appearance="outline">
+                <input matInput formControlName="name" placeholder="e.g., Potassium Metabisulfite">
+                @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+                  <mat-error>Material name is required</mat-error>
                 }
-              </mat-select>
-              @if (form.get('category')?.hasError('required')) {
-                <mat-error>Category is required</mat-error>
-              }
-            </mat-form-field>
-
-            <!-- Unit -->
-            <mat-form-field appearance="outline">
-              <mat-label>Unit of Measurement</mat-label>
-              <mat-select formControlName="unit">
-                @for (unit of units(); track unit.value) {
-                  <mat-option [value]="unit.value">{{ unit.label }}</mat-option>
-                }
-              </mat-select>
-              @if (form.get('unit')?.hasError('required')) {
-                <mat-error>Unit is required</mat-error>
-              }
-            </mat-form-field>
-
-            <!-- Supplier -->
-            <mat-form-field appearance="outline">
-              <mat-label>Supplier (Optional)</mat-label>
-              <input matInput formControlName="supplier" placeholder="e.g., WineChem Supplies" />
-            </mat-form-field>
-
-            <!-- Low Stock Threshold -->
-            <app-number-input
-              formControlName="low_stock_threshold"
-              label="Low Stock Threshold (Optional)"
-              [decimals]="2"
-              [min]="0"
-              placeholder="Alert when stock falls below">
-            </app-number-input>
-
-            <!-- Notes -->
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Notes (Optional)</mat-label>
-              <textarea
-                matInput
-                formControlName="notes"
-                rows="4"
-                placeholder="Additional notes, specifications, or usage instructions"></textarea>
-            </mat-form-field>
-
-            <!-- Is Active -->
-            <div class="checkbox-field full-width">
-              <mat-checkbox formControlName="is_active">
-                Active (uncheck to archive this material)
-              </mat-checkbox>
+              </mat-form-field>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Product Code</label>
+              <mat-form-field appearance="outline">
+                <input matInput formControlName="code" placeholder="e.g., SO2-KMS-100">
+              </mat-form-field>
             </div>
           </div>
-        </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">Category</label>
+              <mat-form-field appearance="outline">
+                <mat-select formControlName="category">
+                  @for (category of categories(); track category.value) {
+                    <mat-option [value]="category.value">{{ category.label }}</mat-option>
+                  }
+                </mat-select>
+                @if (form.get('category')?.hasError('required') && form.get('category')?.touched) {
+                  <mat-error>Category is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Unit of Measurement</label>
+              <mat-form-field appearance="outline">
+                <mat-select formControlName="unit">
+                  @for (unit of units(); track unit.value) {
+                    <mat-option [value]="unit.value">{{ unit.label }}</mat-option>
+                  }
+                </mat-select>
+                @if (form.get('unit')?.hasError('required') && form.get('unit')?.touched) {
+                  <mat-error>Unit is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Supplier & Stock Management -->
+        <section class="form-section">
+          <h3 class="section-title">SUPPLIER & STOCK MANAGEMENT</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Supplier</label>
+              <mat-form-field appearance="outline">
+                <input matInput formControlName="supplier" placeholder="e.g., WineChem Supplies">
+              </mat-form-field>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Low Stock Threshold</label>
+              <app-number-input
+                formControlName="low_stock_threshold"
+                placeholder="Alert when stock falls below"
+                [decimals]="2"
+                [min]="0">
+              </app-number-input>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Additional Details -->
+        <section class="form-section">
+          <h3 class="section-title">ADDITIONAL DETAILS</h3>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label class="form-label">Notes</label>
+              <mat-form-field appearance="outline">
+                <textarea
+                  matInput
+                  formControlName="notes"
+                  rows="4"
+                  placeholder="Additional notes, specifications, or usage instructions"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+          
+          <div class="toggle-card" [class.active]="form.get('is_active')?.value">
+            <mat-checkbox formControlName="is_active">
+              <div class="toggle-content">
+                <span class="toggle-label">Active Material</span>
+                <span class="toggle-hint">Uncheck to archive this material</span>
+              </div>
+            </mat-checkbox>
+          </div>
+        </section>
       </form>
     </app-form-page>
   `,
