@@ -95,7 +95,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
               <app-skeleton width="100%" height="200px"></app-skeleton>
             } @else if (tank()) {
               <div class="volume-visual">
-                <div class="tank-illustration" [style.--fill-level]="tank()!.fill_percentage + '%'">
+                <div class="tank-illustration">
                   <svg viewBox="0 0 200 300" class="tank-svg">
                     <!-- Tank outline -->
                     <ellipse cx="100" cy="30" rx="80" ry="15" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -116,22 +116,32 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                     
                     <!-- Animated liquid level -->
                     <g clip-path="url(#tankClip)">
+                      <!-- Bottom ellipse base -->
+                      <ellipse 
+                        cx="100" 
+                        [attr.cy]="270 - (240 * tank()!.fill_percentage / 100)" 
+                        rx="80" 
+                        ry="15" 
+                        fill="url(#wineGradient)"
+                        class="liquid-base"
+                      />
+                      <!-- Main liquid rectangle -->
                       <rect 
                         x="20" 
-                        y="30"
+                        [attr.y]="270 - (240 * tank()!.fill_percentage / 100)"
                         width="160" 
-                        height="240"
+                        [attr.height]="240 * tank()!.fill_percentage / 100"
                         fill="url(#wineGradient)"
                         class="liquid-fill"
                       />
                       <!-- Liquid surface wave -->
                       <ellipse 
                         cx="100" 
-                        cy="30"
+                        [attr.cy]="270 - (240 * tank()!.fill_percentage / 100)" 
                         rx="80" 
                         ry="8" 
                         fill="#9575ff"
-                        opacity="0.6"
+                        opacity="0.7"
                         class="liquid-surface"
                       />
                     </g>
