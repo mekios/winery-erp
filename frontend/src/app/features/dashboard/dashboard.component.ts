@@ -1008,21 +1008,22 @@ export class DashboardComponent implements OnInit {
   loading = signal(true);
   data = signal<DashboardData | null>(null);
   error = signal<string | null>(null);
-  private hasLoaded = false;
   
   constructor() {
-    // Use effect to react when winery becomes available
+    // Use effect to react when winery changes
     effect(() => {
       const winery = this.wineryService.currentWinery();
       const initialized = this.wineryService.initialized();
       
-      // Load dashboard when winery is available and we haven't loaded yet
-      if (initialized && winery && !this.hasLoaded) {
-        this.hasLoaded = true;
+      // Load dashboard whenever winery changes (and we're initialized)
+      if (initialized && winery) {
+        console.log('[Dashboard] Winery changed to:', winery.winery.name, '- reloading dashboard');
         this.loadDashboard();
       } else if (initialized && !winery) {
         // No winery available
+        console.log('[Dashboard] No winery available');
         this.loading.set(false);
+        this.data.set(null);
       }
     }, { allowSignalWrites: true });
   }
@@ -1039,13 +1040,11 @@ export class DashboardComponent implements OnInit {
     
     this.loading.set(true);
     this.error.set(null);
-    this.hasLoaded = false;
     
     this.dashboardService.getDashboard().subscribe({
       next: (data) => {
         this.data.set(data);
         this.loading.set(false);
-        this.hasLoaded = true;
       },
       error: (err) => {
         console.error('Dashboard error:', err);
