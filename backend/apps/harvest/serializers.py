@@ -24,10 +24,11 @@ class HarvestSeasonSerializer(serializers.ModelSerializer):
 class HarvestSeasonListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for lists."""
     batch_count = serializers.ReadOnlyField()
+    total_grape_weight_kg = serializers.ReadOnlyField()
     
     class Meta:
         model = HarvestSeason
-        fields = ['id', 'year', 'name', 'is_active', 'batch_count']
+        fields = ['id', 'year', 'name', 'is_active', 'batch_count', 'total_grape_weight_kg']
 
 
 class HarvestSeasonDropdownSerializer(serializers.ModelSerializer):

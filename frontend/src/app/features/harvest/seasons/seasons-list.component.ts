@@ -249,11 +249,14 @@ export class SeasonsListComponent implements OnInit {
     });
   }
   
-  formatWeight(kg: number): string {
+  formatWeight(kg: number | null | undefined): string {
+    if (kg === null || kg === undefined || kg === 0) {
+      return '0kg';
+    }
     if (kg >= 1000) {
       return `${(kg / 1000).toFixed(1)}t`;
     }
-    return `${kg}kg`;
+    return `${kg.toFixed(0)}kg`;
   }
   
   navigateToCreate(): void {
