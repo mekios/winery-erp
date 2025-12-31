@@ -244,7 +244,8 @@ h1 {
   
   // Smooth transitions for the clipped elements and surface
   #liquidClip rect,
-  .liquid-surface {
+  .liquid-surface,
+  .liquid-highlight {
     transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }

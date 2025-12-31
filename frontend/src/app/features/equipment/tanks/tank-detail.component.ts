@@ -136,8 +136,17 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                         rx="78" 
                         ry="14" 
                         fill="url(#wineGradient)" 
-                        opacity="0.9"
                         class="liquid-surface"
+                      />
+                      <!-- Surface highlight for 3D effect -->
+                      <ellipse 
+                        cx="100" 
+                        [attr.cy]="270 - (240 * tank()!.fill_percentage / 100)" 
+                        rx="78" 
+                        ry="14" 
+                        fill="#9575ff" 
+                        opacity="0.3"
+                        class="liquid-highlight"
                       />
                     }
                   </svg>
