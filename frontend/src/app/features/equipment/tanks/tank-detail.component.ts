@@ -28,7 +28,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
       
       <!-- Header -->
       <header class="detail-header">
-        <button mat-icon-button (click)="goBack()" class="back-btn">
+        <button (click)="goBack()" class="back-btn">
           <mat-icon>arrow_back</mat-icon>
         </button>
         
@@ -95,7 +95,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
               <app-skeleton width="100%" height="200px"></app-skeleton>
             } @else if (tank()) {
               <div class="volume-visual">
-                <div class="tank-illustration">
+                <div class="tank-illustration" [style.--fill-level]="tank()!.fill_percentage + '%'">
                   <svg viewBox="0 0 200 300" class="tank-svg">
                     <!-- Tank outline -->
                     <ellipse cx="100" cy="30" rx="80" ry="15" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -118,16 +118,16 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                     <g clip-path="url(#tankClip)">
                       <rect 
                         x="20" 
-                        [attr.y]="30 + (240 * (1 - tank()!.fill_percentage / 100))" 
+                        y="30"
                         width="160" 
-                        [attr.height]="240 * (tank()!.fill_percentage / 100)"
+                        height="240"
                         fill="url(#wineGradient)"
                         class="liquid-fill"
                       />
                       <!-- Liquid surface wave -->
                       <ellipse 
                         cx="100" 
-                        [attr.cy]="30 + (240 * (1 - tank()!.fill_percentage / 100))" 
+                        cy="30"
                         rx="80" 
                         ry="8" 
                         fill="#9575ff"

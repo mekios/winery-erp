@@ -41,17 +41,25 @@
   height: 40px;
   border-radius: 10px;
   border: 1px solid var(--border-color);
-  background: transparent;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s ease;
+  padding: 0;
   
   mat-icon {
     color: var(--text-secondary);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
   
   &:hover {
     background: var(--gray-100);
     border-color: var(--gray-300);
-    transform: translateX(-4px);
+    transform: translateX(-2px);
     
     mat-icon {
       color: var(--text-primary);
@@ -227,6 +235,7 @@ h1 {
 
 .tank-illustration {
   color: #cbd5e1;
+  --fill-level: 0%;
   
   .tank-svg {
     width: 100%;
@@ -235,10 +244,14 @@ h1 {
   }
   
   .liquid-fill {
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: top;
+    transform: translateY(calc(240px * (1 - var(--fill-level) / 100%))) scaleY(calc(var(--fill-level) / 100%));
+    transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .liquid-surface {
+    transform: translateY(calc(240px * (1 - var(--fill-level) / 100%)));
+    transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
     animation: wave 3s infinite ease-in-out;
   }
 }
