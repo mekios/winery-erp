@@ -377,6 +377,7 @@ class DashboardView(WineryContextMixin, APIView):
         # Composition integrity alerts (tanks with unknown composition)
         try:
             from apps.ledger.models import TankLedger
+            from apps.inventory.models import Material
             
             # Check tanks with wine for unknown composition
             tanks_with_wine = tanks_qs.filter(current_volume_l__gt=0)
@@ -390,6 +391,26 @@ class DashboardView(WineryContextMixin, APIView):
                         'message': f'Tank {tank.code} has {pct:.1f}% unknown origin',
                         'date': timezone.now().isoformat(),
                         'source_id': str(tank.id),
+                    })
+            
+            # Low stock alerts
+            low_stock_materials = Material.objects.filter(
+                winery=winery,
+                is_active=True,
+                low_stock_threshold__isnull=False
+            )
+            
+            for material in low_stock_materials:
+                current_stock = material.get_current_stock()
+                if current_stock < material.low_stock_threshold:
+                    alert_type = 'danger' if current_stock == 0 else 'warning'
+                    stock_str = f'{current_stock} {material.unit}' if current_stock > 0 else 'Out of stock'
+                    alerts.append({
+                        'type': alert_type,
+                        'category': 'low_stock',
+                        'message': f'Low stock: {material.name} ({stock_str})',
+                        'date': timezone.now().isoformat(),
+                        'source_id': str(material.id),
                     })
         except ImportError:
             # Ledger app not available

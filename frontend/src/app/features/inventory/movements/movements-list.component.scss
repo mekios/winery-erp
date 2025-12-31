@@ -1,0 +1,168 @@
+.content-container {
+  padding: 1.5rem;
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+}
+
+.header-action-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loading-state,
+.empty-state {
+  padding: 2rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+
+  app-icon {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+  }
+
+  p {
+    margin: 0 0 1.5rem 0;
+    color: var(--text-secondary);
+  }
+}
+
+.movements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.movement-card {
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 1.5rem;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.movement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.movement-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.material-name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.movement-quantity {
+  font-size: 1.5rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &.quantity-positive {
+    color: var(--success);
+  }
+
+  &.quantity-negative {
+    color: var(--danger);
+  }
+}
+
+// Movement type chips
+::ng-deep {
+  .type-purchase {
+    background-color: var(--success-light) !important;
+    color: var(--success) !important;
+  }
+
+  .type-adjustment {
+    background-color: var(--info-light) !important;
+    color: var(--info) !important;
+  }
+
+  .type-transfer {
+    background-color: var(--primary-light) !important;
+    color: var(--primary) !important;
+  }
+
+  .type-usage {
+    background-color: var(--warning-light) !important;
+    color: var(--warning) !important;
+  }
+
+  .type-waste,
+  .type-return {
+    background-color: var(--danger-light) !important;
+    color: var(--danger) !important;
+  }
+}
+
+.movement-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  font-size: 0.875rem;
+
+  &.notes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  &.meta {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .label {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .value {
+    color: var(--text-primary);
+    text-align: right;
+
+    &.total-cost {
+      font-weight: 700;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .movement-header {
+    flex-direction: column;
+  }
+
+  .movement-quantity {
+    align-self: flex-start;
+  }
+}
+

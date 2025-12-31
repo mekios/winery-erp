@@ -1,0 +1,88 @@
+<app-page-header
+  title="Material Additions"
+  subtitle="Track materials added to tanks, barrels, and batches"
+  icon="flask">
+</app-page-header>
+
+<div class="content-container">
+  @if (loading()) {
+    <div class="loading-state">
+      <app-skeleton height="100px" count="5" />
+    </div>
+  } @else if (error()) {
+    <app-error-state
+      [message]="error()!"
+      (retry)="loadAdditions()">
+    </app-error-state>
+  } @else if (additions().length === 0) {
+    <div class="empty-state">
+      <app-icon name="flask" size="48" />
+      <h3>No Additions Recorded</h3>
+      <p>Material additions are created when you add SO₂, yeast, or other materials to tanks or barrels from their detail pages.</p>
+    </div>
+  } @else {
+    <div class="additions-list">
+      @for (addition of additions(); track addition.id) {
+        <div class="addition-card">
+          <div class="addition-header">
+            <div class="addition-info">
+              <h3 class="material-name">{{ addition.material_name }}</h3>
+              <div class="category-badge">{{ addition.material_category_display }}</div>
+            </div>
+            <div class="addition-quantity">
+              {{ addition.quantity | number:'1.0-2' }} {{ addition.unit_display }}
+            </div>
+          </div>
+
+          <div class="addition-details">
+            <div class="detail-row">
+              <span class="label">Target:</span>
+              <span class="value target">{{ addition.target_display }}</span>
+            </div>
+
+            @if (addition.purpose) {
+              <div class="detail-row">
+                <span class="label">Purpose:</span>
+                <span class="value">{{ addition.purpose }}</span>
+              </div>
+            }
+
+            @if (addition.dosage_rate) {
+              <div class="detail-row">
+                <span class="label">Dosage Rate:</span>
+                <span class="value dosage">{{ addition.dosage_rate }}</span>
+              </div>
+            }
+
+            @if (addition.target_volume_l) {
+              <div class="detail-row">
+                <span class="label">Target Volume:</span>
+                <span class="value">{{ addition.target_volume_l | number:'1.0-0' }} L</span>
+              </div>
+            }
+
+            <div class="detail-row">
+              <span class="label">Date:</span>
+              <span class="value">{{ addition.addition_date | date:'medium' }}</span>
+            </div>
+
+            @if (addition.notes) {
+              <div class="detail-row notes">
+                <span class="label">Notes:</span>
+                <span class="value">{{ addition.notes }}</span>
+              </div>
+            }
+
+            @if (addition.added_by_name) {
+              <div class="detail-row meta">
+                <span class="label">Added by:</span>
+                <span class="value">{{ addition.added_by_name }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+

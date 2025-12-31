@@ -1,0 +1,41 @@
+<app-page-header
+  title="Materials & Supplies"
+  subtitle="Manage inventory of winemaking materials"
+  icon="flask">
+  <div actions>
+    <button
+      mat-flat-button
+      color="primary"
+      routerLink="/inventory/materials/new"
+      class="header-action-button">
+      <app-icon name="plus" />
+      Add Material
+    </button>
+  </div>
+</app-page-header>
+
+<div class="content-container">
+  @if (error()) {
+    <div class="error-message">{{ error() }}</div>
+  }
+
+  <app-data-table
+    [data]="materials()"
+    [columns]="columns"
+    [actions]="actions"
+    [loading]="loading()"
+    editRoute="/inventory/materials"
+    (actionClicked)="onAction($event)">
+    <!-- Custom template for stock status -->
+    <ng-template #customTemplate let-column="column" let-row="row">
+      @if (column.key === 'is_low_stock') {
+        <mat-chip
+          [ngClass]="getStockStatus(row).class"
+          [disabled]="true">
+          {{ getStockStatus(row).label }}
+        </mat-chip>
+      }
+    </ng-template>
+  </app-data-table>
+</div>
+
