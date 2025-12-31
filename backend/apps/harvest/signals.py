@@ -22,7 +22,7 @@ def update_tank_status_on_batch_create(sender, instance, created, **kwargs):
 def create_ledger_entry_on_batch_create(sender, instance, created, **kwargs):
     """
     When a batch is created with an initial_tank and must_volume,
-    create a ledger entry to track the must in the tank.
+    create a ledger entry and update the tank's current volume.
     """
     # Only process on creation
     if not created:
@@ -47,5 +47,10 @@ def create_ledger_entry_on_batch_create(sender, instance, created, **kwargs):
         composition_key_label=instance.batch_code,
         derived_source=DerivedSource.EXPLICIT,
     )
+    
+    # Update the tank's current volume
+    tank = instance.initial_tank
+    tank.current_volume_l += instance.must_volume_l
+    tank.save(update_fields=['current_volume_l'])
 
 
