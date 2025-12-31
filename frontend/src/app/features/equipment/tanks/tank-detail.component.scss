@@ -243,9 +243,9 @@ h1 {
   }
   
   // Smooth transitions for SVG elements
-  .liquid-base,
   .liquid-fill,
-  .liquid-surface {
+  .liquid-surface,
+  .liquid-bottom {
     transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
   

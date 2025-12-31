@@ -110,31 +110,22 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                         <stop offset="100%" style="stop-color:#5e35d1;stop-opacity:1" />
                       </linearGradient>
                       <clipPath id="tankClip">
-                        <rect x="20" y="30" width="160" height="240"/>
+                        <rect x="20" y="30" width="160" height="250"/>
                       </clipPath>
                     </defs>
                     
                     <!-- Animated liquid level -->
                     <g clip-path="url(#tankClip)">
-                      <!-- Bottom ellipse base -->
-                      <ellipse 
-                        cx="100" 
-                        [attr.cy]="270 - (240 * tank()!.fill_percentage / 100)" 
-                        rx="80" 
-                        ry="15" 
-                        fill="url(#wineGradient)"
-                        class="liquid-base"
-                      />
                       <!-- Main liquid rectangle -->
                       <rect 
                         x="20" 
                         [attr.y]="270 - (240 * tank()!.fill_percentage / 100)"
                         width="160" 
-                        [attr.height]="240 * tank()!.fill_percentage / 100"
+                        [attr.height]="240 * tank()!.fill_percentage / 100 + 15"
                         fill="url(#wineGradient)"
                         class="liquid-fill"
                       />
-                      <!-- Liquid surface wave -->
+                      <!-- Liquid surface wave (top ellipse) -->
                       <ellipse 
                         cx="100" 
                         [attr.cy]="270 - (240 * tank()!.fill_percentage / 100)" 
@@ -145,6 +136,16 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                         class="liquid-surface"
                       />
                     </g>
+                    <!-- Bottom ellipse (rendered outside clip for proper rounding) -->
+                    <ellipse 
+                      cx="100" 
+                      cy="270"
+                      rx="80" 
+                      ry="15" 
+                      fill="url(#wineGradient)"
+                      class="liquid-bottom"
+                      [style.opacity]="tank()!.fill_percentage > 0 ? 1 : 0"
+                    />
                   </svg>
                 </div>
                 
