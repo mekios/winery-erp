@@ -4,9 +4,9 @@
 
 .detail-page {
   position: relative;
-  max-width: 1400px; // Increased for wider layout
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%; // Full width like form pages
+  margin: 0;
+  padding: 1.5rem; // Same padding as form pages
   min-height: 100vh;
 }
 
@@ -37,11 +37,25 @@
 }
 
 .back-btn {
-  margin-top: 4px;
-  transition: transform 0.2s ease;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  transition: all 0.2s ease;
+  
+  mat-icon {
+    color: var(--text-secondary);
+  }
   
   &:hover {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
     transform: translateX(-4px);
+    
+    mat-icon {
+      color: var(--text-primary);
+    }
   }
 }
 
@@ -178,7 +192,18 @@ h1 {
   gap: 8px;
   
   button {
+    padding: 0 1.25rem;
+    height: 40px;
+    border-radius: 10px;
     font-weight: 600;
+    font-size: 0.875rem;
+    
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-right: 4px;
+    }
   }
 }
 
@@ -1098,11 +1123,12 @@ h1 {
 
 @media screen and (max-width: 768px) {
   .detail-page {
-    padding: 16px;
+    padding: 1rem;
   }
   
   .detail-header {
     flex-direction: column;
+    padding: 1rem;
   }
   
   .header-actions {
@@ -1110,6 +1136,8 @@ h1 {
     
     button {
       flex: 1;
+      height: 38px;
+      font-size: 0.8125rem;
     }
   }
   
@@ -1134,5 +1162,15 @@ h1 {
   
   .timeline-connector {
     left: 24px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .detail-page {
+    padding: 0.75rem;
+  }
+  
+  .detail-header {
+    padding: 0.75rem;
   }
 }

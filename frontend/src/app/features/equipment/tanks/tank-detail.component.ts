@@ -72,7 +72,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
           </div>
           
           <div class="header-actions">
-            <button mat-flat-button color="primary" [routerLink]="['/equipment/tanks', tankId, 'edit']">
+            <button mat-stroked-button [routerLink]="['/equipment/tanks', tankId, 'edit']">
               <mat-icon>edit</mat-icon>
               Edit Tank
             </button>
