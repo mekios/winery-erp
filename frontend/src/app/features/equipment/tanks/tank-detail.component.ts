@@ -72,6 +72,14 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
           </div>
           
           <div class="header-actions">
+            <button mat-stroked-button [routerLink]="['/production/transfers/new']" [queryParams]="{destinationTank: tankId}">
+              <mat-icon>arrow_downward</mat-icon>
+              Transfer In
+            </button>
+            <button mat-stroked-button [routerLink]="['/production/transfers/new']" [queryParams]="{sourceTank: tankId}">
+              <mat-icon>arrow_upward</mat-icon>
+              Transfer Out
+            </button>
             <button mat-stroked-button [routerLink]="['/equipment/tanks', tankId, 'edit']">
               <mat-icon>edit</mat-icon>
               Edit Tank
