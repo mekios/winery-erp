@@ -67,6 +67,20 @@ def _create_outflow_entries(transfer):
             composition_key_label=transfer.batch.batch_code,
             derived_source=DerivedSource.EXPLICIT,
         )
+    elif transfer.action_type == 'DRAIN' or (not transfer.destination_tank and not transfer.destination_barrel):
+        # DRAIN operation - treat as removing mixed wine (no proportional split)
+        # Once wine is mixed in a tank, you can't know what's coming out
+        TankLedger.objects.create(
+            winery=transfer.winery,
+            transfer=transfer,
+            event_datetime=transfer.transfer_date,
+            tank=transfer.source_tank,
+            delta_volume_l=volume_out,
+            composition_key_type=CompositionKeyType.UNKNOWN,
+            composition_key_id=None,
+            composition_key_label='Drain',
+            derived_source=DerivedSource.EXPLICIT,
+        )
     else:
         # Inherit from source tank composition
         _create_inherited_entries(

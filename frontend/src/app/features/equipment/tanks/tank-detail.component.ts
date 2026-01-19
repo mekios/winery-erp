@@ -335,8 +335,9 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                 <div class="ledger-timeline">
                   @for (entry of history(); track entry.id; let i = $index) {
                     <div class="timeline-entry" 
-                         [class.entry-inflow]="entry.delta_volume_l > 0" 
-                         [class.entry-outflow]="entry.delta_volume_l < 0"
+                         [class.entry-inflow]="entry.delta_volume_l > 0 && entry.composition_key_label !== 'Drain'" 
+                         [class.entry-outflow]="entry.delta_volume_l < 0 && entry.composition_key_label !== 'Drain'"
+                         [class.entry-drain]="entry.composition_key_label === 'Drain'"
                          [style.animation-delay]="i * 0.05 + 's'">
                       <!-- Timeline line connector -->
                       @if (i < history().length - 1) {
@@ -347,7 +348,9 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                       <div class="timeline-node">
                         <div class="node-pulse"></div>
                         <div class="node-icon">
-                          @if (entry.event_type === 'batch_intake') {
+                          @if (entry.composition_key_label === 'Drain') {
+                            <app-icon name="drain" [size]="16"></app-icon>
+                          } @else if (entry.event_type === 'batch_intake') {
                             <app-icon name="wine" [size]="16"></app-icon>
                           } @else if (entry.delta_volume_l > 0) {
                             <mat-icon>arrow_downward</mat-icon>
@@ -365,11 +368,19 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                               {{ entry.delta_volume_l > 0 ? '+' : '' }}{{ entry.delta_volume_l | number:'1.0-0' }} L
                             </span>
                             <span class="volume-label">
-                              {{ entry.delta_volume_l > 0 ? 'Inflow' : 'Outflow' }}
+                              @if (entry.composition_key_label === 'Drain') {
+                                Drain
+                              } @else {
+                                {{ entry.delta_volume_l > 0 ? 'Inflow' : 'Outflow' }}
+                              }
                             </span>
                           </div>
-                          <div class="event-badge" [class]="'event-' + entry.event_type">
-                            {{ entry.event_type === 'batch_intake' ? 'Batch Intake' : 'Transfer' }}
+                          <div class="event-badge" [class]="entry.composition_key_label === 'Drain' ? 'event-drain' : 'event-' + entry.event_type">
+                            @if (entry.composition_key_label === 'Drain') {
+                              Drain
+                            } @else {
+                              {{ entry.event_type === 'batch_intake' ? 'Batch Intake' : 'Transfer' }}
+                            }
                           </div>
                         </div>
                         

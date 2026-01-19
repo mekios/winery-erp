@@ -133,6 +133,21 @@ class Command(BaseCommand):
                     derived_source=DerivedSource.EXPLICIT,
                 )
             return 1
+        elif transfer.action_type == 'DRAIN' or (not transfer.destination_tank and not transfer.destination_barrel):
+            # DRAIN operation - treat as removing mixed wine (no proportional split)
+            if not dry_run:
+                TankLedger.objects.create(
+                    winery=transfer.winery,
+                    transfer=transfer,
+                    event_datetime=transfer.transfer_date,
+                    tank=transfer.source_tank,
+                    delta_volume_l=volume_out,
+                    composition_key_type=CompositionKeyType.UNKNOWN,
+                    composition_key_id=None,
+                    composition_key_label='Drain',
+                    derived_source=DerivedSource.EXPLICIT,
+                )
+            return 1
         else:
             # Inherit from source composition
             composition = TankLedger.get_tank_composition(

@@ -1075,6 +1075,39 @@ h1 {
   }
 }
 
+.entry-drain {
+  .timeline-connector {
+    background: linear-gradient(to bottom, #dc2626, #ef4444);
+  }
+  
+  .timeline-node {
+    border-color: #dc2626;
+    background: #fef2f2;
+    
+    .node-pulse {
+      background: #dc2626;
+    }
+    
+    .node-icon {
+      color: #dc2626;
+    }
+  }
+  
+  .entry-card {
+    border-left: 3px solid #dc2626;
+  }
+  
+  .volume-badge {
+    .volume-value {
+      color: #dc2626;
+      font-weight: 700;
+    }
+    .volume-label {
+      color: #ef4444;
+    }
+  }
+}
+
 .event-badge {
   padding: 6px 14px;
   border-radius: 20px;
@@ -1091,6 +1124,12 @@ h1 {
   &.event-transfer {
     background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
     color: #4338ca;
+  }
+  
+  &.event-drain {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #991b1b;
+    border: 1px solid #f87171;
   }
   
   &.event-unknown {
