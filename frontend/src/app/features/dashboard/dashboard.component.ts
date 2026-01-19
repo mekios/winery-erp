@@ -310,7 +310,7 @@ import {
                         <app-tank-visual
                           [tankId]="tank.id"
                           [fillPercentage]="tank.fill_percentage"
-                          [colors]="getTankColor(tank.dominant_variety)"
+                          [colors]="getTankColor(tank.dominant_variety_color)"
                           [compact]="true">
                         </app-tank-visual>
                       </div>
@@ -460,36 +460,26 @@ export class DashboardComponent implements OnInit {
     return role.replace('_', ' ');
   }
   
-  getTankColor(variety: string | null): { start: string; end: string } {
-    if (!variety) {
+  getTankColor(varietyColor: 'RED' | 'WHITE' | 'ROSE' | null | undefined): { start: string; end: string } {
+    if (!varietyColor) {
       // Default purple for unknown/empty
       return { start: '#7c4dff', end: '#5e35d1' };
     }
     
-    const varietyName = variety.toLowerCase();
-    
-    // Check if it's a red variety
-    if (varietyName.includes('merlot') || varietyName.includes('cabernet') ||
-        varietyName.includes('syrah') || varietyName.includes('shiraz') ||
-        varietyName.includes('pinot noir') || varietyName.includes('grenache') ||
-        varietyName.includes('tempranillo') || varietyName.includes('malbec') ||
-        varietyName.includes('sangiovese') || varietyName.includes('zinfandel')) {
-      // Red wine
+    // Use actual variety color from backend
+    if (varietyColor === 'RED') {
+      // Red wine - deep red/purple
       return { start: '#dc2626', end: '#991b1b' };
+    } else if (varietyColor === 'WHITE') {
+      // White wine - light yellow-green
+      return { start: '#f1f285', end: '#e8e654' };
+    } else if (varietyColor === 'ROSE') {
+      // Rosé - pink
+      return { start: '#f472b6', end: '#db2777' };
     }
     
-    // Check if it's a white variety
-    if (varietyName.includes('chardonnay') || varietyName.includes('sauvignon') ||
-        varietyName.includes('riesling') || varietyName.includes('pinot gris') ||
-        varietyName.includes('pinot grigio') || varietyName.includes('viognier') ||
-        varietyName.includes('gewurztraminer') || varietyName.includes('moscato') ||
-        varietyName.includes('semillon') || varietyName.includes('albarino')) {
-      // White wine
-      return { start: '#fde047', end: '#facc15' };
-    }
-    
-    // Default to rosé/blend color for others
-    return { start: '#f472b6', end: '#db2777' };
+    // Default to purple for unknown
+    return { start: '#7c4dff', end: '#5e35d1' };
   }
   
   getAlertLink(alert: DashboardAlert): string[] {

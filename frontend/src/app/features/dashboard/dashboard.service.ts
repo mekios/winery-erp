@@ -65,6 +65,7 @@ export interface TopTank {
   current_volume_l: number;
   fill_percentage: number;
   dominant_variety: string | null;
+  dominant_variety_color?: 'RED' | 'WHITE' | 'ROSE' | null;
 }
 
 export interface DashboardAlert {

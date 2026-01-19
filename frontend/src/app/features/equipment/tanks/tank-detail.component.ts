@@ -561,8 +561,8 @@ export class TankDetailComponent implements OnInit {
       // Red wine - deep red/purple
       return { start: '#dc2626', end: '#991b1b' };
     } else if (whiteTotal > 50) {
-      // White wine - bright yellow
-      return { start: '#fde047', end: '#facc15' };
+      // White wine - light yellow-green
+      return { start: '#f1f285', end: '#e8e654' };
     } else if (roseTotal > 50 || (redTotal > 0 && whiteTotal > 0)) {
       // Rosé or blend - pink
       return { start: '#f472b6', end: '#db2777' };

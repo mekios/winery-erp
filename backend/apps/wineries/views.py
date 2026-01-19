@@ -322,12 +322,15 @@ class DashboardView(WineryContextMixin, APIView):
             
             # Get dominant variety from tank composition
             dominant_variety = None
+            dominant_variety_color = None
             try:
                 from apps.ledger.models import TankLedger
                 composition = TankLedger.get_tank_composition(t)
                 if composition['by_variety']:
                     # Get the variety with the highest percentage
-                    dominant_variety = max(composition['by_variety'], key=lambda x: x['percentage'])['variety']
+                    dominant = max(composition['by_variety'], key=lambda x: x['percentage'])
+                    dominant_variety = dominant['variety']
+                    dominant_variety_color = dominant.get('variety_color')
             except (ImportError, Exception):
                 pass
             
@@ -339,6 +342,7 @@ class DashboardView(WineryContextMixin, APIView):
                 'current_volume_l': float(t.current_volume_l),
                 'fill_percentage': round(fill_pct, 1),
                 'dominant_variety': dominant_variety,
+                'dominant_variety_color': dominant_variety_color,
             })
 
         # === ALERTS ===
