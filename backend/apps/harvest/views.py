@@ -9,11 +9,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum, Count
 
 from apps.wineries.mixins import WineryRequiredMixin
-from .models import HarvestSeason, Batch, BatchSource
+from .models import HarvestSeason, Batch, BatchSource, BatchFraction
 from .serializers import (
     HarvestSeasonSerializer, HarvestSeasonListSerializer, HarvestSeasonDropdownSerializer,
     BatchSerializer, BatchListSerializer, BatchCreateSerializer, BatchUpdateSerializer,
     BatchSourceSerializer, BatchSourceCreateSerializer,
+    BatchFractionSerializer, BatchFractionListSerializer, BatchFractionCreateSerializer,
 )
 
 
@@ -80,7 +81,7 @@ class BatchViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
     """
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['harvest_season', 'stage', 'source_type', 'initial_tank']
+    filterset_fields = ['harvest_season', 'stage', 'source_type']
     search_fields = ['batch_code', 'notes']
     ordering_fields = ['batch_code', 'intake_date', 'grape_weight_kg', 'stage']
     ordering = ['-intake_date', '-created_at']
@@ -89,8 +90,8 @@ class BatchViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
         winery = getattr(self.request, 'winery', None)
         if winery:
             return Batch.objects.filter(winery=winery).select_related(
-                'harvest_season', 'initial_tank'
-            ).prefetch_related('sources__variety', 'sources__vineyard_block')
+                'harvest_season'
+            ).prefetch_related('sources__variety', 'sources__vineyard_block', 'fractions__tank')
         return Batch.objects.none()
     
     def get_serializer_class(self):
@@ -189,6 +190,44 @@ class BatchSourceViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
         batch_id = self.request.data.get('batch')
         batch = Batch.objects.get(id=batch_id, winery=self.request.winery)
         serializer.save(winery=self.request.winery, batch=batch)
+
+
+class BatchFractionViewSet(WineryRequiredMixin, viewsets.ModelViewSet):
+    """
+    API endpoint for managing batch fractions.
+    
+    list: GET /api/v1/harvest/fractions/
+    create: POST /api/v1/harvest/fractions/
+    retrieve: GET /api/v1/harvest/fractions/{id}/
+    update: PUT /api/v1/harvest/fractions/{id}/
+    partial_update: PATCH /api/v1/harvest/fractions/{id}/
+    destroy: DELETE /api/v1/harvest/fractions/{id}/
+    """
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['batch', 'fraction_type', 'tank']
+    search_fields = ['fraction_code', 'notes']
+    ordering_fields = ['fraction_code', 'separation_datetime', 'volume_l']
+    ordering = ['batch', 'separation_datetime']
+    
+    def get_queryset(self):
+        winery = getattr(self.request, 'winery', None)
+        if winery:
+            return BatchFraction.objects.filter(winery=winery).select_related(
+                'batch', 'tank'
+            )
+        return BatchFraction.objects.none()
+    
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return BatchFractionListSerializer
+        if self.action == 'create':
+            return BatchFractionCreateSerializer
+        return BatchFractionSerializer
+    
+    def perform_create(self, serializer):
+        serializer.save()
+
 
 
 

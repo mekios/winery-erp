@@ -2,7 +2,7 @@
 Django Admin configuration for Harvest models.
 """
 from django.contrib import admin
-from .models import HarvestSeason, Batch, BatchSource
+from .models import HarvestSeason, Batch, BatchSource, BatchFraction
 
 
 class BatchSourceInline(admin.TabularInline):
@@ -10,6 +10,14 @@ class BatchSourceInline(admin.TabularInline):
     extra = 1
     fields = ['vineyard_block', 'variety', 'weight_kg', 'is_estimated', 'notes']
     autocomplete_fields = ['vineyard_block', 'variety']
+
+
+class BatchFractionInline(admin.TabularInline):
+    model = BatchFraction
+    extra = 0
+    fields = ['fraction_type', 'fraction_code', 'tank', 'volume_l', 'separation_datetime', 'notes']
+    readonly_fields = ['fraction_code']
+    autocomplete_fields = ['tank']
 
 
 @admin.register(HarvestSeason)
@@ -35,15 +43,15 @@ class BatchAdmin(admin.ModelAdmin):
     search_fields = ['batch_code', 'notes']
     ordering = ['-intake_date', '-created_at']
     readonly_fields = ['id', 'batch_code', 'grape_weight_kg', 'created_at', 'updated_at']
-    autocomplete_fields = ['harvest_season', 'initial_tank']
-    inlines = [BatchSourceInline]
+    autocomplete_fields = ['harvest_season']
+    inlines = [BatchSourceInline, BatchFractionInline]
     
     fieldsets = (
         (None, {
             'fields': ('winery', 'batch_code', 'harvest_season')
         }),
         ('Intake Details', {
-            'fields': ('intake_date', 'source_type', 'initial_tank')
+            'fields': ('intake_date', 'source_type')
         }),
         ('Quantities', {
             'fields': ('grape_weight_kg', 'must_volume_l')
@@ -65,6 +73,35 @@ class BatchSourceAdmin(admin.ModelAdmin):
     search_fields = ['batch__batch_code', 'variety__name', 'vineyard_block__name']
     autocomplete_fields = ['batch', 'vineyard_block', 'variety']
     readonly_fields = ['id', 'created_at', 'updated_at']
+
+
+@admin.register(BatchFraction)
+class BatchFractionAdmin(admin.ModelAdmin):
+    list_display = ['fraction_code', 'batch', 'fraction_type', 'tank', 'volume_l', 'separation_datetime', 'winery']
+    list_filter = ['winery', 'fraction_type', 'batch__harvest_season']
+    search_fields = ['fraction_code', 'batch__batch_code']
+    autocomplete_fields = ['batch', 'tank']
+    readonly_fields = ['id', 'fraction_code', 'created_at', 'updated_at']
+    
+    fieldsets = (
+        (None, {
+            'fields': ('winery', 'batch', 'fraction_code')
+        }),
+        ('Fraction Details', {
+            'fields': ('fraction_type', 'tank', 'volume_l', 'separation_datetime')
+        }),
+        ('Notes', {
+            'fields': ('notes',)
+        }),
+        ('Metadata', {
+            'fields': ('id', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+
+
 
 
 

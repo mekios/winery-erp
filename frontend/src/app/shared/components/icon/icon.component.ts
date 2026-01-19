@@ -241,6 +241,13 @@ const ICONS: Record<string, string> = {
     <path d="M12 17h.01"/>
   `,
   
+  // Alert Circle - Alert triangle with exclamation in circle
+  'alert-circle': `
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M12 8v4"/>
+    <path d="M12 16h.01"/>
+  `,
+  
   // Info - Information circle icon
   'info': `
     <circle cx="12" cy="12" r="10"/>

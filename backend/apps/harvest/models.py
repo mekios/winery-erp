@@ -106,14 +106,6 @@ class Batch(models.Model):
         choices=SOURCE_TYPE_CHOICES,
         default='OWN'
     )
-    initial_tank = models.ForeignKey(
-        'equipment.Tank',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='initial_batches',
-        help_text='Tank where grapes were initially placed'
-    )
     grape_weight_kg = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -267,6 +259,130 @@ class BatchSource(models.Model):
             total=Sum('weight_kg')
         )['total'] or 0
         self.batch.save(update_fields=['grape_weight_kg'])
+
+
+class BatchFraction(models.Model):
+    """
+    Represents a fraction/portion of a batch (e.g., free run, 1st press, 2nd press).
+    Each fraction can be stored in a different tank and tracked separately.
+    
+    This allows tracking the different quality levels from pressing operations:
+    - Free Run: Juice that flows naturally before pressing
+    - 1st Press: Light pressing
+    - 2nd Press: Medium pressing
+    - 3rd Press: Hard pressing
+    
+    All fractions maintain traceability to the parent batch for composition tracking.
+    """
+    FRACTION_TYPE_CHOICES = [
+        ('FREE_RUN', 'Free Run'),
+        ('PRESS_1', '1st Press'),
+        ('PRESS_2', '2nd Press'),
+        ('PRESS_3', '3rd Press'),
+        ('SKIN_CONTACT', 'Skin Contact'),
+        ('SETTLING', 'Settling'),
+        ('RACKING', 'Racking'),
+        ('OTHER', 'Other'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    winery = models.ForeignKey(
+        'wineries.Winery',
+        on_delete=models.CASCADE,
+        related_name='batch_fractions'
+    )
+    batch = models.ForeignKey(
+        Batch,
+        on_delete=models.CASCADE,
+        related_name='fractions',
+        help_text='Parent batch this fraction belongs to'
+    )
+    
+    fraction_type = models.CharField(
+        max_length=20,
+        choices=FRACTION_TYPE_CHOICES,
+        help_text='Type of fraction (e.g., Free Run, Press)'
+    )
+    fraction_code = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text='Auto-generated code (e.g., 2024-001-FR, 2024-001-P1)'
+    )
+    
+    tank = models.ForeignKey(
+        'equipment.Tank',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='batch_fractions',
+        help_text='Current tank storing this fraction'
+    )
+    volume_l = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        help_text='Volume in liters'
+    )
+    
+    separation_datetime = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='When this fraction was separated/pressed'
+    )
+    notes = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Batch Fraction'
+        verbose_name_plural = 'Batch Fractions'
+        ordering = ['batch', 'separation_datetime', 'fraction_type']
+        unique_together = ['winery', 'fraction_code']
+    
+    def __str__(self):
+        return f"{self.fraction_code or self.batch.batch_code} - {self.get_fraction_type_display()}"
+    
+    def save(self, *args, **kwargs):
+        # Ensure winery matches batch's winery
+        if self.batch:
+            self.winery = self.batch.winery
+        
+        # Generate fraction code if not set
+        if not self.fraction_code:
+            self.fraction_code = self.generate_fraction_code()
+        
+        super().save(*args, **kwargs)
+    
+    def generate_fraction_code(self):
+        """Generate unique fraction code based on batch code and type."""
+        # Map fraction types to short codes
+        type_codes = {
+            'FREE_RUN': 'FR',
+            'PRESS_1': 'P1',
+            'PRESS_2': 'P2',
+            'PRESS_3': 'P3',
+            'SKIN_CONTACT': 'SC',
+            'SETTLING': 'ST',
+            'RACKING': 'RK',
+            'OTHER': 'OT',
+        }
+        
+        type_code = type_codes.get(self.fraction_type, 'XX')
+        base_code = f"{self.batch.batch_code}-{type_code}"
+        
+        # Check if we need to add a number suffix (for duplicate types)
+        existing = BatchFraction.objects.filter(
+            winery=self.winery,
+            batch=self.batch,
+            fraction_type=self.fraction_type
+        ).exclude(id=self.id).count()
+        
+        if existing > 0:
+            return f"{base_code}{existing + 1}"
+        
+        return base_code
+
 
 
 

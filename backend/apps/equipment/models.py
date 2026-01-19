@@ -77,6 +77,27 @@ class Tank(models.Model):
     def __str__(self):
         return f"{self.code} - {self.name}" if self.name else self.code
     
+    def get_volume_from_ledger(self):
+        """
+        Calculate current volume from ledger entries.
+        This is the source of truth for tank volume.
+        """
+        from apps.ledger.models import TankLedger
+        from django.db.models import Sum
+        
+        total = TankLedger.objects.filter(
+            tank=self
+        ).aggregate(
+            total=Sum('delta_volume_l')
+        )['total']
+        
+        return total or 0
+    
+    def sync_volume_from_ledger(self):
+        """Update current_volume_l from ledger and save."""
+        self.current_volume_l = self.get_volume_from_ledger()
+        self.save(update_fields=['current_volume_l'])
+    
     @property
     def fill_percentage(self):
         """Calculate current fill percentage."""

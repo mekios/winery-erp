@@ -184,12 +184,25 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                   (retry)="loadComposition()">
                 </app-error-state>
               } @else if (composition()) {
-                @if (composition()!.has_integrity_issues) {
+                @if (composition()!.total_volume_l < 0) {
+                  <div class="integrity-error">
+                    <app-icon name="alert-circle" [size]="24"></app-icon>
+                    <div class="error-content">
+                      <strong>Negative Volume Detected</strong>
+                      <p>This tank has a negative volume of <strong>{{ composition()!.total_volume_l | number:'1.0-0' }} L</strong>.</p>
+                      <p class="error-detail">This usually means wine was transferred OUT before any was added IN. Check the ledger history below to identify the problematic entries.</p>
+                    </div>
+                  </div>
+                } @else if (composition()!.has_integrity_issues) {
                   <div class="integrity-warning">
                     <app-icon name="alert" [size]="20"></app-icon>
                     <div class="warning-content">
                       <strong>Composition Integrity Issue</strong>
-                      <span>This tank has some wine from unknown sources.</span>
+                      @if (composition()!.unknown_volume_l > 0) {
+                        <span>This tank has {{ composition()!.unknown_volume_l | number:'1.0-0' }} L ({{ composition()!.unknown_percentage | number:'1.1-1' }}%) of wine from unknown sources.</span>
+                      } @else {
+                        <span>This tank's composition history shows inconsistencies. Check the ledger below for negative composition entries or transactions that occurred out of sequence.</span>
+                      }
                     </div>
                   </div>
                 }

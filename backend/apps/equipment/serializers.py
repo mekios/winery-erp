@@ -41,10 +41,11 @@ class TankListSerializer(serializers.ModelSerializer):
 class TankDropdownSerializer(serializers.ModelSerializer):
     """Minimal serializer for dropdowns."""
     display_name = serializers.SerializerMethodField()
+    available_capacity_l = serializers.ReadOnlyField()
     
     class Meta:
         model = Tank
-        fields = ['id', 'code', 'name', 'display_name', 'capacity_l', 'current_volume_l', 'status']
+        fields = ['id', 'code', 'name', 'display_name', 'capacity_l', 'current_volume_l', 'available_capacity_l', 'status']
     
     def get_display_name(self, obj):
         return f"{obj.code} - {obj.name}" if obj.name else obj.code

@@ -523,6 +523,54 @@ h1 {
 
 // ===== INTEGRITY WARNING =====
 
+.integrity-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px 24px;
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  border-radius: 16px;
+  color: #7f1d1d;
+  margin-bottom: 32px;
+  border: 2px solid #ef4444;
+  
+  app-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: #dc2626;
+  }
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  
+  strong {
+    font-size: 16px;
+    font-weight: 700;
+    color: #7f1d1d;
+  }
+  
+  p {
+    font-size: 14px;
+    font-weight: 500;
+    color: #991b1b;
+    margin: 0;
+    
+    strong {
+      font-size: 14px;
+      color: #dc2626;
+    }
+  }
+  
+  .error-detail {
+    font-size: 13px;
+    color: #b91c1c;
+    margin-top: 4px;
+  }
+}
+
 .integrity-warning {
   display: flex;
   align-items: flex-start;

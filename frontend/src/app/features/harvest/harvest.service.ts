@@ -80,9 +80,6 @@ export interface Batch {
   season_year: number;
   intake_date: string;
   source_type: SourceType;
-  initial_tank: string | null;
-  tank_code: string | null;
-  tank_name: string | null;
   grape_weight_kg: number;
   must_volume_l: number;
   stage: BatchStage;
@@ -91,6 +88,8 @@ export interface Batch {
   primary_variety_name: string | null;
   variety_breakdown: VarietyBreakdown[];
   sources: BatchSource[];
+  fractions: BatchFractionList[];
+  total_fraction_volume: number;
   created_at: string;
   updated_at: string;
 }
@@ -101,7 +100,6 @@ export interface BatchList {
   season_year: number;
   intake_date: string;
   source_type: SourceType;
-  tank_code: string | null;
   grape_weight_kg: number;
   must_volume_l: number;
   stage: BatchStage;
@@ -113,10 +111,10 @@ export interface BatchCreate {
   harvest_season: string;
   intake_date: string;
   source_type?: SourceType;
-  initial_tank?: string;
   must_volume_l?: number;
   notes?: string;
   sources?: BatchSourceCreate[];
+  fractions?: BatchFractionCreateInline[];
 }
 
 export interface BatchSummary {
@@ -128,8 +126,70 @@ export interface BatchSummary {
 }
 
 // ===============================
+// Batch Fraction Types
+// ===============================
+export type FractionType = 'FREE_RUN' | 'PRESS_1' | 'PRESS_2' | 'PRESS_3' | 'SKIN_CONTACT' | 'SETTLING' | 'RACKING' | 'OTHER';
+
+export interface BatchFraction {
+  id: string;
+  batch: string;
+  batch_code: string;
+  fraction_type: FractionType;
+  fraction_type_display: string;
+  fraction_code: string;
+  tank: string | null;
+  tank_code: string | null;
+  tank_name: string | null;
+  volume_l: number;
+  separation_datetime: string | null;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BatchFractionList {
+  id: string;
+  batch_code: string;
+  fraction_code: string;
+  fraction_type: FractionType;
+  fraction_type_display: string;
+  tank_code: string | null;
+  tank_id: string | null;
+  volume_l: number;
+  separation_datetime: string | null;
+}
+
+export interface BatchFractionCreate {
+  batch: string;
+  fraction_type: FractionType;
+  tank?: string;
+  volume_l: number;
+  separation_datetime?: string;
+  notes?: string;
+}
+
+export interface BatchFractionCreateInline {
+  fraction_type: FractionType;
+  tank?: string;
+  volume_l: number;
+  separation_datetime?: string;
+  notes?: string;
+}
+
+// ===============================
 // Label Maps
 // ===============================
+export const FRACTION_TYPE_LABELS: Record<FractionType, string> = {
+  FREE_RUN: 'Free Run',
+  PRESS_1: '1st Press',
+  PRESS_2: '2nd Press',
+  PRESS_3: '3rd Press',
+  SKIN_CONTACT: 'Skin Contact',
+  SETTLING: 'Settling',
+  RACKING: 'Racking',
+  OTHER: 'Other',
+};
+
 export const BATCH_STAGE_LABELS: Record<BatchStage, string> = {
   INTAKE: 'Intake',
   CRUSHING: 'Crushing',
@@ -226,6 +286,30 @@ export class HarvestService {
   
   updateSource(id: string, data: Partial<BatchSourceCreate>): Observable<BatchSource> {
     return this.api.patch<BatchSource>('harvest/sources', id, data);
+  }
+  
+  // ===============================
+  // Batch Fractions
+  // ===============================
+  
+  getFractions(params?: QueryParams): Observable<PaginatedResponse<BatchFractionList>> {
+    return this.api.getList<BatchFractionList>('harvest/fractions', params);
+  }
+  
+  getFraction(id: string): Observable<BatchFraction> {
+    return this.api.get<BatchFraction>('harvest/fractions', id);
+  }
+  
+  createFraction(data: BatchFractionCreate): Observable<BatchFraction> {
+    return this.api.create<BatchFraction>('harvest/fractions', data);
+  }
+  
+  updateFraction(id: string, data: Partial<BatchFractionCreate>): Observable<BatchFraction> {
+    return this.api.patch<BatchFraction>('harvest/fractions', id, data);
+  }
+  
+  deleteFraction(id: string): Observable<void> {
+    return this.api.delete('harvest/fractions', id);
   }
 }
 
