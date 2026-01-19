@@ -215,10 +215,14 @@ class TankLedger(models.Model):
                     
                     # Variety breakdown
                     variety_name = source.variety.name
+                    variety_color = source.variety.color if source.variety else None
                     if variety_name in by_variety:
-                        by_variety[variety_name] += source_volume
+                        by_variety[variety_name]['volume'] += source_volume
                     else:
-                        by_variety[variety_name] = source_volume
+                        by_variety[variety_name] = {
+                            'volume': source_volume,
+                            'color': variety_color
+                        }
                     
                     # Vineyard breakdown
                     if source.vineyard_block:
@@ -236,11 +240,12 @@ class TankLedger(models.Model):
         
         # Convert variety dict to list with percentages
         variety_list = []
-        for variety_name, volume in by_variety.items():
+        for variety_name, data in by_variety.items():
             variety_list.append({
                 'variety': variety_name,
-                'volume_l': volume,
-                'percentage': round((volume / total_volume) * 100, 2) if total_volume > 0 else Decimal('0'),
+                'variety_color': data['color'],
+                'volume_l': data['volume'],
+                'percentage': round((data['volume'] / total_volume) * 100, 2) if total_volume > 0 else Decimal('0'),
             })
         variety_list.sort(key=lambda x: x['volume_l'], reverse=True)
         

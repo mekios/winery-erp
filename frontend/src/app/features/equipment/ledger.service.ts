@@ -16,6 +16,7 @@ export interface CompositionBatch {
 
 export interface CompositionVariety {
   variety: string;
+  variety_color?: 'RED' | 'WHITE' | 'ROSE' | null;
   volume_l: number;
   percentage: number;
 }

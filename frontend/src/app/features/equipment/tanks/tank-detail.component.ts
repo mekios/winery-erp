@@ -537,27 +537,21 @@ export class TankDetailComponent implements OnInit {
       return { start: '#7c4dff', end: '#5e35d1' };
     }
     
-    // Get total percentages by color
+    // Get total percentages by color from backend data
     let redTotal = 0;
     let whiteTotal = 0;
     let roseTotal = 0;
     
     for (const v of comp.by_variety) {
-      const varietyName = v.variety.toLowerCase();
-      // Simple heuristic based on common variety names
-      if (varietyName.includes('merlot') || varietyName.includes('cabernet') || 
-          varietyName.includes('syrah') || varietyName.includes('shiraz') ||
-          varietyName.includes('pinot noir') || varietyName.includes('grenache') ||
-          varietyName.includes('tempranillo') || varietyName.includes('malbec') ||
-          varietyName.includes('sangiovese') || varietyName.includes('zinfandel')) {
+      const color = v.variety_color;
+      if (color === 'RED') {
         redTotal += v.percentage;
-      } else if (varietyName.includes('chardonnay') || varietyName.includes('sauvignon') ||
-                 varietyName.includes('riesling') || varietyName.includes('pinot gris') ||
-                 varietyName.includes('pinot grigio') || varietyName.includes('viognier') ||
-                 varietyName.includes('gewurztraminer') || varietyName.includes('moscato') ||
-                 varietyName.includes('semillon') || varietyName.includes('albarino')) {
+      } else if (color === 'WHITE') {
         whiteTotal += v.percentage;
+      } else if (color === 'ROSE') {
+        roseTotal += v.percentage;
       } else {
+        // Unknown color - treat as mixed
         roseTotal += v.percentage;
       }
     }

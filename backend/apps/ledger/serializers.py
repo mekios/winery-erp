@@ -37,6 +37,7 @@ class CompositionBatchSerializer(serializers.Serializer):
 class CompositionVarietySerializer(serializers.Serializer):
     """Serializer for variety composition breakdown."""
     variety = serializers.CharField()
+    variety_color = serializers.CharField(required=False, allow_null=True)
     volume_l = serializers.DecimalField(max_digits=10, decimal_places=2)
     percentage = serializers.DecimalField(max_digits=5, decimal_places=2)
 
