@@ -38,12 +38,16 @@ def create_ledger_entries(sender, instance, created, **kwargs):
     # Handle outflow from source tank
     if transfer.source_tank:
         _create_outflow_entries(transfer)
+        # Sync tank volume from ledger
+        transfer.source_tank.sync_volume_from_ledger()
         # Update source tank status if it becomes empty
         _update_tank_status_if_empty(transfer.source_tank)
     
     # Handle inflow to destination tank
     if transfer.destination_tank:
         _create_inflow_entries(transfer)
+        # Sync tank volume from ledger
+        transfer.destination_tank.sync_volume_from_ledger()
         # Update destination tank status to IN_USE if it receives volume
         if transfer.destination_tank.status == 'EMPTY' and transfer.volume_l > 0:
             transfer.destination_tank.status = 'IN_USE'
