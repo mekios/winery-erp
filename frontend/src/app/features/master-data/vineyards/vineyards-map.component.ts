@@ -123,6 +123,7 @@ export class VineyardsMapComponent implements OnInit {
   mapZoom = 7;
   
   mapOptions: google.maps.MapOptions = {
+    mapTypeId: google.maps.MapTypeId.SATELLITE,
     mapTypeControl: true,
     streetViewControl: false,
     fullscreenControl: true,

@@ -55,6 +55,7 @@ export class MapPickerComponent implements OnChanges {
   mapZoom = this.defaultZoom;
   
   mapOptions: google.maps.MapOptions = {
+    mapTypeId: google.maps.MapTypeId.SATELLITE,
     mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false,
