@@ -154,25 +154,37 @@ class TankLedger(models.Model):
         total_volume = Decimal('0')
         unknown_volume = Decimal('0')
         by_batch = []
+        by_batch_dict = {}  # Track batch volumes to check for negatives
         has_integrity_issues = False
         
         for entry in composition:
             volume = entry['volume'] or Decimal('0')
-            
-            # Check for negative volumes (integrity issue)
-            if volume < 0:
-                has_integrity_issues = True
-            
             total_volume += volume
             
             if entry['composition_key_type'] == CompositionKeyType.UNKNOWN:
                 unknown_volume += volume
             elif entry['composition_key_type'] == CompositionKeyType.BATCH:
-                by_batch.append({
-                    'batch_id': entry['composition_key_id'],
-                    'label': entry['composition_key_label'],
-                    'volume_l': volume,
-                })
+                batch_id = entry['composition_key_id']
+                # Aggregate by batch_id (multiple entries might exist with different labels)
+                if batch_id in by_batch_dict:
+                    by_batch_dict[batch_id]['volume_l'] += volume
+                else:
+                    by_batch_dict[batch_id] = {
+                        'batch_id': batch_id,
+                        'label': entry['composition_key_label'],
+                        'volume_l': volume,
+                    }
+        
+        # Convert batch dict to list and check for negative batch volumes
+        by_batch = list(by_batch_dict.values())
+        for batch in by_batch:
+            if batch['volume_l'] < 0:
+                has_integrity_issues = True
+                break
+        
+        # Check for negative unknown volume
+        if unknown_volume < 0:
+            has_integrity_issues = True
         
         # Calculate percentages and get variety/vineyard breakdown
         by_variety = {}
