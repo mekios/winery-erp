@@ -84,17 +84,17 @@ class TransferCreateSerializer(serializers.ModelSerializer):
         
         # Validate destination has capacity
         if destination_tank:
-            available = destination_tank.capacity_l - destination_tank.current_volume_l
-            if volume_l > available:
+            can_accept, error_msg = destination_tank.can_accept_volume(volume_l)
+            if not can_accept:
                 raise serializers.ValidationError({
-                    'volume_l': f'Volume exceeds destination tank available capacity ({available}L available).'
+                    'volume_l': error_msg
                 })
         
         if destination_barrel:
             available = destination_barrel.capacity_l - destination_barrel.current_volume_l
             if volume_l > available:
                 raise serializers.ValidationError({
-                    'volume_l': f'Volume exceeds destination barrel available capacity ({available}L available).'
+                    'volume_l': f'Barrel {destination_barrel.code} cannot accept {volume_l}L. Available capacity: {available}L'
                 })
         
         return attrs
@@ -231,6 +231,7 @@ WINE_LOT_STATUS_CHOICES = [
     {'value': choice[0], 'label': choice[1]}
     for choice in WineLotStatus.choices
 ]
+
 
 
 

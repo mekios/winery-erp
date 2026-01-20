@@ -176,9 +176,12 @@ class BatchCreateSerializer(serializers.ModelSerializer):
         ]
     
     def validate(self, data):
-        """Validate that total fraction volumes don't exceed batch volume."""
+        """Validate that total fraction volumes don't exceed batch volume and tank capacities."""
+        from apps.equipment.models import Tank
+        
         fractions = data.get('fractions', [])
         must_volume = data.get('must_volume_l', 0)
+        winery = self.context['request'].winery
         
         if fractions and must_volume:
             total_fraction_volume = sum(f['volume_l'] for f in fractions)
@@ -186,6 +189,24 @@ class BatchCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     'fractions': f'Total fraction volumes ({total_fraction_volume}L) exceed batch volume ({must_volume}L)'
                 })
+        
+        # Validate each fraction's tank capacity
+        for i, fraction in enumerate(fractions):
+            tank_id = fraction.get('tank')
+            volume_l = fraction.get('volume_l', 0)
+            
+            if tank_id and volume_l:
+                try:
+                    tank = Tank.objects.get(id=tank_id, winery=winery)
+                    can_accept, error_msg = tank.can_accept_volume(volume_l)
+                    if not can_accept:
+                        raise serializers.ValidationError({
+                            f'fractions[{i}].volume_l': error_msg
+                        })
+                except Tank.DoesNotExist:
+                    raise serializers.ValidationError({
+                        f'fractions[{i}].tank': 'Tank not found'
+                    })
         
         return data
     

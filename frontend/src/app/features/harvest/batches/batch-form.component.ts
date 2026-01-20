@@ -253,6 +253,9 @@ import { FractionFormDialogComponent, FractionFormDialogData } from './fraction-
                             [step]="50"
                             [quickValues]="[100, 250, 500, 1000]">
                           </app-number-input>
+                          @if (getFractionCapacityError(i)) {
+                            <span class="field-error">{{ getFractionCapacityError(i) }}</span>
+                          }
                         </div>
                       </div>
                     </div>
@@ -520,6 +523,24 @@ export class BatchFormComponent implements OnInit {
   getRemainingVolume(): number {
     const mustVolume = this.form.get('must_volume_l')?.value || 0;
     return mustVolume - this.getTotalFractionVolume();
+  }
+  
+  getFractionCapacityError(index: number): string | null {
+    const fraction = this.fractionsArray.at(index);
+    const tankId = fraction.get('tank')?.value;
+    const volume = fraction.get('volume_l')?.value;
+    
+    if (!tankId || !volume || volume <= 0) return null;
+    
+    const tank = this.tanks().find(t => t.id === tankId);
+    if (!tank) return null;
+    
+    const available = tank.available_capacity_l;
+    if (volume > available) {
+      return `Tank ${tank.code} can only accept ${available}L (Current: ${tank.current_volume_l}L / Capacity: ${tank.capacity_l}L)`;
+    }
+    
+    return null;
   }
   
   onSave(): void {

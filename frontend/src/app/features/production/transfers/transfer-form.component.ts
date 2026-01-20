@@ -1,7 +1,7 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -156,6 +156,15 @@ import { HarvestService, BatchList } from '@features/harvest/harvest.service';
               @if (form.get('volume_l')?.hasError('required') && form.get('volume_l')?.touched) {
                 <span class="field-error">Volume is required</span>
               }
+              @if (form.get('volume_l')?.hasError('exceedsCapacity') && form.get('volume_l')?.touched) {
+                <span class="field-error">{{ form.get('volume_l')?.getError('exceedsCapacity') }}</span>
+              }
+              @if (form.get('volume_l')?.hasError('exceedsSource') && form.get('volume_l')?.touched) {
+                <span class="field-error">{{ form.get('volume_l')?.getError('exceedsSource') }}</span>
+              }
+              @if (capacityWarning()) {
+                <span class="field-warning">⚠️ {{ capacityWarning() }}</span>
+              }
             </div>
             
             <div class="form-group">
@@ -237,6 +246,33 @@ export class TransferFormComponent implements OnInit {
   
   actionTypes = Object.entries(TRANSFER_ACTION_LABELS).map(([value, label]) => ({ value, label }));
   
+  // Computed signals for validation feedback
+  selectedSourceTank = computed(() => {
+    const tankId = this.form.get('source_tank')?.value;
+    return this.tanks().find(t => t.id === tankId);
+  });
+  
+  selectedDestinationTank = computed(() => {
+    const tankId = this.form.get('destination_tank')?.value;
+    return this.tanks().find(t => t.id === tankId);
+  });
+  
+  capacityWarning = computed(() => {
+    const volume = this.form.get('volume_l')?.value;
+    const destTank = this.selectedDestinationTank();
+    
+    if (!volume || !destTank) return null;
+    
+    const available = destTank.available_capacity_l;
+    const fillPercentage = (volume / destTank.capacity_l) * 100;
+    
+    if (fillPercentage > 90 && volume <= available) {
+      return `This will fill tank ${destTank.code} to ${fillPercentage.toFixed(1)}%`;
+    }
+    
+    return null;
+  });
+  
   constructor() {
     this.form = this.fb.group({
       action_type: ['RACK', Validators.required],
@@ -251,6 +287,46 @@ export class TransferFormComponent implements OnInit {
       wine_lot: [null],
       notes: [''],
     });
+    
+    // Add dynamic validation when volume or tanks change
+    this.form.get('volume_l')?.valueChanges.subscribe(() => this.validateCapacity());
+    this.form.get('source_tank')?.valueChanges.subscribe(() => this.validateCapacity());
+    this.form.get('destination_tank')?.valueChanges.subscribe(() => this.validateCapacity());
+  }
+  
+  validateCapacity(): void {
+    const volumeControl = this.form.get('volume_l');
+    if (!volumeControl) return;
+    
+    const volume = volumeControl.value;
+    if (!volume || volume <= 0) return;
+    
+    // Clear previous capacity errors
+    const errors = { ...volumeControl.errors };
+    delete errors['exceedsCapacity'];
+    delete errors['exceedsSource'];
+    volumeControl.setErrors(Object.keys(errors).length ? errors : null);
+    
+    // Validate destination capacity
+    const destTank = this.selectedDestinationTank();
+    if (destTank) {
+      const available = destTank.available_capacity_l;
+      if (volume > available) {
+        volumeControl.setErrors({
+          ...volumeControl.errors,
+          exceedsCapacity: `Tank ${destTank.code} can only accept ${available}L (Current: ${destTank.current_volume_l}L / Capacity: ${destTank.capacity_l}L)`
+        });
+      }
+    }
+    
+    // Validate source has enough volume
+    const sourceTank = this.selectedSourceTank();
+    if (sourceTank && sourceTank.current_volume_l < volume) {
+      volumeControl.setErrors({
+        ...volumeControl.errors,
+        exceedsSource: `Source tank ${sourceTank.code} only has ${sourceTank.current_volume_l}L available`
+      });
+    }
   }
   
   ngOnInit(): void {

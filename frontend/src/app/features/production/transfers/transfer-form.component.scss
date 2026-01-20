@@ -42,3 +42,10 @@ mat-form-field { width: 100%; }
   color: var(--danger);
   margin-top: 0.25rem;
 }
+
+.field-warning {
+  font-size: 0.75rem;
+  color: var(--warning, #f59e0b);
+  margin-top: 0.25rem;
+  display: block;
+}

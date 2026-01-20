@@ -109,6 +109,44 @@ class Tank(models.Model):
     def available_capacity_l(self):
         """Calculate available capacity."""
         return self.capacity_l - self.current_volume_l
+    
+    def can_accept_volume(self, volume_l):
+        """
+        Check if tank can accept the specified volume without exceeding capacity.
+        
+        Args:
+            volume_l: Volume in liters to add
+            
+        Returns:
+            tuple: (bool, str) - (can_accept, error_message)
+        """
+        if volume_l <= 0:
+            return True, ""
+        
+        available = self.available_capacity_l
+        if volume_l > available:
+            return False, (
+                f"Tank {self.code} cannot accept {volume_l}L. "
+                f"Available capacity: {available}L (Current: {self.current_volume_l}L / Capacity: {self.capacity_l}L)"
+            )
+        return True, ""
+    
+    def validate_capacity(self):
+        """
+        Validate that current volume doesn't exceed capacity.
+        Raises ValidationError if invalid.
+        """
+        from django.core.exceptions import ValidationError
+        
+        if self.current_volume_l > self.capacity_l:
+            raise ValidationError(
+                f"Tank {self.code} volume ({self.current_volume_l}L) exceeds capacity ({self.capacity_l}L)"
+            )
+        
+        if self.current_volume_l < 0:
+            raise ValidationError(
+                f"Tank {self.code} volume cannot be negative ({self.current_volume_l}L)"
+            )
 
 
 class Barrel(models.Model):
