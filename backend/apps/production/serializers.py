@@ -106,30 +106,11 @@ class TransferCreateSerializer(serializers.ModelSerializer):
         
         transfer = super().create(validated_data)
         
-        # Update tank/barrel volumes
-        self._update_volumes(transfer)
+        # NOTE: Volume updates are handled automatically by the ledger signal
+        # (apps.ledger.signals.create_ledger_entries) which syncs tank volumes
+        # from ledger entries. No need to manually update volumes here.
         
         return transfer
-    
-    def _update_volumes(self, transfer):
-        """Update source and destination volumes after transfer."""
-        volume = transfer.volume_l
-        
-        # Decrease source volume
-        if transfer.source_tank:
-            transfer.source_tank.current_volume_l -= volume
-            transfer.source_tank.save(update_fields=['current_volume_l'])
-        elif transfer.source_barrel:
-            transfer.source_barrel.current_volume_l -= volume
-            transfer.source_barrel.save(update_fields=['current_volume_l'])
-        
-        # Increase destination volume
-        if transfer.destination_tank:
-            transfer.destination_tank.current_volume_l += volume
-            transfer.destination_tank.save(update_fields=['current_volume_l'])
-        elif transfer.destination_barrel:
-            transfer.destination_barrel.current_volume_l += volume
-            transfer.destination_barrel.save(update_fields=['current_volume_l'])
 
 
 class LotBatchLinkSerializer(serializers.ModelSerializer):
