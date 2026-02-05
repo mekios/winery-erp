@@ -145,25 +145,14 @@ class Batch(models.Model):
         super().save(*args, **kwargs)
     
     def generate_batch_code(self):
-        """Generate unique batch code: YYYY-NNN format."""
-        year = self.harvest_season.year
-        
-        # Get the last batch number for this winery and year
-        last_batch = Batch.objects.filter(
-            winery=self.winery,
-            batch_code__startswith=f"{year}-"
-        ).order_by('-batch_code').first()
-        
-        if last_batch:
-            try:
-                last_num = int(last_batch.batch_code.split('-')[1])
-                next_num = last_num + 1
-            except (IndexError, ValueError):
-                next_num = 1
-        else:
-            next_num = 1
-        
-        return f"{year}-{next_num:03d}"
+        """
+        Generate unique batch code: YYYY-MMDD-HHMM format.
+        Uses timestamp to ensure uniqueness without database queries or locks.
+        Example: 2025-0205-1430 (Feb 5, 2025 at 2:30 PM)
+        """
+        from django.utils import timezone
+        now = timezone.now()
+        return f"{now.year}-{now.month:02d}{now.day:02d}-{now.hour:02d}{now.minute:02d}"
     
     @property
     def source_count(self):

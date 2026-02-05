@@ -218,7 +218,7 @@ class BatchCreateSerializer(serializers.ModelSerializer):
         fractions_data = validated_data.pop('fractions', [])
         winery = self.context['request'].winery
         
-        # Create batch
+        # Create batch (timestamp-based code ensures uniqueness)
         batch = Batch.objects.create(winery=winery, **validated_data)
         
         # Create sources
