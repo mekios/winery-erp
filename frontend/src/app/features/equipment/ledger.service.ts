@@ -10,34 +10,34 @@ import { environment } from '../../../environments/environment';
 export interface CompositionBatch {
   batch_id: string;
   label: string;
-  volume_l: number;
-  percentage: number;
+  volume_l: number | string;  // Backend returns decimal as string
+  percentage: number | string;  // Backend returns decimal as string
 }
 
 export interface CompositionVariety {
   variety: string;
   variety_color?: 'RED' | 'WHITE' | 'ROSE' | null;
-  volume_l: number;
-  percentage: number;
+  volume_l: number | string;  // Backend returns decimal as string
+  percentage: number | string;  // Backend returns decimal as string
 }
 
 export interface CompositionVineyard {
   vineyard: string;
   grower: string;
-  volume_l: number;
-  percentage: number;
+  volume_l: number | string;  // Backend returns decimal as string
+  percentage: number | string;  // Backend returns decimal as string
 }
 
 export interface TankComposition {
   tank_id: string;
   tank_code: string;
   tank_name: string;
-  total_volume_l: number;
+  total_volume_l: number | string;  // Backend returns decimal as string
   by_batch: CompositionBatch[];
   by_variety: CompositionVariety[];
   by_vineyard: CompositionVineyard[];
-  unknown_volume_l: number;
-  unknown_percentage: number;
+  unknown_volume_l: number | string;  // Backend returns decimal as string
+  unknown_percentage: number | string;  // Backend returns decimal as string
   has_integrity_issues: boolean;
 }
 

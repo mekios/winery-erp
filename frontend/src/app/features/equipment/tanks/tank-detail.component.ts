@@ -184,7 +184,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                   (retry)="loadComposition()">
                 </app-error-state>
               } @else if (composition()) {
-                @if (composition()!.total_volume_l < 0) {
+                @if (Number(composition()!.total_volume_l) < 0) {
                   <div class="integrity-error">
                     <app-icon name="alert-circle" [size]="24"></app-icon>
                     <div class="error-content">
@@ -198,7 +198,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                     <app-icon name="alert" [size]="20"></app-icon>
                     <div class="warning-content">
                       <strong>Composition Integrity Issue</strong>
-                      @if (composition()!.unknown_volume_l > 0) {
+                      @if (Number(composition()!.unknown_volume_l) > 0) {
                         <span>This tank has {{ composition()!.unknown_volume_l | number:'1.0-0' }} L ({{ composition()!.unknown_percentage | number:'1.1-1' }}%) of wine from unknown sources.</span>
                       } @else {
                         <span>This tank's composition history shows inconsistencies. Check the ledger below for negative composition entries or transactions that occurred out of sequence.</span>
@@ -207,7 +207,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                   </div>
                 }
                 
-                @if (composition()!.total_volume_l > 0) {
+                @if (Number(composition()!.total_volume_l) > 0) {
                   <!-- By Variety -->
                   <div class="composition-section variety-section">
                     <div class="section-header">
@@ -299,7 +299,7 @@ import { LedgerService, TankComposition, LedgerEntry } from '../ledger.service';
                   </div>
                   
                   <!-- Unknown -->
-                  @if (composition()!.unknown_volume_l > 0) {
+                  @if (Number(composition()!.unknown_volume_l) > 0) {
                     <div class="composition-section unknown-section">
                       <div class="unknown-card">
                         <app-icon name="help-circle" [size]="24"></app-icon>
@@ -445,6 +445,9 @@ export class TankDetailComponent implements OnInit {
   TANK_TYPE_LABELS = TANK_TYPE_LABELS;
   TANK_STATUS_LABELS = TANK_STATUS_LABELS;
   
+  // Expose Number constructor for template use
+  protected readonly Number = Number;
+  
   private varietyColors = [
     '#7c4dff', '#10b981', '#f59e0b', '#ef4444', '#3b82f6',
     '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1'
@@ -544,15 +547,17 @@ export class TankDetailComponent implements OnInit {
     
     for (const v of comp.by_variety) {
       const color = v.variety_color;
+      const percentage = Number(v.percentage) || 0;
+      
       if (color === 'RED') {
-        redTotal += v.percentage;
+        redTotal += percentage;
       } else if (color === 'WHITE') {
-        whiteTotal += v.percentage;
+        whiteTotal += percentage;
       } else if (color === 'ROSE') {
-        roseTotal += v.percentage;
+        roseTotal += percentage;
       } else {
         // Unknown color - treat as mixed
-        roseTotal += v.percentage;
+        roseTotal += percentage;
       }
     }
     
